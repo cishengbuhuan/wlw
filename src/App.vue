@@ -13,7 +13,7 @@ export default {
 <style>
   #app {
     width: 100%;
-    height: calc(100vh - 100px);
+    height: 100vh;
   }
 /*公共样式--开始*/
 html, body, div, ul, li, h1, h2, h3, h4, h5, h6, p, dl, dt, dd, ol, form, input, textarea, th, td, select {

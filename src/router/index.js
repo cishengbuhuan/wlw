@@ -7,10 +7,15 @@ import card from '../pages/card.vue'
 import flowPool from '../pages/flowPool.vue'
 import account from '../pages/account.vue'
 import recharge from '../pages/recharge.vue'
+import message from '../pages/message.vue'
+import manage from '../pages/manage.vue'
+import bill from '../pages/applyBill.vue'
+import forget from '../pages/forget.vue'
 Vue.use(Router)
 
 const router = new Router({
   linkActiveClass: 'active',
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -42,6 +47,30 @@ const router = new Router({
       name: 'recharge',
       component: recharge
     },
+    {
+      path: '/message',
+      name: 'message',
+      component: message
+    },
+    {
+      path: '/manage',
+      name: 'manage',
+      component: manage
+    },
+    {
+      path: '/forget',
+      name: 'forget',
+      component: forget
+    },
+    {
+      path: '/bill',
+      name: 'bill',
+      component: bill
+    },
+    {
+      path: '*',
+      redirect: '/login'
+    }
   ]
 })
 
@@ -51,19 +80,19 @@ const router = new Router({
 //     return
 //   }
 //   // 每次跳转时，更新vuex里的user
-//   await axios.get("/loginCheck")
-//     .then(res=> {
-//       if (res.data.code === "0") {
-//         store.commit("updateUserInfo", res.data.data);
-//       }else {
-//         store.commit("updateUserInfo", {
-//           userId: null,
-//           companyName: null,
-//           companyId: null,
-//           userName: null
-//         });
-//       }
-//     });
+//   // await axios.get("/loginCheck")
+//   //   .then(res=> {
+//   //     if (res.data.code === "0") {
+//   //       store.commit("updateUserInfo", res.data.data);
+//   //     }else {
+//   //       store.commit("updateUserInfo", {
+//   //         userId: null,
+//   //         companyName: null,
+//   //         companyId: null,
+//   //         userName: null
+//   //       });
+//   //     }
+//   //   });
 //
 //   if(to.path !== '/login'){
 //     // 下面这个判断是自行实现到底是否有没有登录
@@ -74,8 +103,8 @@ const router = new Router({
 //     }else{
 //       next()
 //     }
-//     // 如果访问的是登陆页面，且已经登陆，跳转至count
 //   }
+//   // 如果访问的是登陆页面，且已经登陆，跳转至index
 //   else if(to.path === '/login'){
 //     if(!store.state.user.user.companyId){
 //       next()
@@ -86,7 +115,7 @@ const router = new Router({
 //         })
 //       }else{
 //         next({
-//           path:'/count'
+//           path:'/index'
 //         })
 //       }
 //     }
@@ -97,5 +126,17 @@ const router = new Router({
 //   }
 // });
 
-
+// router.beforeEach((to,from,next) => {
+//   let token = JSON.parse(sessionStorage.getItem('_token'));
+//   if(token && to.path == '/login'){
+//     console.log('1111111111111')
+//     next({path: '/'});
+//   }else if(!token && to.path != '/login'){
+//     console.log('222222222222222222')
+//     next({path: '/login'});
+//   }else {
+//     console.log('3333333333333333')
+//     next();
+//   }
+// });
 export default router

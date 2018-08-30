@@ -1,10 +1,9 @@
 <template>
   <div class="dream-slide">
     <el-col :span="24">
-      <h5>默认颜色</h5>
       <el-menu
         default-active="2"
-        active-text-color="green"
+        active-text-color="#4cb2ff"
         class="el-menu-vertical-demo"
         @open="handleOpen"
         @close="handleClose">
@@ -13,7 +12,7 @@
             <template slot="title">
               <span>{{ item.title }}</span>
             </template>
-            <el-menu-item-group v-for="child in item.menuTwo">
+            <el-menu-item-group v-for="(child,i) in item.menuTwo" :key="i">
               <el-menu-item :index="child.index" @click="toPath(child)">
                 {{ child.titleTwo }}
               </el-menu-item>
@@ -55,17 +54,17 @@
             index: '3',
             menuTwo: [
               {
-                titleTwo: '10M套餐',
+                titleTwo: '中国移动',
                 path: '/flowPool',
                 index: '3-1'
               },
               {
-                titleTwo: '20M套餐',
+                titleTwo: '中国联通',
                 path: '/flowPool',
                 index: '3-2'
               },
               {
-                titleTwo: '30M套餐',
+                titleTwo: '中国电信',
                 path: '/flowPool',
                 index: '3-3'
               }
@@ -84,11 +83,28 @@
                 titleTwo: '我的账户',
                 path: '/account',
                 index: '4-2'
+              },
+              {
+                titleTwo: '消息',
+                path: '/message',
+                index: '4-3'
+              },
+              {
+                titleTwo: '账户管理',
+                path: '/manage',
+                index: '4-4'
+              },
+              {
+                titleTwo: '申请开票',
+                path: '/bill',
+                index: '4-5'
               }
             ]
           }
         ]
       };
+    },
+    mounted(){
     },
     methods: {
       handleOpen(key, keyPath) {
@@ -99,21 +115,27 @@
       },
       toPath(path) {
         this.$router.replace(path)
-      }
+      },
+//      toPath(path) {
+//        this.$router.push({path: `${path}/${flowType}`})
+//      }
     }
   };
 </script>
 
 <style lang="stylus" scoped>
   .dream-slide {
-    width: 340px;
-    height: 100%;
+    width: 200px;
+    height: 100vh;
     background-color: #334766;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 990;
-    padding-top: 100px;
+    padding-top: 95px;
+    .active {
+      background-color: #48576a;
+    }
   }
 </style>
 <style lang="stylus">
@@ -123,17 +145,56 @@
         border-right: none;
         background-color: transparent;
         li.el-menu-item {
-          font-size: 36px;
+          font-size: 18px;
           color: #bbb;
+          height: 52px;
+          line-height: 52px;
+        }
+        li.el-menu-item:hover, li.el-menu-item:focus {
+          background-color: #48576a;
         }
         li.el-submenu {
           .el-submenu__title {
-            font-size: 36px;
+            font-size: 18px;
             color: #bbb;
           }
+          .el-submenu__title:hover, .el-submenu__title:focus {
+            background-color: #48576a;
+          }
+          ul {
+            li.el-menu-item-group {
+              height: 36px;
+              line-height: 36px;
+              font-size: 16px;
+              color: #999;
+              .el-menu-item-group__title {
+                padding: 0;
+              }
+            }
+            li.el-menu-item {
+              height: 36px;
+              line-height: 36px;
+              font-size: 16px;
+              color: #999;
+            }
+          }
         }
+
       }
     }
+    /*.is-active {
+      position: relative;
+    }
+    .is-active:after {
+      content: '';
+      display: block;
+      width: 10px;
+      height: 100%;
+      background-color: #4cb2ff;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }*/
   }
 </style>
 
