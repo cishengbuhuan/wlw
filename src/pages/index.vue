@@ -253,7 +253,7 @@
           ]
         ],
         // 运营商的筛选框
-        operatorValue: '',
+        operatorValue: '移动',
         optionsArr: [
           {
             value: '1',
@@ -262,21 +262,24 @@
           },
           {
             value: '2',
-            operator: '电信',
+            operator: '联通',
             isChecked: false
           },
           {
             value: '3',
-            operator: '联通',
+            operator: '电信',
             isChecked: false
           }
-        ]
+        ],
+        netWork: '',
+        defaultNetWork: 1
       };
     },
     mounted() {
       this.getCompanyInfo()
       this.getMsg()
       this.getCardTotal()
+      this.getFlowTotal()
     },
     methods: {
       // 切换运营商下拉框的显示隐藏状态
@@ -331,7 +334,37 @@
             }
           }
         })
+      },
+      // 获取流量统计数据
+      getFlowTotal(){
+        this.$axios({
+          url: '/api/v2/pool/poolnetWorkList',
+          method: 'post',
+          params: {
+            netWork: this.netWork ? this.netWork : this.defaultNetWork
+          }
+        }).then(res=>{
+          console.log(res.data)
+          let data = res.data.data
+//          for(let i=0; i<data.length; i++){
+//            this.cardData[i].title = data[i].title
+//            this.cardData[i].totalCard = data[i].totalCard
+//            let rows = data[i].rows;
+//            for(let j=0; j<rows.length; j++){
+//              this.cardData[i].rows.push({
+//                status: rows[j].status,
+//                number: rows[j].number
+//              })
+//            }
+//          }
+        })
+      },
+      // 运营商的下拉框的值发生变化的时候触发
+      toggleOperator(val){
+        this.netWork = val;
+        this.getFlowTotal()
       }
+
     }
   };
 </script>

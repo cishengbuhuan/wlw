@@ -26,6 +26,7 @@
           <ul>
             <li v-for="(item,index) in rechargeData"
                 :class="{ current : item.isSelected }"
+                @click="chooseThis(index)"
                 :key="index">{{ item.number }}</li>
             <li>自定义金额</li>
           </ul>
@@ -64,7 +65,7 @@
     data() {
       return {
         account: '成都快船有限公司',
-        balance: 0.00,
+        balance: 0,
         payWay: [
           {
             wayImgSrc: '../../static/images/alipay.png'
@@ -74,33 +75,13 @@
           }
         ],
         wayIndex: 0,
-        rechargeData: [
-          {
-            number: 1000,
-            isSelected: true
-          },
-          {
-            number: 3000,
-            isSelected: false
-          },
-          {
-            number: 4000,
-            isSelected: false
-          },
-          {
-            number: 8000,
-            isSelected: false
-          },
-          {
-            number: 10000,
-            isSelected: false
-          }
-        ],
+        rechargeData: [],
         modalShow: false
       };
     },
     mounted(){
       this.getUserInfo()
+      this.getRechargeList()
     },
     methods: {
       togglePayWay(index){
@@ -114,7 +95,36 @@
       },
       // 获取到用户信息
       getUserInfo(){
-
+        this.$axios({
+          url: '/api/v2/base/getBasal',
+          method: 'post'
+        }).then(res=>{
+          let data = res.data.data;
+          this.account = data.companyName
+          this.balance = data.amount
+        })
+      },
+      // 获取到充值金额到选项
+      getRechargeList(){
+        this.$axios({
+          url: '/api/v2/account/getAmount',
+          method: 'post'
+        }).then(res=>{
+          let data = res.data.data;
+          for(let i=0; i<data.length; i++){
+            this.rechargeData.push({
+              number: data[i].amount,
+              isSelected: data[i].check
+            })
+          }
+        })
+      },
+      // 切换所选金额
+      chooseThis(index){
+        for(let i=0; i<this.rechargeData.length; i++){
+          this.rechargeData[i].isSelected = false;
+        }
+        this.rechargeData[index].isSelected = true;
       }
     }
   };

@@ -1,13 +1,14 @@
 <template>
   <div class="flowPool-wrap">
     <dream-header></dream-header>
-    <dream-slide></dream-slide>
+    <dream-slide @typeChange="typeChange"></dream-slide>
     <div class="content">
       <!-- 基本信息 -->
       <div class="base-info">
         <div class="info-header">
-          <span>{{ operator }}</span>
           <el-select v-model="packageValue"
+                     @change="packageChange"
+                     value-key="value"
                      placeholder="请选择套餐">
             <el-option
               v-for="item in packageOptions"
@@ -29,7 +30,7 @@
           <div class="chart-tips">
             <span>总流量：{{ baseInfo.totalFlow }}M</span>
             <span>单卡流量：{{ baseInfo.singleFlow }}M</span>
-            <span>使用率：{{ baseInfo.usageRate }}M</span>
+            <span>使用率：{{ baseInfo.usageRate }}</span>
             <span>已超出：{{ baseInfo.overview }}M</span>
             <span>预警数：{{ baseInfo.warnNumber }}M</span>
             <span>报警卡数：{{ baseInfo.alarmCardNumber }}M</span>
@@ -118,11 +119,13 @@
             </el-table-column>
           </el-table>
           <el-pagination
-            v-if="totalCount > pagesize"
-            layout="prev, pager, next"
-            :page-size='pagesize'
-            :current-page="pageno"
+            v-if="totalCount > pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :page-size="pageSize"
+            :current-page="pageNo"
             :total="totalCount"
+            :page-sizes="[5, 10, 20]"
+            @size-change="changeSize"
             @current-change="changePageNo">
           </el-pagination>
         </div>
@@ -167,30 +170,15 @@
       }
       return {
         packageValue: '',
+        defaultPoolId: '',
+        poolId: '',
         // 筛选的套餐
-        packageOptions: [
-          {
-            value: '1',
-            flowPackage: '10M'
-          },
-          {
-            value: '2',
-            flowPackage: '20M'
-          },
-          {
-            value: '3',
-            flowPackage: '30M'
-          },
-          {
-            value: '4',
-            flowPackage: '50M'
-          },
-        ],
+        packageOptions: [],
         // 饼状图数据
         baseInfo: {
-          totalFlow: 100,
-          singleFlow: 10,
-          usageRate: '10%',
+          totalFlow: 0,
+          singleFlow: 0,
+          usageRate: '',
           overview: 20,
           warnNumber: 2,
           alarmCardNumber: 3,
@@ -211,44 +199,14 @@
                 { usage: '已消费', number: 2923 }
               ]
             }
-          ],
-          ring: {
-            columns: ['usage', 'number'],
-            rows: [
-              { usage: '已使用', number: 1393 },
-              { usage: '未使用', number: 3530 },
-              { usage: '已超出', number: 3530 }
-            ]
-          }
+          ]
         },
         totalCount: 134,
-        pagesize: 10,
-        pageno: 1,
+        pageSize: 10,
+        pageNo: 1,
         areaValue: '',
         statusValue: '',
         systemValue: '',
-        cardInfo: [
-          {
-            title: '总卡数',
-            num: 10
-          },
-          {
-            title: '在线数',
-            num: 10
-          },
-          {
-            title: '停机数',
-            num: 10
-          },
-          {
-            title: '欠费数',
-            num: 10
-          },
-          {
-            title: '沉默数',
-            num: 10
-          }
-        ],
         selectData: {
           areaOptions: [
             {
@@ -340,11 +298,12 @@
             cardStatus: '在线',
             operate: '查看详情'
           }
-        ]
+        ],
+        typeValue: ''
       };
     },
     mounted(){
-      this.getPoolList()
+      this.getPackageOptions();
     },
     methods: {
       goDetail(){
@@ -354,20 +313,69 @@
       changePageNo(val){
         this.pageno  = val;
       },
-      getPoolList(){
+      // 改变每页显示的条数
+      changeSize(val){
+        this.pageSize = val;
+        this.getTableData()
+      },
+      // 改变type的类型，即跳转不同的路由
+      typeChange(){
+        console.log('=--------------=')
+        console.log(this.$route.query.type)
+        console.log('=--------------=')
+
+        this.getPackageOptions()
+      },
+      // 获取到套餐选项
+      getPackageOptions(){
         this.$axios({
           url: '/api/v2/pool/poolList',
-          method: 'post'
+          method: 'post',
+          params: {
+            netWork: this.$route.query.type
+          }
+        }).then(res=>{
+          console.log('======================')
+          console.log(res.data)
+          console.log('======================')
+          let data = res.data.data;
+          this.packageOptions = []
+          this.packageValue = data[0].name
+          this.defaultPoolId = data[0].poolId
+          console.log(this.defaultPoolId)
+          for(let i=0; i<data.length; i++){
+            this.packageOptions.push({
+              value: data[i].poolId,
+              flowPackage: data[i].name
+            })
+          }
+          this.getPieTips()
+        })
+      },
+      // 获取到饼状图下到相关信息
+      getPieTips(){
+        console.log(this.defaultPoolId)
+        this.$axios({
+          url: '/api/v2/pool/poolUsage',
+          method: 'post',
+          params: {
+            poolId: this.poolId ? this.poolId : this.defaultPoolId
+          }
         }).then(res=>{
           console.log(res.data)
+          let data = res.data.data;
+          // 总流量
+          this.baseInfo.totalFlow =data.total
+          // 单卡流量
+          this.baseInfo.singleFlow =data.dataSize
+          // 使用率
+          this.baseInfo.usageRate =data.usage
         })
-      }
-    },
-    computed: {
-      operator(){
-        return this.$route.query.flowType === 1 ? '中国移动' :
-               this.$route.query.flowType === 2 ? '中国联通' :
-               this.$route.query.flowType === 3 ? '中国电信' : ''
+      },
+      // 基本信息的下拉框的值发生变化的时候触发
+      packageChange(val){
+        this.poolId = val;
+        this.getPieTips()
       }
     }
   };

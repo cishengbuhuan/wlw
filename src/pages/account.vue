@@ -36,6 +36,14 @@
               <el-table-column prop="way" label="扣款方式" align="center"></el-table-column>
               <el-table-column prop="remark" label="备注" align="center"></el-table-column>
             </el-table>
+            <el-pagination
+              v-if="totalCount > pageSize"
+              layout="prev, pager, next"
+              :page-size='pageSize'
+              :current-page="pageNo"
+              :total="totalCount"
+              @current-change="changePage">
+            </el-pagination>
           </div>
           <!-- 充值记录 -->
           <div class="recharge-record" v-if="index == 1">
@@ -47,6 +55,14 @@
               <el-table-column prop="way" label="充值方式" align="center"></el-table-column>
               <el-table-column prop="remark" label="备注" align="center"></el-table-column>
             </el-table>
+            <el-pagination
+              v-if="totalCount > pageSize"
+              layout="prev, pager, next"
+              :page-size='pageSize'
+              :current-page="pageNo"
+              :total="totalCount"
+              @current-change="changePage">
+            </el-pagination>
           </div>
         </div>
       </div>
@@ -71,36 +87,7 @@
         },
         index: 0,
         // 消费记录
-        consumptionData: [
-          {
-            type: '流量池套餐',
-            amount: 100,
-            time: '2018-08-12',
-            way: '与扣款',
-            remark: '备注'
-          },
-          {
-            type: '流量池套餐',
-            amount: 100,
-            time: '2018-08-12',
-            way: '与扣款',
-            remark: '备注'
-          },
-          {
-            type: '流量池套餐',
-            amount: 100,
-            time: '2018-08-12',
-            way: '与扣款',
-            remark: '备注'
-          },
-          {
-            type: '流量池套餐',
-            amount: 100,
-            time: '2018-08-12',
-            way: '与扣款',
-            remark: '备注'
-          }
-        ],
+        consumptionData: [],
         // 充值记录
         rechargeData: [
           {
@@ -127,12 +114,46 @@
             way: '与扣款',
             remark: '备注'
           }
-        ]
+        ],
+        // 分页
+        totalCount: 0,
+        pageSize: 3,
+        pageNo: 1
       };
+    },
+    mounted(){
+      this.getConsumptionRecords()
     },
     methods: {
       toggleNav(i){
         this.index = i
+      },
+      // 获取消费记录
+      getConsumptionRecords(){
+        this.$axios({
+          url: '/api/v2/account/buyRecord',
+          method: 'post',
+          params: {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize
+          }
+        }).then(res=>{
+          let data = res.data.data;
+          this.totalCount = res.data.totalCount
+          for(let i=0; i<data.length; i++){
+            this.consumptionData.push({
+              type: data[i].remark,
+              amount: data[i].amount,
+              time: data[i].tradeTime,
+              way: data[i].type,
+              remark: data[i].remark
+            })
+          }
+        })
+      },
+      // 分页
+      changePage(val){
+        this.pageNo  = val;
       }
     }
   };
@@ -229,12 +250,12 @@
         }
         .record-content {
           padding: 0 100px;
-          .el-table::before {
+          /*.el-table::before {
             content: '';
             position: absolute;
             background-color: #fff;
             z-index: 1;
-          }
+          }*/
         }
       }
     }

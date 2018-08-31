@@ -18,13 +18,14 @@
         <div class="table-header">
           <!-- 搜索框 -->
           <div class="search-box">
-            <input type="text" placeholder="请输入ICCID">
-            <div class="btn-search"><i class="el-icon-search"></i></div>
+            <input type="text" placeholder="请输入ICCID" v-model="numVal">
+            <div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
           </div>
           <!-- 联动选择器 -->
           <div class="cascader">
             <!-- 地区运营商 -->
             <el-select v-model="areaValue"
+                       @change="getTableData"
                        placeholder="请选择地区">
               <el-option
                 v-for="item in selectData.areaOptions"
@@ -35,6 +36,7 @@
             </el-select>
             <!-- 状态 -->
             <el-select v-model="statusValue"
+                       @change="getTableData"
                        placeholder="请选择状态">
               <el-option
                 v-for="item in selectData.statusOptions"
@@ -45,6 +47,7 @@
             </el-select>
             <!-- 制式 -->
             <el-select v-model="systemValue"
+                       @change="getTableData"
                        placeholder="请选择制式">
               <el-option
                 v-for="item in selectData.systemOptions"
@@ -66,7 +69,7 @@
               start-placeholder="计费时间"
               end-placeholder="结束时间">
             </el-date-picker>
-            <div class="btn-inquire">查询</div>
+            <div class="btn-inquire" @click="pickChange">查询</div>
           </div>
         </div>
         <div class="table-box">
@@ -108,6 +111,7 @@
 <script>
   import dreamHeader from '../components/dreamHeader/dreamHeader.vue'
   import dreamSlide from '../components/dreamSlide/dreamSlide.vue'
+  import {timestampToTime,format} from '../api/dataUtil'
   export default {
     components: {
       dreamHeader,
@@ -147,19 +151,13 @@
           areaOptions: [
             {
               value: '1',
-              area: '北京移动'
+              area: '海门移动',
+              netWork: 5
             },
             {
               value: '2',
-              area: '上海移动'
-            },
-            {
-              value: '3',
-              area: '上海电信'
-            },
-            {
-              value: '4',
-              area: '广东联通'
+              area: '北京移动',
+              netWork: 7
             }
           ],
           statusOptions: [
@@ -175,7 +173,7 @@
           systemOptions: [
             {
               value: '1',
-              system: '三切'
+              system: '大卡'
             },
             {
               value: '2',
@@ -183,16 +181,34 @@
             },
             {
               value: '3',
-              system: '5*6'
+              system: '三切'
             },
             {
               value: '4',
               system: '2*2'
+            },
+            {
+              value: '5',
+              system: '5*6'
+            },
+            {
+              value: '6',
+              system: 'eSim'
+            },
+            {
+              value: '7',
+              system: '其他'
             }
           ]
         },
         timeValue: '',
-        tableData: []
+        tableData: [],
+        numVal: '',
+        beginTime: '',
+        endTime: '',
+        netWork: '',
+        status: '',
+        netWorkType: ''
       };
     },
     mounted(){
@@ -217,13 +233,26 @@
       },
       // 获取表格数据
       getTableData(){
+        let params = {
+          pageSize: this.pageSize,
+          pageNo: this.pageNo,
+          cardNo: this.numVal,
+          netWork: this.formatArea(this.areaValue),
+          status: this.formatStatus(this.statusValue),
+          netWorkType: this.formatSystem(this.systemValue),
+          startTime: this.beginTime,
+          endTime: this.endTime
+        }
+        console.log(params.netWork)
+        console.log(this.areaValue)
+
+
+        console.log(params.status)
+        console.log(params.netWorkType)
         this.$axios({
           url: '/api/v2/device/devicePageList',
           method: 'post',
-          params: {
-            pageSize: this.pageSize,
-            pageNo: this.pageNo,
-          }
+          params: params
         }).then(res=>{
           console.log(res.data)
           let data = res.data.data;
@@ -241,8 +270,8 @@
               message: data[i].msgNo,
               flowUsage: data[i].usageMonth,
               flowOverage: data[i].flowOverage + 'M',
-              startTime: this.timestampToTime(data[i].serveTime),
-              endTime: this.timestampToTime(data[i].endTime),
+              startTime: timestampToTime(data[i].serveTime),
+              endTime: timestampToTime(data[i].endTime),
               cardKind: data[i].cardType === 1 ? '大卡' :
                         data[i].cardType === 2 ? '双切' :
                         data[i].cardType === 3 ? '三切' :
@@ -271,18 +300,46 @@
         this.pageSize = val;
         this.getTableData()
       },
-      // 转化时间戳
-      timestampToTime(timestamp) {
-        let date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000]
-        let Y,M,D,h,m,s;
-        Y = date.getFullYear() + '-';
-        M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-        D = date.getDate() + ' ';
-        h = date.getHours() + ':';
-        m = date.getMinutes() + ':';
-        s = date.getSeconds();
-        return Y+M+D;
+      // 转换地区
+      formatArea(val){
+        if(val == '北京移动') {
+          return 5
+        }else if(val == '海门移动') {
+          return 7
+        }
       },
+      // 转换状态
+      formatStatus(val){
+        if(val == '在线') {
+          return 1
+        }else if(val == '离线') {
+          return 0
+        }
+      },
+      // 转换制式
+      formatSystem(val){
+        if(val == '大卡') {
+          return 1
+        }else if(val == '双切') {
+          return 2
+        }else if(val == '三切') {
+          return 3
+        }else if(val == '2*2') {
+          return 4
+        }else if(val == '5*6') {
+          return 5
+        }else if(val == 'eSim') {
+          return 6
+        }else if(val == '其他'){
+          return 7
+        }
+      },
+      // 选择日期
+      pickChange(){
+        this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
+        this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
+        this.getTableData();
+      }
     }
   };
 </script>

@@ -38,6 +38,7 @@
 <script>
   import dreamHeader from '../components/dreamHeader/dreamHeader.vue'
   import dreamSlide from '../components/dreamSlide/dreamSlide.vue'
+  import {timestampToTime} from '../api/dataUtil'
   export default {
     components: {
       dreamHeader,
@@ -48,30 +49,7 @@
         totalCount: 123,
         pageSize: 10,
         pageNo: 1,
-        msgData: [
-          {
-            title: '欠费提醒',
-            info: '尊敬的客户，您的账户预缴费不足500元，请查收。',
-            time: '2018-08-08 14:08',
-            flagSrc: ''
-          },
-          {
-            title: '欠费提醒',
-            info: '尊敬的客户，您的账户预缴费不足500元，请查收。',
-            time: '2018-08-08 14:08'
-          },
-          {
-            title: '欠费提醒',
-            info: '尊敬的客户，您的账户预缴费不足500元，请查收。',
-            time: '2018-08-08 14:08',
-            flagSrc: ''
-          },
-          {
-            title: '欠费提醒',
-            info: '尊敬的客户，您的账户预缴费不足500元，请查收。',
-            time: '2018-08-08 14:08'
-          }
-        ]
+        msgData: []
       };
     },
     mounted(){
@@ -130,15 +108,19 @@
         }).then(res=>{
           console.log(res.data.data)
           let data = res.data.data;
+          for(let i=0; i<data.length; i++){
+            this.msgData.push({
+              title: data[i].title,
+              info: data[i].content,
+              time: timestampToTime(data[i].createTime),
+            })
+          }
         })
       },
       // 改变当前页数
       changePageNo(val){
         this.pageNo  = val;
-      },
-      handleSizeChange(){
-
-      },
+      }
     }
   };
 </script>

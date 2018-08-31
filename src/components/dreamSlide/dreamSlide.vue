@@ -55,17 +55,17 @@
             menuTwo: [
               {
                 titleTwo: '中国移动',
-                path: '/flowPool',
+                path: '/flowPool?type=1',
                 index: '3-1'
               },
               {
                 titleTwo: '中国联通',
-                path: '/flowPool',
+                path: '/flowPool?type=2',
                 index: '3-2'
               },
               {
                 titleTwo: '中国电信',
-                path: '/flowPool',
+                path: '/flowPool?type=3',
                 index: '3-3'
               }
             ]
@@ -114,11 +114,11 @@
         console.log(key, keyPath);
       },
       toPath(path) {
+        if(path.path.indexOf('type') > 0) {
+          this.$emit('typeChange')
+        }
         this.$router.replace(path)
-      },
-//      toPath(path) {
-//        this.$router.push({path: `${path}/${flowType}`})
-//      }
+      }
     }
   };
 </script>
