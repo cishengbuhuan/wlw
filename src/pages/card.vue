@@ -220,7 +220,7 @@
     },
     mounted(){
       this.getAllDeviceStatus()
-      this.getDataParams()
+      this.getTableData()
     },
     methods: {
       // 获取今日卡况的数据
@@ -238,26 +238,21 @@
           this.cardInfo[4].num = data.unactiveNo
         })
       },
-      // 获取表格 参数
-      getDataParams(){
-        let params = {
-          pageSize: this.pageSize,
-          pageNo: this.pageNo,
-          cardNo: this.numVal,
-          netWork: this.netWork ? this.netWork : this.defaultNetWork,
-          status: this.status ? this.status : this.defaultStatus,
-          netWorkType: this.netWorkType ? this.netWorkType : this.defaultNetWorkType,
-          startTime: this.beginTime,
-          endTime: this.endTime
-        }
-        this.getData(params)
-      },
       // 获取表格 数据
-      getData(params){
+      getTableData(){
         this.$axios({
           url: '/api/v2/device/devicePageList',
           method: 'post',
-          params: params
+          params: {
+            pageSize: this.pageSize,
+            pageNo: this.pageNo,
+            cardNo: this.numVal,
+            area: this.netWork ? this.netWork : this.defaultNetWork,
+            status: this.status ? this.status : this.defaultStatus,
+            netWorkType: this.netWorkType ? this.netWorkType : this.defaultNetWorkType,
+            startTime: this.beginTime,
+            endTime: this.endTime
+          }
         }).then(res=>{
           console.log(res.data)
           let data = res.data.data;
@@ -304,40 +299,6 @@
       changeSize(val){
         this.pageSize = val;
         this.getTableData()
-      },
-      // 转换地区
-      formatArea(val){
-        if(val == '北京移动') {
-          return 5
-        }else if(val == '海门移动') {
-          return 7
-        }
-      },
-      // 转换状态
-      formatStatus(val){
-        if(val == '在线') {
-          return 1
-        }else if(val == '离线') {
-          return 0
-        }
-      },
-      // 转换制式
-      formatSystem(val){
-        if(val == '大卡') {
-          return 1
-        }else if(val == '双切') {
-          return 2
-        }else if(val == '三切') {
-          return 3
-        }else if(val == '2*2') {
-          return 4
-        }else if(val == '5*6') {
-          return 5
-        }else if(val == 'eSim') {
-          return 6
-        }else if(val == '其他'){
-          return 7
-        }
       },
       // 选择日期
       pickChange(){

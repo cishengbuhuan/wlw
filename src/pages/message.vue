@@ -21,6 +21,7 @@
             </div>
             <div class="delete" @click="deleteMsg(index)">删除</div>
           </div>
+          <div class="no-more" v-if="msgData.length == 0">暂无消息！</div>
           <el-pagination
             v-if="totalCount > pageSize"
             layout="prev, pager, next"
@@ -46,7 +47,7 @@
     },
     data() {
       return {
-        totalCount: 123,
+        totalCount: 0,
         pageSize: 10,
         pageNo: 1,
         msgData: []
@@ -57,13 +58,22 @@
     },
     methods: {
       // 删除一行
-      deleteMsg(){
+      deleteMsg(index){
         this.$confirm('是否删除这一条消息?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          console.log(this)
+          this.$axios({
+            url: '/api/v2/msg/delete',
+            method: 'post',
+            params: {
+              msgId: this.msgData[index].msgId
+            }
+          }).then(res=>{
+            this.msgData = [];
+            this.getAllMsgList()
+          })
           this.$message({
             type: 'success',
             message: '删除成功!'
@@ -83,7 +93,13 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          console.log(this)
+          this.$axios({
+            url: '/api/v2/msg/clearMsg',
+            method: 'post'
+          }).then(res=>{
+            this.msgData = [];
+            this.getAllMsgList()
+          })
           this.$message({
             type: 'success',
             message: '删除成功!'
@@ -113,6 +129,7 @@
               title: data[i].title,
               info: data[i].content,
               time: timestampToTime(data[i].createTime),
+              msgId: data[i].messageId
             })
           }
         })
@@ -203,6 +220,10 @@
           }
           .msg-item:last-child {
             border-bottom: none;
+          }
+          .no-more {
+            font-size: 20px;
+            margin-top: 35px;
           }
         }
       }

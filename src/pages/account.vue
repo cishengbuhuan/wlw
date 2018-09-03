@@ -56,6 +56,7 @@
               <el-table-column prop="remark" label="备注" align="center"></el-table-column>
             </el-table>
             <el-pagination
+              v-if="totalCount > pageSize"
               layout="prev, pager, next"
               :page-size='pageSize'
               :current-page="pageNo"
@@ -98,13 +99,32 @@
     mounted(){
       this.getConsumptionRecords()
       this.getRechargeRecords()
+      this.getUserBasic()
+      this.getUserAssets()
     },
     methods: {
       toggleNav(i){
         this.index = i
       },
       // 获取我的账户的基本信息
-
+      getUserBasic(){
+        this.$axios({
+          url: '/api/v2/base/getUser',
+          method: 'post'
+        }).then(res=>{
+          let data = res.data.data;
+          this.userInfo.account = data.phone
+        })
+      },
+      getUserAssets(){
+        this.$axios({
+          url: '/api/v2/base/getBasal',
+          method: 'post'
+        }).then(res=>{
+          let data = res.data.data;
+          this.userInfo.assets = data.amount
+        })
+      },
       // 获取消费记录
       getConsumptionRecords(){
         this.$axios({

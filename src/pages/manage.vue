@@ -26,7 +26,7 @@
                 <th><input type="checkbox" v-model="allChecked" @click="toggleAllChecked"></th>
                 <th>姓名</th>
                 <th>账号</th>
-                <th>密码</th>
+                <!--<th>密码</th>-->
                 <th>操作</th>
               </tr>
             </thead>
@@ -38,9 +38,8 @@
                 <td><input type="checkbox" v-model="item.isChecked"></td>
                 <td>{{ item.name }}</td>
                 <td>{{ item.account }}</td>
-                <td>{{ item.password }}</td>
+                <!--<td>{{ item.password }}</td>-->
                 <td>
-                  <span class="edit"><i class="el-icon-edit-outline"></i>编辑</span>
                   <span @click="deleteThisRow(index)"><i class="el-icon-remove-outline"></i>删除</span>
                 </td>
               </tr>
@@ -59,20 +58,20 @@
           <!-- 姓名 -->
           <div class="name">
             <span>姓名：</span>
-            <input type="text">
+            <input type="text" v-model="user.name">
           </div>
           <!-- 账号 -->
           <div class="account">
             <span>账户：</span>
-            <input type="text">
+            <input type="text" v-model="user.account">
           </div>
           <!-- 密码 -->
           <div class="password">
             <span>密码：</span>
-            <input type="text">
+            <input type="text" v-model="user.password">
           </div>
           <!-- 按钮 -->
-          <div class="btn-add">添加</div>
+          <div class="btn-add" @click="btnSure">确定</div>
         </div>
       </div>
     </div>
@@ -90,33 +89,19 @@
       return {
         userInfo: {
           headImg: '../../static/images/default-head.png',
-          account: '17789789762',
+          account: '',
         },
         // 全选
         allChecked: false,
         // 账号信息
-        accountData: [
-          {
-            name: '张三',
-            account: '17766668888',
-            password: '123456',
-            isChecked: true
-          },
-          {
-            name: '李四',
-            account: '17766668888',
-            password: '123456',
-            isChecked: false
-          },
-          {
-            name: '王武',
-            account: '17766668888',
-            password: '123456',
-            isChecked: false
-          }
-        ],
+        accountData: [],
         // 弹框是否显示
-        modalIsShow: false
+        modalIsShow: false,
+        user: {
+          name: '',
+          account: '',
+          password: ''
+        }
       };
     },
     mounted(){
@@ -154,21 +139,29 @@
         });
       },
       // 删除一行
-      deleteThisRow(){
+      deleteThisRow(index){
         this.$confirm('是否删除此账号?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          for(let i=0; i<this.accountData.length; i++){
-            if(this.accountData[i].isChecked === false){
-              this.accountData.shift(this.accountData[i])
+          this.$axios({
+            url: '/api/v2/user/delete',
+            method: 'post',
+            params: {
+              mobile: this.accountData[index].account
             }
-          }
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+          }).then(res=>{
+            this.modalIsShow = false;
+            this.accountData = [];
+            this.getAccountList()
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }).catch(res=>{
+            this.$message({type: 'info',message: res.msg});
+          })
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -178,15 +171,58 @@
       },
       // 点击空白处让弹框隐藏
       closeModalWrap(){
+        this.user.name  = '';
+        this.user.account  = '';
+        this.user.password  = '';
         this.modalIsShow = !this.modalIsShow;
       },
       // 点击添加按钮
       btnAdd(){
         this.modalIsShow = true;
       },
+      // 确定按钮
+      btnSure(){
+        this.$axios({
+          url: '/api/v2/user/addUser',
+          method: 'post',
+          params: {
+            name: this.user.name,
+            mobile: this.user.account,
+            password: this.user.password
+          }
+        }).then(res=>{
+          if(res.data.code == 1){
+            this.$message({type: 'success',message: '添加成功！'});
+            this.modalIsShow = false;
+            this.accountData = [];
+            this.user.name = ''
+            this.user.account = ''
+            this.user.password = ''
+            this.getAccountList()
+          }else {
+            this.$message({type: 'error',message: res.data.msg});
+          }
+        }).catch(res=>{
+          this.$message({type: 'info',message: res.data.msg});
+        })
+      },
       // 获取到账户列表
       getAccountList(){
-
+        this.$axios({
+          url: '/api/v2/user/userList',
+          method: 'post'
+        }).then(res=>{
+          let data = res.data.data;
+          console.log(data)
+          for(let i=0; i<data.length; i++){
+            this.accountData.push({
+              name: data[i].name,
+              account: data[i].phone,
+              password: data[i].salt,
+              isChecked: false
+            })
+          }
+        })
       }
     }
   };

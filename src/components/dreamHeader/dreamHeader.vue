@@ -5,7 +5,9 @@
     </div>
     <div class="user">
       <div class="info">
-        <span>消息</span>({{ user.msgNum }})
+        <router-link to="/message">
+          <span>消息</span>({{ user.msgNum }})
+        </router-link>
       </div>
       <div class="head-name">
         <img class="head" :src="user.headImg">
@@ -15,7 +17,7 @@
               {{ user.nickname }}<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>退出登录</el-dropdown-item>
+              <el-dropdown-item @click="signOut">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -50,6 +52,12 @@
           this.user.headImg = data.avatar ? data.avatar : '../../static/images/default-head.png';
           this.user.nickname = data.companyName;
         })
+      },
+      // 退出登录
+      signOut(){
+        console.log('退出')
+        localStorage.removeItem('_token');
+        this.$router.push({ path: '/' })
       }
     }
   };
@@ -87,10 +95,12 @@
     .user {
       display: flex;
       .info {
-        color: #fff;
-        font-size: 16px;
-        margin-right: 25px;
-        cursor: pointer;
+        a {
+          color: #fff;
+          font-size: 16px;
+          margin-right: 25px;
+          cursor: pointer;
+        }
       }
       .head-name {
         display: flex;

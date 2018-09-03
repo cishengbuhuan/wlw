@@ -156,48 +156,7 @@
           }
         ],
         // 流量统计饼状图数据
-        flowData: [
-          [
-            {
-              monthTotal: '100(M)',
-              date: '本月总流量',
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已使用', number: 1393 },
-                { usage: '未使用', number: 3530 }
-              ]
-            },
-            {
-              monthTotal: '100(M)',
-              date: '上月总流量',
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已使用', number: 1393 },
-                { usage: '已超出', number: 4567 }
-              ]
-            }
-          ],
-          [
-            {
-              monthTotal: '100(M)',
-              date: '本月总流量',
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已使用', number: 1393 },
-                { usage: '未使用', number: 3530 }
-              ]
-            },
-            {
-              monthTotal: '100(M)',
-              date: '上月总流量',
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已使用', number: 1393 },
-                { usage: '已超出', number: 4567 }
-              ]
-            }
-          ]
-        ],
+        flowData: [],
         // 运营商的筛选框
         operatorValue: '移动',
         optionsArr: [
@@ -291,14 +250,28 @@
           }
         }).then(res=>{
           console.log(res.data.data)
-          let data = res.data.data
+          let data = res.data.data;
+          var result = [];
           for(let i=0; i<data.length; i++){
+            var arr = [];
             for(let j=0; j<data[i].length; j++){
-              for(let k=0; k<data[i].rows.length; k++){
+              var obj={
+                columns: ['usage', 'number'],
+                rows:[]
+              };
+              obj.monthTotal=data[i][j].monthTotal
+              obj.date=data[i][j].date;
 
+              for(let k=0; k<data[i][j].rows.length; k++){
+                // console.log(data[i][j])
+                obj.rows.push({usage:data[i][j].rows[k].status,number:data[i][j].rows[k].number})
               }
+              arr.push(obj)
             }
+            result.push(arr)
           }
+          // console.log(result)
+          this.flowData = result
         })
       },
       // 运营商的下拉框的值发生变化的时候触发

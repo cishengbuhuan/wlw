@@ -30,8 +30,8 @@
                 :key="index">{{ item.number }}</li>
             <li>自定义金额</li>
           </ul>
-          <div class="button-recharge">立即充值</div>
-          <div class="user-protocol">我已同意<span @click="alertProtocol">《用户协议》</span><input type="checkbox"></div>
+          <div class="button-recharge" @click="btnRecharge">立即充值</div>
+          <div class="user-protocol">我已同意<span @click="alertProtocol">《用户协议》</span><input type="checkbox" v-model="checked"></div>
         </div>
       </div>
     </div>
@@ -76,7 +76,8 @@
         ],
         wayIndex: 0,
         rechargeData: [],
-        modalShow: false
+        modalShow: false,
+        checked: true
       };
     },
     mounted(){
@@ -88,7 +89,7 @@
         this.wayIndex = index
       },
       alertProtocol(){
-        this.modalShow = true;
+        this.modalShow = false;
       },
       sure(){
         this.modalShow = false;
@@ -125,6 +126,10 @@
           this.rechargeData[i].isSelected = false;
         }
         this.rechargeData[index].isSelected = true;
+      },
+      // 点击立即充值按钮
+      btnRecharge(){
+        this.$message({type: 'info',message: '系统更新中...'});
       }
     }
   };

@@ -22,8 +22,11 @@
         <div class="info-chart">
           <!-- 饼图 -->
           <div class="chart">
-            <div class="chart-item" v-for="(item,index) in baseInfo.ringData" :key="index">
-              <ve-pie :data="item" :settings="baseSettings" :extend="baseExtend"></ve-pie>
+            <div class="chart-item">
+              <ve-pie :data="baseInfo.usageData" :settings="baseSettings" :extend="baseExtend"></ve-pie>
+            </div>
+            <div class="chart-item">
+              <ve-pie :data="baseInfo.alarmData" :settings="baseSettings" :extend="baseExtend"></ve-pie>
             </div>
           </div>
           <!-- tips -->
@@ -31,9 +34,9 @@
             <span>总流量：{{ baseInfo.totalFlow }}M</span>
             <span>单卡流量：{{ baseInfo.singleFlow }}M</span>
             <span>使用率：{{ baseInfo.usageRate }}</span>
-            <span>已超出：{{ baseInfo.overview }}M</span>
-            <span>预警数：{{ baseInfo.warnNumber }}M</span>
-            <span>报警卡数：{{ baseInfo.alarmCardNumber }}M</span>
+            <span>已超出：{{ baseInfo.overview }}个</span>
+            <span>预警数：{{ baseInfo.warnNumber }}个</span>
+            <span>报警卡数：{{ baseInfo.alarmCardNumber }}个</span>
           </div>
         </div>
       </div>
@@ -42,8 +45,8 @@
         <div class="table-header">
           <!-- 搜索框 -->
           <div class="search-box">
-            <input type="text" placeholder="请输入ICCID">
-            <div class="btn-search"><i class="el-icon-search"></i></div>
+            <input type="text" placeholder="请输入ICCID" v-model="numVal">
+            <div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
           </div>
           <!-- 联动选择器 -->
           <div class="cascader">
@@ -59,9 +62,10 @@
             <!--</el-select>-->
             <!-- 状态 -->
             <el-select v-model="statusValue"
+                       @change="toggleStatus"
                        placeholder="请选择状态">
               <el-option
-                v-for="item in selectData.statusOptions"
+                v-for="item in statusOptions"
                 :key="item.value"
                 :label="item.status"
                 :value="item.value">
@@ -90,7 +94,7 @@
               start-placeholder="计费时间"
               end-placeholder="结束时间">
             </el-date-picker>
-            <div class="btn-inquire">查询</div>
+            <div class="btn-inquire" @click="pickChange">查询</div>
           </div>
         </div>
         <!-- table内容 -->
@@ -112,11 +116,11 @@
             <el-table-column prop="message" label="短信" align="center"></el-table-column>
             <el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
             <el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
-            <el-table-column prop="operate" label="操作" align="center">
-              <template slot-scope="scope">
-                <span @click="goDetail(scope.row)">{{ scope.row.operate }}</span>
-              </template>
-            </el-table-column>
+            <!--<el-table-column prop="operate" label="操作" align="center">-->
+              <!--<template slot-scope="scope">-->
+                <!--<span class="more" @click="goDetail(scope.row)">{{ scope.row.operate }}</span>-->
+              <!--</template>-->
+            <!--</el-table-column>-->
           </el-table>
           <el-pagination
             v-if="totalCount > pageSize"
@@ -138,6 +142,7 @@
   import dreamHeader from '../components/dreamHeader/dreamHeader.vue'
   import dreamSlide from '../components/dreamSlide/dreamSlide.vue'
   import VePie from "v-charts/lib/pie.common";
+  import {timestampToTime,format} from '../api/dataUtil'
   export default {
     components: {
       dreamHeader,
@@ -179,27 +184,17 @@
           totalFlow: 0,
           singleFlow: 0,
           usageRate: '',
-          overview: 20,
-          warnNumber: 2,
-          alarmCardNumber: 3,
-          ringData: [
-            {
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已激活', number: 1393 },
-                { usage: '已停卡', number: 3530 },
-                { usage: '已消费', number: 2923 }
-              ]
-            },
-            {
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已激活', number: 1393 },
-                { usage: '已停卡', number: 3530 },
-                { usage: '已消费', number: 2923 }
-              ]
-            }
-          ]
+          overview: 0,
+          warnNumber: 0,
+          alarmCardNumber: 0,
+          usageData: {
+            columns: ['usage', 'number'],
+            rows: []
+          },
+          alarmData: {
+            columns: ['usage', 'number'],
+            rows: []
+          }
         },
         totalCount: 134,
         pageSize: 10,
@@ -207,111 +202,35 @@
         areaValue: '',
         statusValue: '',
         systemValue: '',
-        selectData: {
-          areaOptions: [
-            {
-              value: '1',
-              area: '北京移动'
-            },
-            {
-              value: '2',
-              area: '上海移动'
-            },
-            {
-              value: '3',
-              area: '上海电信'
-            },
-            {
-              value: '4',
-              area: '广东联通'
-            }
-          ],
-          statusOptions: [
-            {
-              value: '1',
-              status: '在线'
-            },
-            {
-              value: '2',
-              status: '离线'
-            }
-          ],
-          systemOptions: [
-            {
-              value: '1',
-              system: '三切'
-            },
-            {
-              value: '2',
-              system: '双切'
-            },
-            {
-              value: '3',
-              system: '5*6'
-            },
-            {
-              value: '4',
-              system: '2*2'
-            }
-          ]
-        },
-        timeValue: '',
-        tableData: [
+        statusOptions: [
           {
-            sortNum: '1234',
-            cardNum: '123456789',
-            operator: '电信',
-            flowPackage: '10M',
-            flowUsage: 12,
-            message: 0,
-            endTime: '2019-07-31',
-            cardStatus: '在线',
-            operate: '查看详情'
-          },{
-            sortNum: '1234',
-            cardNum: '123456789',
-            operator: '电信',
-            flowPackage: '10M',
-            flowUsage: 12,
-            message: 0,
-            endTime: '2019-07-31',
-            cardStatus: '在线',
-            operate: '查看详情'
-          },{
-            sortNum: '1234',
-            cardNum: '123456789',
-            operator: '电信',
-            flowPackage: '10M',
-            flowUsage: 12,
-            message: 0,
-            endTime: '2019-07-31',
-            cardStatus: '在线',
-            operate: '查看详情'
-          },{
-            sortNum: '1234',
-            cardNum: '123456789',
-            operator: '电信',
-            flowPackage: '10M',
-            flowUsage: 12,
-            message: 0,
-            endTime: '2019-07-31',
-            cardStatus: '在线',
-            operate: '查看详情'
+            value: '1',
+            status: '在线'
+          },
+          {
+            value: '0',
+            status: '离线'
           }
         ],
-        typeValue: ''
+        timeValue: '',
+        tableData: [],
+        typeValue: '',
+        status: '',
+        defaultStatus: '',
+        numVal: '',
+        beginTime: '',
+        endTime: ''
       };
     },
     mounted(){
       this.getPackageOptions();
+      this.getTableData();
     },
     methods: {
-      goDetail(){
-        this.$router.push({ path: '/index' })
-      },
       // 改变当前页数
       changePageNo(val){
-        this.pageno  = val;
+        this.pageNo  = val;
+        this.getTableData()
       },
       // 改变每页显示的条数
       changeSize(val){
@@ -320,11 +239,15 @@
       },
       // 改变type的类型，即跳转不同的路由
       typeChange(type){
-        console.log('=--------------=')
-        console.log(type)
-        console.log('=--------------=')
-
         this.getPackageOptions(type)
+        this.getPieUsage(type)
+
+        this.timeValue = ''
+        this.beginTime = ''
+        this.endTime = ''
+        this.numVal = ''
+        this.getTableData(type)
+        console.log(type)
       },
       // 获取到套餐选项
       getPackageOptions(type){
@@ -347,11 +270,13 @@
             })
           }
           this.getPieTips()
+          this.getAlarmTips()
+          this.getPieUsage()
+          this.getPieAlarm()
         })
       },
       // 获取到饼状图下到相关信息
       getPieTips(){
-        console.log(this.defaultPoolId)
         this.$axios({
           url: '/api/v2/pool/poolUsage',
           method: 'post',
@@ -359,7 +284,6 @@
             poolId: this.poolId ? this.poolId : this.defaultPoolId
           }
         }).then(res=>{
-          console.log(res.data)
           let data = res.data.data;
           // 总流量
           this.baseInfo.totalFlow =data.total
@@ -369,33 +293,87 @@
           this.baseInfo.usageRate =data.usage
         })
       },
+      getAlarmTips(){
+        this.$axios({
+          url: '/api/v2/pool/poolCardWarning',
+          method: 'post',
+          params: {
+            poolId: this.poolId ? this.poolId : this.defaultPoolId
+          }
+        }).then(res=>{
+          let data = res.data.data;
+          console.log(data)
+
+          // 已超出
+          this.baseInfo.overview =data.over
+          // 预警数
+          this.baseInfo.warnNumber =data.warn
+          // 报警卡数
+          this.baseInfo.alarmCardNumber =data.alarm
+        })
+
+      },
+      // 获取到使用信息
+      getPieUsage(){
+        this.$axios({
+          url: '/api/v2/pool/poolUsageChart',
+          method: 'post',
+          params: {
+            poolId: this.poolId ? this.poolId : this.defaultPoolId
+          }
+        }).then(res=>{
+          let data = res.data.data;
+          this.baseInfo.usageData.rows = []
+          for(let i=0; i<data.length; i++){
+            this.baseInfo.usageData.rows.push({
+              usage: data[i].usage,
+              number: data[i].number
+            })
+          }
+        })
+      },
+      // 获取到预警图表
+      getPieAlarm(){
+        this.$axios({
+          url: '/api/v2/pool/poolCardWarningChart',
+          method: 'post',
+          params: {
+            poolId: this.poolId ? this.poolId : this.defaultPoolId
+          }
+        }).then(res=>{
+          let data = res.data.data;
+          this.baseInfo.alarmData.rows = []
+          for(let i=0; i<data.length; i++){
+            this.baseInfo.alarmData.rows.push({
+              usage: data[i].usage,
+              number: data[i].number
+            })
+          }
+        })
+      },
       // 基本信息的下拉框的值发生变化的时候触发
       packageChange(val){
         this.poolId = val;
         this.getPieTips()
+        this.getAlarmTips()
+        this.getPieUsage()
+        this.getPieAlarm()
       },
-      // 获取表格数据
-      getTableData(){
-        let params = {
-          pageSize: this.pageSize,
-          pageNo: this.pageNo,
-          cardNo: this.numVal,
-          netWork: this.formatArea(this.areaValue),
-          status: this.formatStatus(this.statusValue),
-          netWorkType: this.formatSystem(this.systemValue),
-          startTime: this.beginTime,
-          endTime: this.endTime
-        }
-        console.log(params.netWork)
-        console.log(this.areaValue)
-
-
-        console.log(params.status)
-        console.log(params.netWorkType)
+      // 获取表格 数据
+      getTableData(type){
+        console.log(type)
         this.$axios({
           url: '/api/v2/device/devicePageList',
           method: 'post',
-          params: params
+          params: {
+            pageSize: this.pageSize,
+            pageNo: this.pageNo,
+            cardNo: this.numVal,
+//            netWork: type,
+            status: this.status ? this.status : this.defaultStatus,
+            startTime: this.beginTime,
+            endTime: this.endTime
+          }
         }).then(res=>{
           console.log(res.data)
           let data = res.data.data;
@@ -405,33 +383,32 @@
             this.tableData.push({
               sortNum: data[i].no,
               cardNum: data[i].cardNumber,
-              iccid:  data[i].netWork === 1 ? data[i].cmIccid :
-                data[i].netWork === 2 ? data[i].cuIccid :
-                  data[i].ctIccid,
               operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
               flowPackage: data[i].packages,
-              message: data[i].msgNo,
               flowUsage: data[i].usageMonth,
-              flowOverage: data[i].flowOverage + 'M',
-              startTime: timestampToTime(data[i].serveTime),
+              message: data[i].msgNo,
               endTime: timestampToTime(data[i].endTime),
-              cardKind: data[i].cardType === 1 ? '大卡' :
-                data[i].cardType === 2 ? '双切' :
-                  data[i].cardType === 3 ? '三切' :
-                    data[i].cardType === 4 ? '2*2' :
-                      data[i].cardType === 5 ? '5*6' :
-                        data[i].cardType === 6 ? 'eSim' : '其他',
-              system: data[i].cardType === 2 ? '2G' :
-                data[i].cardType === 3 ? '3G' :
-                  data[i].cardType === 4 ? '4G' :
-                    data[i].cardType === 5 ? '5G' :
-                      data[i].cardType === 6 ? 'NB' :
-                        data[i].cardType === 7 ? 'emtc' : '',
               cardStatus: data[i].onlineStatus === 1 ? '在线' :
-                data[i].onlineStatus === 0 ? '离线' : ''
+                data[i].onlineStatus === 0 ? '离线' : '',
+              operate: '查看详情'
             })
           }
         })
+      },
+      // 跳转到详情页
+      goDetail(){
+        this.$router.push({ path: '/index' })
+      },
+      // 状态的下拉框的值发生变化的时候触发
+      toggleStatus(val){
+        this.status = val;
+        this.getTableData()
+      },
+      // 选择日期
+      pickChange(){
+        this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
+        this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
+        this.getTableData();
       },
     }
   };
@@ -615,6 +592,10 @@
         }
         .table-box {
           margin-top: 40px;
+          .more {
+            cursor: pointer;
+            color: mainBlue;
+          }
           .el-pagination {
             text-align: center;
             margin-top: 40px;
