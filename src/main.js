@@ -12,8 +12,8 @@ import { Dropdown, DropdownMenu, DropdownItem, MessageBox, Message,
   TabPane, Notification, Submenu, MenuItemGroup, Select, Option } from 'element-ui';
 
 
-axios.defaults.baseURL = 'http://192.168.1.5:8090';
-// axios.defaults.baseURL = 'http://192.168.1.70:8080/matrix';
+// axios.defaults.baseURL = 'http://192.168.1.5:8090';
+axios.defaults.baseURL = 'http://f8980b93.ngrok.io';
 axios.defaults.timeout = 10000;
 
 Vue.use(Col).use(Row).use(Table).use(DatePicker)
@@ -46,8 +46,24 @@ Vue.use(VCharts)
 
 
 axios.interceptors.request.use(config => {
-  config.params = Object.assign({_token: sessionStorage.getItem('_token')},config.params)
+  config.params = Object.assign({_token: localStorage.getItem('_token')},config.params)
   return config
 },err => {
   return Promise.reject(err)
 })
+
+axios.interceptors.response.use(function (response) {
+  // token 已过期，重定向到登录页面
+  if (response.data.code == 110){
+    localStorage.removeItem('_token')
+    router.replace({
+      path: '/login',
+      query: {redirect: router.currentRoute.fullPath}
+    })
+  }
+  return response
+}, function (error) {
+  // Do something with response error
+  return Promise.reject(error)
+})
+

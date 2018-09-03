@@ -25,7 +25,7 @@
           <div class="cascader">
             <!-- 地区运营商 -->
             <el-select v-model="areaValue"
-                       @change="getTableData"
+                       @change="toggleArea"
                        placeholder="请选择地区">
               <el-option
                 v-for="item in selectData.areaOptions"
@@ -36,7 +36,7 @@
             </el-select>
             <!-- 状态 -->
             <el-select v-model="statusValue"
-                       @change="getTableData"
+                       @change="toggleStatus"
                        placeholder="请选择状态">
               <el-option
                 v-for="item in selectData.statusOptions"
@@ -47,7 +47,7 @@
             </el-select>
             <!-- 制式 -->
             <el-select v-model="systemValue"
-                       @change="getTableData"
+                       @change="toggleSystem"
                        placeholder="请选择制式">
               <el-option
                 v-for="item in selectData.systemOptions"
@@ -147,29 +147,33 @@
             num: 0
           }
         ],
+        // 联动选择的数据
         selectData: {
+          // 地区运营商
           areaOptions: [
             {
-              value: '1',
+              value: '5',
               area: '海门移动',
               netWork: 5
             },
             {
-              value: '2',
+              value: '7',
               area: '北京移动',
               netWork: 7
             }
           ],
+          // 状态
           statusOptions: [
             {
               value: '1',
               status: '在线'
             },
             {
-              value: '2',
+              value: '0',
               status: '离线'
             }
           ],
+          // 制式
           systemOptions: [
             {
               value: '1',
@@ -208,12 +212,15 @@
         endTime: '',
         netWork: '',
         status: '',
-        netWorkType: ''
+        netWorkType: '',
+        defaultNetWork: '',
+        defaultStatus: '',
+        defaultNetWorkType: ''
       };
     },
     mounted(){
       this.getAllDeviceStatus()
-      this.getTableData()
+      this.getDataParams()
     },
     methods: {
       // 获取今日卡况的数据
@@ -231,24 +238,22 @@
           this.cardInfo[4].num = data.unactiveNo
         })
       },
-      // 获取表格数据
-      getTableData(){
+      // 获取表格 参数
+      getDataParams(){
         let params = {
           pageSize: this.pageSize,
           pageNo: this.pageNo,
           cardNo: this.numVal,
-          netWork: this.formatArea(this.areaValue),
-          status: this.formatStatus(this.statusValue),
-          netWorkType: this.formatSystem(this.systemValue),
+          netWork: this.netWork ? this.netWork : this.defaultNetWork,
+          status: this.status ? this.status : this.defaultStatus,
+          netWorkType: this.netWorkType ? this.netWorkType : this.defaultNetWorkType,
           startTime: this.beginTime,
           endTime: this.endTime
         }
-        console.log(params.netWork)
-        console.log(this.areaValue)
-
-
-        console.log(params.status)
-        console.log(params.netWorkType)
+        this.getData(params)
+      },
+      // 获取表格 数据
+      getData(params){
         this.$axios({
           url: '/api/v2/device/devicePageList',
           method: 'post',
@@ -263,8 +268,8 @@
               sortNum: data[i].no,
               cardNum: data[i].cardNumber,
               iccid:  data[i].netWork === 1 ? data[i].cmIccid :
-                      data[i].netWork === 2 ? data[i].cuIccid :
-                      data[i].ctIccid,
+                data[i].netWork === 2 ? data[i].cuIccid :
+                  data[i].ctIccid,
               operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
               flowPackage: data[i].packages,
               message: data[i].msgNo,
@@ -273,19 +278,19 @@
               startTime: timestampToTime(data[i].serveTime),
               endTime: timestampToTime(data[i].endTime),
               cardKind: data[i].cardType === 1 ? '大卡' :
-                        data[i].cardType === 2 ? '双切' :
-                        data[i].cardType === 3 ? '三切' :
-                        data[i].cardType === 4 ? '2*2' :
-                        data[i].cardType === 5 ? '5*6' :
+                data[i].cardType === 2 ? '双切' :
+                  data[i].cardType === 3 ? '三切' :
+                    data[i].cardType === 4 ? '2*2' :
+                      data[i].cardType === 5 ? '5*6' :
                         data[i].cardType === 6 ? 'eSim' : '其他',
               system: data[i].cardType === 2 ? '2G' :
-                      data[i].cardType === 3 ? '3G' :
-                      data[i].cardType === 4 ? '4G' :
-                      data[i].cardType === 5 ? '5G' :
+                data[i].cardType === 3 ? '3G' :
+                  data[i].cardType === 4 ? '4G' :
+                    data[i].cardType === 5 ? '5G' :
                       data[i].cardType === 6 ? 'NB' :
-                      data[i].cardType === 7 ? 'emtc' : '',
+                        data[i].cardType === 7 ? 'emtc' : '',
               cardStatus: data[i].onlineStatus === 1 ? '在线' :
-                          data[i].onlineStatus === 0 ? '离线' : ''
+                data[i].onlineStatus === 0 ? '离线' : ''
             })
           }
         })
@@ -339,6 +344,21 @@
         this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
         this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
         this.getTableData();
+      },
+      // 运营商 的下拉框的值发生变化的时候触发
+      toggleArea(val){
+        this.netWork = val;
+        this.getTableData()
+      },
+      // 状态 的下拉框的值发生变化的时候触发
+      toggleStatus(val){
+        this.status = val;
+        this.getTableData()
+      },
+      // 制式 的下拉框的值发生变化的时候触发
+      toggleSystem(val){
+        this.netWorkType = val;
+        this.getTableData()
       }
     }
   };

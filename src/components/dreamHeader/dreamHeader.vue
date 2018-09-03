@@ -32,7 +32,7 @@
         user: {
           msgNum: 0,
           headImg: '../../static/images/default-head.png',
-          nickname: '张三'
+          nickname: ''
         }
       };
     },

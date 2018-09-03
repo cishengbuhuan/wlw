@@ -72,7 +72,8 @@
           account: '',
           password: '',
           code: '',
-          imgSrc: ''
+          imgSrc: '',
+//          baseUrl: 'http://192.168.1.5:8090'
         }
       };
     },
@@ -91,13 +92,12 @@
           }
         }).then(res=>{
           let code = res.data.code;
-          console.log(code)
           if(code == 1){
-            sessionStorage.setItem('_token', res.data.data.token);
+            localStorage.setItem('_token', res.data.data.token);
             this.$router.push({ path: '/index' })
           }else if(code == 0){
             this.$message(res.data.msg);
-            this.user.imgSrc = 'http://192.168.1.5:8090/api/v1/image?userCode='+this.user.account+'&num='+Math.random()
+            this.user.imgSrc = 'http://192.168.1.5:8090/api/v1/image?userCode=' + this.user.account+'&num=' + Math.random()
           }
         })
       },
@@ -107,13 +107,13 @@
           return
         }
         this.codeShow = true;
-        this.user.imgSrc = 'http://192.168.1.5:8090/api/v1/image?userCode='+this.user.account
+        this.user.imgSrc = 'http://192.168.1.5:8090/api/v1/image?userCode=' + this.user.account
       },
       // 点击刷新验证码
       refreshImg(){
         this.user.imgSrc = '';
         this.$nextTick(()=>{
-          this.user.imgSrc = 'http://192.168.1.5:8090/api/v1/image?userCode='+this.user.account+'&num='+Math.random()
+          this.user.imgSrc = 'http://192.168.1.5:8090/api/v1/image?userCode=' + this.user.account+'&num=' + Math.random()
         })
       }
     }

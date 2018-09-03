@@ -42,7 +42,7 @@
               :page-size='pageSize'
               :current-page="pageNo"
               :total="totalCount"
-              @current-change="changePage">
+              @current-change="pageConsumption">
             </el-pagination>
           </div>
           <!-- 充值记录 -->
@@ -56,12 +56,11 @@
               <el-table-column prop="remark" label="备注" align="center"></el-table-column>
             </el-table>
             <el-pagination
-              v-if="totalCount > pageSize"
               layout="prev, pager, next"
               :page-size='pageSize'
               :current-page="pageNo"
               :total="totalCount"
-              @current-change="changePage">
+              @current-change="pageConsumption">
             </el-pagination>
           </div>
         </div>
@@ -82,39 +81,14 @@
       return {
         userInfo: {
           headImg: '../../static/images/default-head.png',
-          account: '17789789762',
-          assets: 2.00
+          account: '',
+          assets: 0
         },
         index: 0,
         // 消费记录
         consumptionData: [],
         // 充值记录
-        rechargeData: [
-          {
-            amount: 100,
-            time: '2018-08-12',
-            way: '与扣款',
-            remark: '备注'
-          },
-          {
-            amount: 100,
-            time: '2018-08-12',
-            way: '与扣款',
-            remark: '备注'
-          },
-          {
-            amount: 100,
-            time: '2018-08-12',
-            way: '与扣款',
-            remark: '备注'
-          },
-          {
-            amount: 100,
-            time: '2018-08-12',
-            way: '与扣款',
-            remark: '备注'
-          }
-        ],
+        rechargeData: [],
         // 分页
         totalCount: 0,
         pageSize: 3,
@@ -123,17 +97,21 @@
     },
     mounted(){
       this.getConsumptionRecords()
+      this.getRechargeRecords()
     },
     methods: {
       toggleNav(i){
         this.index = i
       },
+      // 获取我的账户的基本信息
+
       // 获取消费记录
       getConsumptionRecords(){
         this.$axios({
           url: '/api/v2/account/buyRecord',
           method: 'post',
           params: {
+            type: 1,
             pageNo: this.pageNo,
             pageSize: this.pageSize
           }
@@ -151,10 +129,40 @@
           }
         })
       },
-      // 分页
-      changePage(val){
+      // 分页(消费记录)
+      pageConsumption(val){
         this.pageNo  = val;
-      }
+        this.getConsumptionRecords()
+      },
+      // 获取充值记录
+      getRechargeRecords(){
+        this.$axios({
+          url: '/api/v2/account/buyRecord',
+          method: 'post',
+          params: {
+            type: 2,
+            pageNo: this.pageNo,
+            pageSize: this.pageSize
+          }
+        }).then(res=>{
+          let data = res.data.data;
+          console.log(data)
+          this.totalCount = res.data.totalCount
+          for(let i=0; i<data.length; i++){
+            this.rechargeData.push({
+              amount: data[i].amount,
+              time: data[i].tradeTime,
+              way: data[i].type,
+              remark: data[i].remark
+            })
+          }
+        })
+      },
+      // 分页(消费记录)
+      pageConsumption(val){
+        this.pageNo  = val;
+        this.getRechargeRecords()
+      },
     }
   };
 </script>

@@ -48,15 +48,15 @@
           <!-- 联动选择器 -->
           <div class="cascader">
             <!-- 地区运营商 -->
-            <el-select v-model="areaValue"
-                       placeholder="请选择地区">
-              <el-option
-                v-for="item in selectData.areaOptions"
-                :key="item.value"
-                :label="item.area"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <!--<el-select v-model="areaValue"-->
+                       <!--placeholder="请选择地区">-->
+              <!--<el-option-->
+                <!--v-for="item in selectData.areaOptions"-->
+                <!--:key="item.value"-->
+                <!--:label="item.area"-->
+                <!--:value="item.value">-->
+              <!--</el-option>-->
+            <!--</el-select>-->
             <!-- 状态 -->
             <el-select v-model="statusValue"
                        placeholder="请选择状态">
@@ -68,15 +68,15 @@
               </el-option>
             </el-select>
             <!-- 制式 -->
-            <el-select v-model="systemValue"
-                       placeholder="请选择制式">
-              <el-option
-                v-for="item in selectData.systemOptions"
-                :key="item.value"
-                :label="item.system"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <!--<el-select v-model="systemValue"-->
+                       <!--placeholder="请选择制式">-->
+              <!--<el-option-->
+                <!--v-for="item in selectData.systemOptions"-->
+                <!--:key="item.value"-->
+                <!--:label="item.system"-->
+                <!--:value="item.value">-->
+              <!--</el-option>-->
+            <!--</el-select>-->
           </div>
           <!-- 时间查询 -->
           <div class="time-inquire">
@@ -319,25 +319,22 @@
         this.getTableData()
       },
       // 改变type的类型，即跳转不同的路由
-      typeChange(){
+      typeChange(type){
         console.log('=--------------=')
-        console.log(this.$route.query.type)
+        console.log(type)
         console.log('=--------------=')
 
-        this.getPackageOptions()
+        this.getPackageOptions(type)
       },
       // 获取到套餐选项
-      getPackageOptions(){
+      getPackageOptions(type){
         this.$axios({
           url: '/api/v2/pool/poolList',
           method: 'post',
           params: {
-            netWork: this.$route.query.type
+            netWork: type
           }
         }).then(res=>{
-          console.log('======================')
-          console.log(res.data)
-          console.log('======================')
           let data = res.data.data;
           this.packageOptions = []
           this.packageValue = data[0].name
@@ -376,7 +373,66 @@
       packageChange(val){
         this.poolId = val;
         this.getPieTips()
-      }
+      },
+      // 获取表格数据
+      getTableData(){
+        let params = {
+          pageSize: this.pageSize,
+          pageNo: this.pageNo,
+          cardNo: this.numVal,
+          netWork: this.formatArea(this.areaValue),
+          status: this.formatStatus(this.statusValue),
+          netWorkType: this.formatSystem(this.systemValue),
+          startTime: this.beginTime,
+          endTime: this.endTime
+        }
+        console.log(params.netWork)
+        console.log(this.areaValue)
+
+
+        console.log(params.status)
+        console.log(params.netWorkType)
+        this.$axios({
+          url: '/api/v2/device/devicePageList',
+          method: 'post',
+          params: params
+        }).then(res=>{
+          console.log(res.data)
+          let data = res.data.data;
+          this.totalCount = res.data.totalCount
+          this.tableData = []
+          for(let i=0; i<data.length; i++){
+            this.tableData.push({
+              sortNum: data[i].no,
+              cardNum: data[i].cardNumber,
+              iccid:  data[i].netWork === 1 ? data[i].cmIccid :
+                data[i].netWork === 2 ? data[i].cuIccid :
+                  data[i].ctIccid,
+              operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
+              flowPackage: data[i].packages,
+              message: data[i].msgNo,
+              flowUsage: data[i].usageMonth,
+              flowOverage: data[i].flowOverage + 'M',
+              startTime: timestampToTime(data[i].serveTime),
+              endTime: timestampToTime(data[i].endTime),
+              cardKind: data[i].cardType === 1 ? '大卡' :
+                data[i].cardType === 2 ? '双切' :
+                  data[i].cardType === 3 ? '三切' :
+                    data[i].cardType === 4 ? '2*2' :
+                      data[i].cardType === 5 ? '5*6' :
+                        data[i].cardType === 6 ? 'eSim' : '其他',
+              system: data[i].cardType === 2 ? '2G' :
+                data[i].cardType === 3 ? '3G' :
+                  data[i].cardType === 4 ? '4G' :
+                    data[i].cardType === 5 ? '5G' :
+                      data[i].cardType === 6 ? 'NB' :
+                        data[i].cardType === 7 ? 'emtc' : '',
+              cardStatus: data[i].onlineStatus === 1 ? '在线' :
+                data[i].onlineStatus === 0 ? '离线' : ''
+            })
+          }
+        })
+      },
     }
   };
 </script>

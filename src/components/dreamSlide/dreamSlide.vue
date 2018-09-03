@@ -56,17 +56,20 @@
               {
                 titleTwo: '中国移动',
                 path: '/flowPool?type=1',
-                index: '3-1'
+                index: '3-1',
+                type: 1
               },
               {
                 titleTwo: '中国联通',
                 path: '/flowPool?type=2',
-                index: '3-2'
+                index: '3-2',
+                type: 2
               },
               {
                 titleTwo: '中国电信',
                 path: '/flowPool?type=3',
-                index: '3-3'
+                index: '3-3',
+                type: 3
               }
             ]
           },
@@ -94,11 +97,11 @@
                 path: '/manage',
                 index: '4-4'
               },
-              {
-                titleTwo: '申请开票',
-                path: '/bill',
-                index: '4-5'
-              }
+//              {
+//                titleTwo: '申请开票',
+//                path: '/bill',
+//                index: '4-5'
+//              }
             ]
           }
         ]
@@ -115,7 +118,7 @@
       },
       toPath(path) {
         if(path.path.indexOf('type') > 0) {
-          this.$emit('typeChange')
+          this.$emit('typeChange',path.type)
         }
         this.$router.replace(path)
       }

@@ -21,10 +21,11 @@
       <div class="system-msg">
         <div class="msg-title">公告<div class="icon"></div></div>
         <ul>
-          <li v-for="(item,index) in systemMsg" :key="index">
+          <li v-for="(item,index) in systemMsg" :key="index" v-if="systemMsg.length != 0">
             <router-link to="/message"><span>{{ item.msg }}</span></router-link>
             <div class="isNew"><img src="../../static/images/is-new.png" alt=""></div>
           </li>
+          <li v-if="systemMsg.length == 0">暂无公告信息！</li>
         </ul>
       </div>
       <!-- 卡片统计 -->
@@ -62,7 +63,7 @@
           <div class="chart-item-group" v-for="(item,index) in flowData" :key="index">
             <div class="chart-item" v-for="(itemSon,indexSon) in item" :key="indexSon">
               <ve-pie :data="itemSon" :settings="flowSettings" :extend="flowExtend"></ve-pie>
-              <div class="title">{{ itemSon.date }}总流量：{{ itemSon.monthTotal }}(M)</div>
+              <div class="title">{{ itemSon.date }}：{{ itemSon.monthTotal }}</div>
             </div>
           </div>
         </div>
@@ -125,56 +126,41 @@
         }
       }
       return {
+        // 公司基本信息
         company: {
           name: '',
           cardNum: 0,
           balance: 0
         },
+        // 系统信息
         systemMsg: [],
         // 卡片统计饼状图数据
         cardData: [
           {
             title: '',
-            totalCard: 100,
+            totalCard: 0,
             columns: ['status', 'number'],
-            rows: [
-//              { status: '已激活', number: 1393 },
-//              { status: '已停卡', number: 3530 },
-//              { status: '已消费', number: 2923 },
-//              { status: '已沉默', number: 1723 },
-//              { status: '已销卡', number: 3792 }
-            ]
+            rows: []
           },
           {
             title: '',
-            totalCard: 100,
+            totalCard: 0,
             columns: ['status', 'number'],
-            rows: [
-//              { status: '已激活', number: 1393 },
-//              { status: '已停卡', number: 3530 },
-//              { status: '已消费', number: 2923 },
-//              { status: '已沉默', number: 1723 },
-//              { status: '已销卡', number: 3792 }
-            ]
+            rows: []
           },
           {
             title: '',
-            totalCard: 100,
+            totalCard: 0,
             columns: ['status', 'number'],
-            rows: [
-//              { status: '已激活', number: 1393 },
-//              { status: '已停卡', number: 3530 },
-//              { status: '已消费', number: 2923 },
-//              { status: '已沉默', number: 1723 }
-            ]
+            rows: []
           }
         ],
         // 流量统计饼状图数据
         flowData: [
           [
             {
-              monthTotal: 100,
-              date: '本月',
+              monthTotal: '100(M)',
+              date: '本月总流量',
               columns: ['usage', 'number'],
               rows: [
                 { usage: '已使用', number: 1393 },
@@ -182,8 +168,8 @@
               ]
             },
             {
-              monthTotal: 100,
-              date: '上月',
+              monthTotal: '100(M)',
+              date: '上月总流量',
               columns: ['usage', 'number'],
               rows: [
                 { usage: '已使用', number: 1393 },
@@ -193,8 +179,8 @@
           ],
           [
             {
-              monthTotal: 100,
-              date: '本月',
+              monthTotal: '100(M)',
+              date: '本月总流量',
               columns: ['usage', 'number'],
               rows: [
                 { usage: '已使用', number: 1393 },
@@ -202,48 +188,8 @@
               ]
             },
             {
-              monthTotal: 100,
-              date: '上月',
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已使用', number: 1393 },
-                { usage: '已超出', number: 4567 }
-              ]
-            }
-          ],
-          [
-            {
-              monthTotal: 100,
-              date: '本月',
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已使用', number: 1393 },
-                { usage: '未使用', number: 3530 }
-              ]
-            },
-            {
-              monthTotal: 100,
-              date: '上月',
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已使用', number: 1393 },
-                { usage: '已超出', number: 4567 }
-              ]
-            }
-          ],
-          [
-            {
-              monthTotal: 100,
-              date: '本月',
-              columns: ['usage', 'number'],
-              rows: [
-                { usage: '已使用', number: 1393 },
-                { usage: '未使用', number: 3530 }
-              ]
-            },
-            {
-              monthTotal: 100,
-              date: '上月',
+              monthTotal: '100(M)',
+              date: '上月总流量',
               columns: ['usage', 'number'],
               rows: [
                 { usage: '已使用', number: 1393 },
@@ -344,19 +290,15 @@
             netWork: this.netWork ? this.netWork : this.defaultNetWork
           }
         }).then(res=>{
-          console.log(res.data)
+          console.log(res.data.data)
           let data = res.data.data
-//          for(let i=0; i<data.length; i++){
-//            this.cardData[i].title = data[i].title
-//            this.cardData[i].totalCard = data[i].totalCard
-//            let rows = data[i].rows;
-//            for(let j=0; j<rows.length; j++){
-//              this.cardData[i].rows.push({
-//                status: rows[j].status,
-//                number: rows[j].number
-//              })
-//            }
-//          }
+          for(let i=0; i<data.length; i++){
+            for(let j=0; j<data[i].length; j++){
+              for(let k=0; k<data[i].rows.length; k++){
+
+              }
+            }
+          }
         })
       },
       // 运营商的下拉框的值发生变化的时候触发
@@ -364,7 +306,6 @@
         this.netWork = val;
         this.getFlowTotal()
       }
-
     }
   };
 </script>
