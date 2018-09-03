@@ -33,7 +33,7 @@
           <div class="chart-tips">
             <span>总流量：{{ baseInfo.totalFlow }}M</span>
             <span>单卡流量：{{ baseInfo.singleFlow }}M</span>
-            <span>使用率：{{ baseInfo.usageRate }}</span>
+            <span>使用率：{{ baseInfo.usageRate }}%</span>
             <span>已超出：{{ baseInfo.overview }}个</span>
             <span>预警数：{{ baseInfo.warnNumber }}个</span>
             <span>报警卡数：{{ baseInfo.alarmCardNumber }}个</span>
@@ -286,11 +286,11 @@
         }).then(res=>{
           let data = res.data.data;
           // 总流量
-          this.baseInfo.totalFlow =data.total
+          this.baseInfo.totalFlow = data.total
           // 单卡流量
-          this.baseInfo.singleFlow =data.dataSize
+          this.baseInfo.singleFlow = data.dataSize
           // 使用率
-          this.baseInfo.usageRate =data.usage
+          this.baseInfo.usageRate = parseFloat(data.usage).toFixed(2)
         })
       },
       getAlarmTips(){

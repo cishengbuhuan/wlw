@@ -105,6 +105,7 @@
       };
     },
     mounted(){
+      this.getUserBasic()
       this.getAccountList()
     },
     methods: {
@@ -206,6 +207,16 @@
           this.$message({type: 'info',message: res.data.msg});
         })
       },
+      // 获取我的账户的基本信息
+      getUserBasic(){
+        this.$axios({
+          url: '/api/v2/base/getUser',
+          method: 'post'
+        }).then(res=>{
+          let data = res.data.data;
+          this.userInfo.account = data.phone
+        })
+      },
       // 获取到账户列表
       getAccountList(){
         this.$axios({
@@ -223,7 +234,7 @@
             })
           }
         })
-      }
+      },
     }
   };
 </script>

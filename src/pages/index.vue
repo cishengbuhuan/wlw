@@ -448,9 +448,19 @@
             .icon {
               width: 11px;
               height: 11px;
-              background-color: red;
+              background-color: #79d3ae;
               margin-top: 10px;
               margin-right: 20px;
+            }
+          }
+          .unused {
+            .icon {
+              background-color: #7ab0ec;
+            }
+          }
+          .exceeded {
+            .icon {
+              background-color: #dd6e84;
             }
           }
         }
