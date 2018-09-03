@@ -12,8 +12,8 @@ import { Dropdown, DropdownMenu, DropdownItem, MessageBox, Message,
   TabPane, Notification, Submenu, MenuItemGroup, Select, Option } from 'element-ui';
 
 
-axios.defaults.baseURL = 'http://192.168.1.5:8090';
-// axios.defaults.baseURL = 'http://f8980b93.ngrok.io';
+// axios.defaults.baseURL = 'http://192.168.1.5:8090';
+axios.defaults.baseURL = 'http://47.96.232.174/matrix';
 // axios.defaults.timeout = 10000;
 
 Vue.use(Col).use(Row).use(Table).use(DatePicker)
