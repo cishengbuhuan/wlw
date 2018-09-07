@@ -18,24 +18,25 @@
         <div class="table-header">
           <!-- 搜索框 -->
           <div class="search-box">
-            <input type="text" placeholder="请输入ICCID" v-model="numVal">
-            <div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
+            <input type="text" placeholder="请输入ICCID或者卡号" v-model="numVal">
+            <div class="btn-search" @click="btnSearch"><i class="el-icon-search"></i></div>
           </div>
           <!-- 联动选择器 -->
           <div class="cascader">
             <!-- 地区运营商 -->
-            <el-select v-model="areaValue"
-                       @change="toggleArea"
-                       placeholder="请选择地区">
-              <el-option
-                v-for="item in selectData.areaOptions"
-                :key="item.value"
-                :label="item.area"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <!--<el-select v-model="areaValue"-->
+                       <!--@change="toggleArea"-->
+                       <!--placeholder="请选择地区">-->
+              <!--<el-option-->
+                <!--v-for="item in selectData.areaOptions"-->
+                <!--:key="item.value"-->
+                <!--:label="item.area"-->
+                <!--:value="item.value">-->
+              <!--</el-option>-->
+            <!--</el-select>-->
             <!-- 状态 -->
             <el-select v-model="statusValue"
+                       clearable
                        @change="toggleStatus"
                        placeholder="请选择状态">
               <el-option
@@ -47,6 +48,7 @@
             </el-select>
             <!-- 制式 -->
             <el-select v-model="systemValue"
+                       clearable
                        @change="toggleSystem"
                        placeholder="请选择制式">
               <el-option
@@ -75,7 +77,7 @@
         <div class="table-box">
           <el-table
             :data="tableData"
-            id="searchTable"
+            @sort-change='sortChange'
             border
             style="width: 100%">
             <el-table-column prop="sortNum" label="序号" align="center"></el-table-column>
@@ -84,8 +86,8 @@
             <el-table-column prop="operator" label="运营商" align="center"></el-table-column>
             <el-table-column prop="flowPackage" label="流量池套餐" width='70' align="center"></el-table-column>
             <el-table-column prop="message" label="短信" align="center"></el-table-column>
-            <el-table-column prop="flowUsage" label="本月已使用流量" align="center"></el-table-column>
-            <el-table-column prop="flowOverage" label="本月剩余流量" align="center"></el-table-column>
+            <el-table-column prop="flowUsage" sortable='custom' label="本月已使用流量" align="center"></el-table-column>
+            <el-table-column prop="flowOverage" sortable='custom' label="本月剩余流量" align="center"></el-table-column>
             <el-table-column prop="startTime" label="计费时间" align="center"></el-table-column>
             <el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
             <el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
@@ -215,7 +217,10 @@
         netWorkType: '',
         defaultNetWork: '',
         defaultStatus: '',
-        defaultNetWorkType: ''
+        defaultNetWorkType: '',
+        // 表格流量排序
+        sortData: '',
+        direct: ''
       };
     },
     mounted(){
@@ -223,6 +228,17 @@
       this.getTableData()
     },
     methods: {
+      btnSearch(){
+        let reg = /.*[\u4e00-\u9fa5]+.*$/;
+        if(reg.test(this.numVal)){
+          this.$message({
+            type: 'info',
+            message: '请输入正确的卡号或ICCID'
+          });
+          return
+        }
+        this.getTableData()
+      },
       // 获取今日卡况的数据
       getAllDeviceStatus(){
         this.$axios({
@@ -247,11 +263,13 @@
             pageSize: this.pageSize,
             pageNo: this.pageNo,
             cardNo: this.numVal,
-            area: this.netWork ? this.netWork : this.defaultNetWork,
+//            area: this.netWork ? this.netWork : this.defaultNetWork,
             status: this.status ? this.status : this.defaultStatus,
             netWorkType: this.netWorkType ? this.netWorkType : this.defaultNetWorkType,
             startTime: this.beginTime,
-            endTime: this.endTime
+            endTime: this.endTime,
+            sort: this.sortData,
+            direct: this.direct
           }
         }).then(res=>{
           console.log(res.data)
@@ -268,7 +286,7 @@
               operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
               flowPackage: data[i].packages,
               message: data[i].msgNo,
-              flowUsage: data[i].usageMonth,
+              flowUsage: data[i].usageMonth + 'M',
               flowOverage: data[i].flowOverage + 'M',
               startTime: timestampToTime(data[i].serveTime),
               endTime: timestampToTime(data[i].endTime),
@@ -302,6 +320,11 @@
       },
       // 选择日期
       pickChange(){
+        if(this.timeValue == ''){
+          this.beginTime = ''
+          this.endTime = ''
+          return
+        }
         this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
         this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
         this.getTableData();
@@ -319,6 +342,23 @@
       // 制式 的下拉框的值发生变化的时候触发
       toggleSystem(val){
         this.netWorkType = val;
+        this.getTableData()
+      },
+      // 流量的排序
+      sortChange(column, prop, order){
+        if(column.prop == 'flowUsage' && column.order == 'ascending') {
+          this.sortData = 'usage_month'
+          this.direct = column.order.substring(0,3)
+        }else if(column.prop == 'flowUsage' && column.order == 'descending') {
+          this.sortData = 'usage_month'
+          this.direct = column.order.substring(0,4)
+        }else if(column.prop == 'flowOverage' && column.order == 'ascending') {
+          this.sortData = 'usage_month'
+          this.direct = 'desc'
+        }else if(column.prop == 'flowOverage' && column.order == 'descending') {
+          this.sortData = 'usage_month'
+          this.direct = 'desc'
+        }
         this.getTableData()
       }
     }

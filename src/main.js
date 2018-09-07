@@ -12,8 +12,9 @@ import { Dropdown, DropdownMenu, DropdownItem, MessageBox, Message,
   TabPane, Notification, Submenu, MenuItemGroup, Select, Option } from 'element-ui';
 
 
-// axios.defaults.baseURL = 'http://192.168.1.5:8090';
-axios.defaults.baseURL = 'http://47.96.232.174/matrix';
+// axios.defaults.baseURL = 'http://192.168.1.14:8090';
+axios.defaults.baseURL = 'http://www.tangjinqian.cn:8080/matrix';
+// axios.defaults.baseURL = 'http://47.96.232.174/matrix';
 // axios.defaults.timeout = 10000;
 
 Vue.use(Col).use(Row).use(Table).use(DatePicker)
@@ -52,20 +53,18 @@ axios.interceptors.request.use(config => {
   return Promise.reject(err)
 })
 //
-// axios.interceptors.response.use(function (response) {
-//   // token 已过期，重定向到登录页面
-//   if (response.data.code == 110){
-//     localStorage.removeItem('_token')
-//     router.replace({
-//       path: '/login',
-//       query: {redirect: router.currentRoute.fullPath}
-//     })
-//   }
-//   return response
-// }, function (error) {
-//   // Do something with response error
-//   return Promise.reject(error)
-// })
+axios.interceptors.response.use(function (response) {
+  // token 已过期，重定向到登录页面
+  if (response.data.code == 110){
+    console.log(response.data)
+    localStorage.removeItem('_token')
+    this.$router.replace('/login')
+  }
+  return response
+}, function (error) {
+  // Do something with response error
+  return Promise.reject(error)
+})
 
 
 // Vue.http.interceptors.push((request, next) => {

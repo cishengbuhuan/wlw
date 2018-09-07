@@ -7,7 +7,7 @@
       <div class="msg-box">
         <div class="msg-title">
           <span>系统消息</span>
-          <div class="clear-all-msg" @click="deleteAll">清空</div>
+          <div :class="[{ disabled : isDisabled },'clear-all-msg']" @click="deleteAll">清空</div>
         </div>
         <div class="msg-content">
           <div class="msg-item" v-for="(item,index) in msgData" :key="index">
@@ -53,6 +53,15 @@
         msgData: []
       };
     },
+    computed: {
+      isDisabled(){
+        if(this.msgData.length === 0){
+          return true
+        }else {
+          return false
+        }
+      }
+    },
     mounted(){
       this.getAllMsgList()
     },
@@ -88,6 +97,9 @@
       },
       // 删除所有的消息
       deleteAll(){
+        if(this.isDisabled === true){
+          return
+        }
         this.$confirm('删除所有的消息嘛?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -181,6 +193,11 @@
             font-size: 20px;
             cursor: pointer;
             margin-top: 75px;
+          }
+          .disabled {
+            border: none;
+            background-color: #999;
+            cursor: default;
           }
         }
         .msg-content {

@@ -23,10 +23,10 @@
           <!-- 饼图 -->
           <div class="chart">
             <div class="chart-item">
-              <ve-pie :data="baseInfo.usageData" :settings="baseSettings" :extend="baseExtend"></ve-pie>
+              <ve-pie :data="baseInfo.usageData" :colors="usageColors" :settings="baseSettings" :extend="baseExtend"></ve-pie>
             </div>
             <div class="chart-item">
-              <ve-pie :data="baseInfo.alarmData" :settings="baseSettings" :extend="baseExtend"></ve-pie>
+              <ve-pie :data="baseInfo.alarmData" :colors="alarmColors" :settings="baseSettings" :extend="baseExtend"></ve-pie>
             </div>
           </div>
           <!-- tips -->
@@ -34,7 +34,7 @@
             <span>总流量：{{ baseInfo.totalFlow }}M</span>
             <span>单卡流量：{{ baseInfo.singleFlow }}M</span>
             <span>使用率：{{ baseInfo.usageRate }}%</span>
-            <span>已超出：{{ baseInfo.overview }}个</span>
+            <span>已超出：{{ baseInfo.overview }}M</span>
             <span>预警数：{{ baseInfo.warnNumber }}个</span>
             <span>报警卡数：{{ baseInfo.alarmCardNumber }}个</span>
           </div>
@@ -45,7 +45,7 @@
         <div class="table-header">
           <!-- 搜索框 -->
           <div class="search-box">
-            <input type="text" placeholder="请输入ICCID" v-model="numVal">
+            <input type="text" placeholder="请输入ICCID或者卡号" v-model="numVal">
             <div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
           </div>
           <!-- 联动选择器 -->
@@ -62,6 +62,7 @@
             <!--</el-select>-->
             <!-- 状态 -->
             <el-select v-model="statusValue"
+                       clearable
                        @change="toggleStatus"
                        placeholder="请选择状态">
               <el-option
@@ -101,14 +102,14 @@
         <div class="table-box">
           <el-table
             :data="tableData"
-            id="searchTable"
+            @sort-change='sortChange'
             border
             style="width: 100%">
             <el-table-column prop="sortNum" label="序号" align="center"></el-table-column>
             <el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
             <el-table-column prop="operator" label="运营商" align="center"></el-table-column>
             <el-table-column prop="flowPackage" label="流量池套餐" width='70' align="center"></el-table-column>
-            <el-table-column prop="flowUsage" label="本月已使用流量" align="center">
+            <el-table-column prop="flowUsage" sortable='custom' label="本月已使用流量" align="center">
               <template slot-scope="scope">
                 {{ scope.row.flowUsage.toFixed(2) }}MB
               </template>
@@ -150,13 +151,15 @@
       VePie
     },
     data() {
+      this.usageColors = ['#bbbbbb','#4cb2ff','#da2627']
+      this.alarmColors = ['#4cb2ff','#e3a51e','#da2627']
       this.baseSettings = {
         labelLine: 'show',
         label: {
           position: 'inside'
         },
         radius: 160,
-        offsetY: 200
+        offsetY: 200,
       }
 
       this.baseExtend = {
@@ -219,7 +222,10 @@
         defaultStatus: '',
         numVal: '',
         beginTime: '',
-        endTime: ''
+        endTime: '',
+        // 表格流量排序
+        sortData: '',
+        direct: ''
       };
     },
     mounted(){
@@ -239,15 +245,20 @@
       },
       // 改变type的类型，即跳转不同的路由
       typeChange(type){
-        this.getPackageOptions(type)
-        this.getPieUsage(type)
+        this.timeValue = '';
+        this.beginTime = '';
+        this.endTime = '';
+        this.numVal = '';
+        this.defaultPoolId = '';
+        this.packageValue = '';
+//        this.baseInfo.usageData = [];
+//        this.baseInfo.alarmData = [];
 
-        this.timeValue = ''
-        this.beginTime = ''
-        this.endTime = ''
-        this.numVal = ''
+        this.getPackageOptions(type);
+        this.getPieUsage(type);
+        this.getPieAlarm(type);
         this.getTableData(type)
-        console.log(type)
+//        console.log(type)
       },
       // 获取到套餐选项
       getPackageOptions(type){
@@ -269,10 +280,11 @@
               flowPackage: data[i].name
             })
           }
-          this.getPieTips()
-          this.getAlarmTips()
-          this.getPieUsage()
-          this.getPieAlarm()
+          this.getPieTips();
+          this.getAlarmTips();
+          this.getPieUsage();
+          this.getPieAlarm();
+          this.getTableData();
         })
       },
       // 获取到饼状图下到相关信息
@@ -354,10 +366,11 @@
       // 基本信息的下拉框的值发生变化的时候触发
       packageChange(val){
         this.poolId = val;
-        this.getPieTips()
-        this.getAlarmTips()
-        this.getPieUsage()
-        this.getPieAlarm()
+        this.getPieTips();
+        this.getAlarmTips();
+        this.getPieUsage();
+        this.getPieAlarm();
+        this.getTableData()
       },
       // 获取表格 数据
       getTableData(type){
@@ -369,10 +382,12 @@
             pageSize: this.pageSize,
             pageNo: this.pageNo,
             cardNo: this.numVal,
-//            netWork: type,
+            poolId: this.poolId ? this.poolId : this.defaultPoolId,
             status: this.status ? this.status : this.defaultStatus,
             startTime: this.beginTime,
-            endTime: this.endTime
+            endTime: this.endTime,
+            sort: this.sortData,
+            direct: this.direct
           }
         }).then(res=>{
           console.log(res.data)
@@ -406,10 +421,26 @@
       },
       // 选择日期
       pickChange(){
+        if(this.timeValue == ''){
+          this.beginTime = ''
+          this.endTime = ''
+          return
+        }
         this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
         this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
         this.getTableData();
       },
+      // 流量的排序
+      sortChange(column, prop, order){
+        if(column.prop == 'flowUsage' && column.order == 'ascending') {
+          this.sortData = 'usage_month'
+          this.direct = column.order.substring(0,3)
+        }else if(column.prop == 'flowUsage' && column.order == 'descending') {
+          this.sortData = 'usage_month'
+          this.direct = column.order.substring(0,4)
+        }
+        this.getTableData()
+      }
     }
   };
 </script>

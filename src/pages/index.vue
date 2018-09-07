@@ -7,19 +7,26 @@
       <div class="name-balance">
         <div class="company-name">
           <div class="title">{{ company.name }}</div>
-          <div class="card-num"><div class="icon"></div>卡片总数：<span>{{ company.cardNum }}</span></div>
+          <div class="card-num"><div class="icon" :style="cardNumIcon"></div>卡片总数：<span>{{ company.cardNum }}</span></div>
         </div>
         <div class="balance">
-          <div class="title"><div class="icon"></div><span>账户余额</span></div>
+          <div class="title"><div class="icon" :style="balanceIcon"></div><span>账户余额</span></div>
           <div class="num-button">
             <span>{{ company.balance }}</span>
-            <input type="button" value="立即充值">
+            <router-link to="/recharge">
+              <input type="button" value="立即充值">
+            </router-link>
           </div>
         </div>
       </div>
       <!-- 系统消息 -->
       <div class="system-msg">
-        <div class="msg-title">公告<div class="icon"></div></div>
+        <div class="msg-title">
+          <div class="left">公告<div class="icon" :style="msgTitleIcon"></div></div>
+          <router-link to="/message">
+            <div class="more">查看系统消息>></div>
+          </router-link>
+        </div>
         <ul>
           <li v-for="(item,index) in systemMsg" :key="index" v-if="systemMsg.length != 0">
             <router-link to="/message"><span>{{ item.msg }}</span></router-link>
@@ -34,7 +41,7 @@
         <div class="chart">
           <div class="chart-item" v-for="(item,index) in cardData" :key="index">
             <div class="title">{{ item.title }}:{{ item.totalCard }}</div>
-            <ve-ring :data="item" :settings="cardSettings" :extend="cardExtend"></ve-ring>
+            <ve-ring :data="item" :colors="cardColors" :settings="cardSettings" :extend="cardExtend"></ve-ring>
           </div>
         </div>
       </div>
@@ -60,9 +67,10 @@
         </div>
         <!-- 饼状图 -->
         <div class="chart">
+          <div class="tips-info" v-show="flowShow">暂时没有相关数据！</div>
           <div class="chart-item-group" v-for="(item,index) in flowData" :key="index">
             <div class="chart-item" v-for="(itemSon,indexSon) in item" :key="indexSon">
-              <ve-pie :data="itemSon" :settings="flowSettings" :extend="flowExtend"></ve-pie>
+              <ve-pie :data="itemSon" :colors="flowColors" :settings="flowSettings" :extend="flowExtend"></ve-pie>
               <div class="title">{{ itemSon.date }}：{{ itemSon.monthTotal }}</div>
             </div>
           </div>
@@ -108,8 +116,12 @@
 //            var dataNum = that.cardData
 //            console.log(dataNum)
 //          }
+        },
+        series: {
+          colors: ['#4cb2ff','#36dwf6','#010101','#fh357d','#ed45gt']
         }
       }
+      this.cardColors = ['#ffbf00','#fa5e5b','#20a0ff','#13ce66','#4dd0e1']
 
       // 流量统计
       this.flowSettings = {
@@ -125,7 +137,33 @@
           show: false
         }
       }
+      this.flowColors = ['#bbbbbb','#4cb2ff','#da2627']
+
       return {
+        cardNumIcon: {
+          width: '25px',
+          height: '20px',
+          background: "url("+require('../../static/images/icon-card.png')+") no-repeat",
+          backgroundSize:'100% 100%',
+          marginRight: '20px',
+          marginTop: '5px'
+        },
+        balanceIcon: {
+          width: '20px',
+          height: '20px',
+          background: "url("+require('../../static/images/icon-balance.png')+") no-repeat",
+          backgroundSize:'100% 100%',
+          marginRight: '15px',
+          marginTop: '5px'
+        },
+        msgTitleIcon: {
+          width: '21px',
+          height: '18px',
+          background: "url("+require('../../static/images/icon-announcement.png')+") no-repeat",
+          backgroundSize:'100% 100%',
+          marginLeft: '10px',
+          marginTop: '5px'
+        },
         // 公司基本信息
         company: {
           name: '',
@@ -177,7 +215,8 @@
           }
         ],
         netWork: '',
-        defaultNetWork: 1
+        defaultNetWork: 1,
+        flowShow: false
       };
     },
     mounted() {
@@ -249,29 +288,38 @@
             netWork: this.netWork ? this.netWork : this.defaultNetWork
           }
         }).then(res=>{
-          console.log(res.data.data)
           let data = res.data.data;
           var result = [];
-          for(let i=0; i<data.length; i++){
-            var arr = [];
-            for(let j=0; j<data[i].length; j++){
-              var obj={
-                columns: ['usage', 'number'],
-                rows:[]
-              };
-              obj.monthTotal=data[i][j].monthTotal
-              obj.date=data[i][j].date;
 
-              for(let k=0; k<data[i][j].rows.length; k++){
-                // console.log(data[i][j])
-                obj.rows.push({usage:data[i][j].rows[k].status,number:data[i][j].rows[k].number})
+          if(data.length === 0){
+            this.flowShow = true;
+            this.flowData = []
+          }else {
+            this.flowShow = false;
+            for(let i=0; i<data.length; i++){
+              var arr = [];
+              for(let j=0; j<data[i].length; j++){
+                var obj={
+                  columns: ['usage', 'number'],
+                  rows:[]
+                };
+                obj.monthTotal=data[i][j].monthTotal
+                obj.date=data[i][j].date;
+
+                for(let k=0; k<data[i][j].rows.length; k++){
+                  // console.log(data[i][j])
+                  obj.rows.push({
+                    usage:data[i][j].rows[k].status,
+                    number:data[i][j].rows[k].number
+                  })
+                }
+                arr.push(obj)
               }
-              arr.push(obj)
+              result.push(arr)
             }
-            result.push(arr)
+            this.flowData = result
+            console.log(this.flowData)
           }
-          // console.log(result)
-          this.flowData = result
         })
       },
       // 运营商的下拉框的值发生变化的时候触发
@@ -314,15 +362,6 @@
             color: #999;
             display: flex;
             line-height: 30px;
-            .icon {
-              width: 25px;
-              height: 20px;
-              background: url("../../static/images/icon-card.png");
-              -webkit-background-size: 100% 100%;
-              background-size: 100% 100%;
-              margin-right: 20px;
-              margin-top: 5px;
-            }
             span {
               font-size: 22px;
               color: #000;
@@ -332,15 +371,6 @@
         .balance {
           .title {
             display: flex;
-            .icon {
-              width: 20px;
-              height: 20px;
-              background: url("../../static/images/icon-balance.png");
-              -webkit-background-size: 100% 100%;
-              background-size: 100% 100%;
-              margin-right: 15px;
-              margin-top: 5px;
-            }
           }
           .num-button {
             padding-left: 60px;
@@ -356,6 +386,7 @@
               color: mainBlue;
               font-size: 14px;
               margin-left: 60px;
+              cursor: pointer;
             }
           }
         }
@@ -371,16 +402,17 @@
         margin-bottom: 20px;
         .msg-title {
           display: flex;
-          font-size: 20px;
+          justify-content: space-between;
           margin-bottom: 10px;
-          .icon {
-            width: 21px;
-            height: 18px;
-            background: url("../../static/images/icon-announcement.png");
-            -webkit-background-size: 100% 100%;
-            background-size: 100% 100%;
-            margin-left: 10px;
-            margin-top: 5px;
+          padding-right: 40px;
+          .left {
+            font-size: 20px;
+            display: flex;
+          }
+          .more {
+            font-size: 16px;
+            cursor: pointer;
+            color: #999;
           }
         }
         ul {
@@ -448,23 +480,29 @@
             .icon {
               width: 11px;
               height: 11px;
-              background-color: #79d3ae;
+              background-color: #4cb2ff;
               margin-top: 10px;
               margin-right: 20px;
             }
           }
           .unused {
             .icon {
-              background-color: #7ab0ec;
+              background-color: #bbbbbb;
             }
           }
           .exceeded {
             .icon {
-              background-color: #dd6e84;
+              background-color: #da2627;
             }
           }
         }
         .chart {
+          .tips-info {
+            font-size: 24px;
+            text-align: center;
+            margin: 50px 0 45px;
+            color: #999;
+          }
           .chart-item-group {
             display: flex;
             .chart-item {

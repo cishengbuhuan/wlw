@@ -1,5 +1,5 @@
 <template>
-  <div class="login-wrap">
+  <div class="login-wrap" :style="bg">
     <header>
       <span>欢迎登录</span>
       <div class="line"></div>
@@ -74,6 +74,13 @@
           code: '',
           imgSrc: '',
 //          baseUrl: 'http://192.168.1.5:8090'
+        },
+        bg: {
+          width: '100%',
+          minHeight: '100vh',
+          background: "url("+require('../../static/images/login-bg.png')+") no-repeat",
+          backgroundSize:'100% 100%',
+          position: 'relative'
         }
       };
     },
@@ -97,7 +104,7 @@
             this.$router.push({ path: '/index' })
           }else if(code == 0){
             this.$message(res.data.msg);
-            this.user.imgSrc = 'http://47.96.232.174/matrix/api/v1/image?userCode=' + this.user.account+'&num=' + Math.random()
+            this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account+'&num=' + Math.random()
           }
         })
       },
@@ -107,13 +114,13 @@
           return
         }
         this.codeShow = true;
-        this.user.imgSrc = 'http://47.96.232.174/matrix/api/v1/image?userCode=' + this.user.account
+        this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account
       },
       // 点击刷新验证码
       refreshImg(){
         this.user.imgSrc = '';
         this.$nextTick(()=>{
-          this.user.imgSrc = 'http://47.96.232.174/matrix/api/v1/image?userCode=' + this.user.account+'&num=' + Math.random()
+          this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account+'&num=' + Math.random()
         })
       }
     }
@@ -122,11 +129,6 @@
 
 <style lang="stylus" scoped>
   .login-wrap {
-    width: 100%;
-    min-height: 100vh;
-    background: url("../../static/images/login-bg.png");
-    -webkit-background-size: 100% 100%;
-    background-size: 100% 100%;
     position: relative;
     header {
       width: 100%;

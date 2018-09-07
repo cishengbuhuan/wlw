@@ -27,8 +27,10 @@
             <li v-for="(item,index) in rechargeData"
                 :class="{ current : item.isSelected }"
                 @click="chooseThis(index)"
-                :key="index">{{ item.number }}</li>
-            <li>自定义金额</li>
+                :key="index">
+              <input type="tel" v-model="item.number" disabled>
+            </li>
+            <li><input type="tel" v-model="customAmount" placeholder="自定义金额"></li>
           </ul>
           <div class="button-recharge" @click="btnRecharge">立即充值</div>
           <div class="user-protocol">我已同意<span @click="alertProtocol">《用户协议》</span><input type="checkbox" v-model="checked"></div>
@@ -77,7 +79,9 @@
         wayIndex: 0,
         rechargeData: [],
         modalShow: false,
-        checked: true
+        checked: true,
+        // 自定义金额
+        customAmount: null
       };
     },
     mounted(){
@@ -219,11 +223,15 @@
               height: 40px;
               line-height: 40px;
               border-radius: 5px;
-              text-align: center;
               border: 1px solid #666;
-              font-size: 20px;
-              cursor: pointer;
               margin-bottom: 40px;
+              input {
+                width: 100%;
+                height: 100%;
+                font-size: 20px;
+                text-align: center;
+                cursor: pointer;
+              }
             }
             .current {
               background-color: mainBlue;

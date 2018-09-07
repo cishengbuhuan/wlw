@@ -26,7 +26,6 @@
                 <th><input type="checkbox" v-model="allChecked" @click="toggleAllChecked"></th>
                 <th>姓名</th>
                 <th>账号</th>
-                <!--<th>密码</th>-->
                 <th>操作</th>
               </tr>
             </thead>
@@ -38,8 +37,8 @@
                 <td><input type="checkbox" v-model="item.isChecked"></td>
                 <td>{{ item.name }}</td>
                 <td>{{ item.account }}</td>
-                <!--<td>{{ item.password }}</td>-->
                 <td>
+                  <span @click="editThisRow(index)"><i class="el-icon-edit-outline"></i>编辑</span>
                   <span @click="deleteThisRow(index)"><i class="el-icon-remove-outline"></i>删除</span>
                 </td>
               </tr>
@@ -63,15 +62,16 @@
           <!-- 账号 -->
           <div class="account">
             <span>账户：</span>
-            <input type="text" v-model="user.account">
+            <input type="text" :disabled="isEdit" v-model="user.account" placeholder="账户为手机号">
           </div>
           <!-- 密码 -->
           <div class="password">
             <span>密码：</span>
-            <input type="text" v-model="user.password">
+            <input type="text" v-model.lazy="user.password" minlength="6" maxlength="16" placeholder="密码只能为6～16位的数字和英文字母">
           </div>
           <!-- 按钮 -->
-          <div class="btn-add" @click="btnSure">确定</div>
+          <div class="btn-add" v-show="!isEdit" @click="btnSure">确定</div>
+          <div class="btn-add" v-show="isEdit" @click="saveEdit">保存</div>
         </div>
       </div>
     </div>
@@ -101,12 +101,20 @@
           name: '',
           account: '',
           password: ''
-        }
+        },
+        selectArr: [],
+        isEdit: false
       };
     },
     mounted(){
       this.getUserBasic()
       this.getAccountList()
+    },
+    watch: {
+      'user.password'(val){
+        let reg = /[^\w\.\/]/ig
+        this.user.password = val.replace(reg,'')
+      }
     },
     methods: {
       // 全选
@@ -121,18 +129,39 @@
       },
       // 删除所选中的
       deleteAllSelect(){
-        this.$confirm('是否删除此账号?', '提示', {
+        this.$confirm('是否删除所选账号?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          let arr = []
+          let allTel = ''
           for(let i=0; i<this.accountData.length; i++){
-            if(this.accountData[i].isChecked === false){
-              arr.push(this.accountData[i])
+            if(this.accountData[i].isChecked === true){
+              this.selectArr.push(this.accountData[i])
             }
           }
-          this.accountData = arr;
+          // 循环所选中的数组，获得所有的手机号
+          for(let j=0; j<this.selectArr.length; j++){
+            allTel += ',' + this.selectArr[j].account
+          }
+          this.$axios({
+            url: '/api/v2/user/deleteAll',
+            method: 'post',
+            params: {
+              mobile: allTel.substring(1,allTel.length)
+            }
+          }).then(res=>{
+            this.modalIsShow = false;
+            this.accountData = [];
+            this.allChecked = false;
+            this.getAccountList()
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }).catch(res=>{
+            this.$message({type: 'info',message: res.msg});
+          })
 
           this.$message({type: 'success',message: '删除成功!'});
         }).catch(() => {
@@ -170,6 +199,34 @@
           });
         });
       },
+      // 点击编辑
+      editThisRow(index){
+        this.isEdit = true
+        this.modalIsShow = true;
+        this.user.name = this.accountData[index].name;
+        this.user.account = this.accountData[index].account;
+      },
+      saveEdit(index){
+        this.$axios({
+          url: '/api/v2/user/update',
+          method: 'post',
+          params: {
+            name: this.user.name,
+            mobile: this.user.account,
+            password: this.user.password
+          }
+        }).then(res=>{
+          this.modalIsShow = false;
+          this.accountData = [];
+          this.getAccountList()
+          this.$message({
+            type: 'success',
+            message: '保存成功!'
+          });
+        }).catch(res=>{
+          this.$message({type: 'info',message: res.msg});
+        })
+      },
       // 点击空白处让弹框隐藏
       closeModalWrap(){
         this.user.name  = '';
@@ -179,6 +236,7 @@
       },
       // 点击添加按钮
       btnAdd(){
+        this.isEdit = false;
         this.modalIsShow = true;
       },
       // 确定按钮
@@ -416,6 +474,10 @@
               padding-left: 15px;
               font-size: 20px;
             }
+            input::-webkit-input-placeholder{
+                    font-size: 14px;
+                    color: #999;
+                  }
           }
           .btn-add {
             width: 200px;

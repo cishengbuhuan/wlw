@@ -18,6 +18,10 @@ const router = new Router({
   routes: [
     {
       path: '/',
+      redirect: '/login'
+    },
+    {
+      path: '/login',
       name: 'login',
       component: login
     },
@@ -68,16 +72,5 @@ const router = new Router({
     }
   ]
 })
-
-// router.beforeEach((to,from,next) => {
-//   let token = sessionStorage.getItem('_token');
-//   if(token && to.path == '/login'){
-//     next({path: '/'});
-//   }else if(!token && to.path != '/login'){
-//     next({path: '/login'});
-//   }else {
-//     next();
-//   }
-// });
 
 export default router

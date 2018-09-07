@@ -57,7 +57,7 @@
       signOut(){
         console.log('退出')
         localStorage.removeItem('_token');
-        this.$router.push({ path: '/' })
+        this.$router.push({ path: '/login' })
       }
     }
   };

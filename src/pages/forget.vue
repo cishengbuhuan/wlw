@@ -35,12 +35,12 @@
           <!-- 手机号码 -->
           <div class="tel">
             <span>手机号码</span>
-            <input type="text" placeholder="请输入手机号码" v-model="telVal">
+            <input type="tel" placeholder="请输入手机号码" v-model="telVal" maxlength="11">
           </div>
           <!-- 验证码 -->
           <div class="code">
             <span>验证码</span>
-            <input class="code-input" type="text" placeholder="请输入你的验证码" v-model="codeVal">
+            <input class="code-input" type="tel" maxlength="6" placeholder="请输入你的验证码" v-model="codeVal">
             <div class="btn-get" @click="getCode" v-if="!sendMsgDisabled">{{ code }}</div>
             <div class="btn-get" v-if="sendMsgDisabled">{{ count + '秒后获取' }}</div>
           </div>
@@ -56,12 +56,12 @@
           <!-- 重置密码 -->
           <div class="reset">
             <span>重置密码</span>
-            <input type="text" placeholder="设置你的登入密码" v-model="newPsw">
+            <input type="text" placeholder="设置你的登入密码" minlength="6" maxlength="16" v-model.lazy="newPsw">
           </div>
           <!-- 确认密码 -->
           <div class="sure">
             <span>确认密码</span>
-            <input type="text" placeholder="确认登入密码" v-model="confirmPsw">
+            <input type="text" placeholder="确认登入密码" minlength="6" maxlength="16" v-model.lazy="confirmPsw">
           </div>
           <!-- 确认按钮 -->
           <div class="btn-sure" @click="btnSure">确认</div>
@@ -97,82 +97,87 @@
         confirmPsw: ''
       };
     },
+    watch: {
+      newPsw(val){
+        let reg = /[^\w\.\/]/ig
+        this.newPsw = val.replace(reg,'')
+      },
+      confirmPsw(val){
+        let reg = /[^\w\.\/]/ig
+        this.confirmPsw = val.replace(reg,'')
+      }
+    },
     methods: {
       // 验证身份的下一步
       btnNext(){
-//        if(!(/^1(3|4|5|6|7|8|9)\d{9}$/.test(this.telVal))){
-//          this.$message.error('请输入正确的手机号码！');
-//        }else {
-////          this.isShow.verify = false
-////          this.isShow.reset = true
-////          this.isShow.complete = false
-////
-////          this.stepOneFinished = true
-//
-//
-//          this.$axios({
-//            url: '/api/v2/user/verifiPhone',
-//            method: 'post'
-//          }).then(res=>{
-//            console.log(res)
-//          })
-//        }
-        this.$axios({
-          url: '/api/v2/user/verifiCode',
-          method: 'post',
-          params: {
-            code: this.codeVal
-          }
-        }).then(res=>{
-          if(res.data.code === 1){
-            this.isShow.verify = false
-            this.isShow.reset = true
-            this.isShow.complete = false
+        if(!(/^1(3|4|5|6|7|8|9)\d{9}$/.test(this.telVal))){
+          this.$message.error('请输入正确的手机号码！');
+        }else {
+          this.$axios({
+            url: '/api/v2/user/verifiCode',
+            method: 'post',
+            params: {
+              code: this.codeVal
+            }
+          }).then(res=>{
+            if(res.data.code === 1){
+              this.isShow.verify = false
+              this.isShow.reset = true
+              this.isShow.complete = false
 
-            this.stepOneFinished = true
-          }else {
-            this.$message.error('请输入正确的验证码！');
-          }
-        })
+              this.stepOneFinished = true
+            }else {
+              this.$message.error('请输入正确的验证码！');
+            }
+          })
+        }
       },
       // 获取验证码
       getCode(){
-        this.$axios({
-          url: '/api/v2/user/verifiPhone',
-          method: 'post',
-          params: {
-            mobileNo: this.telVal
-          }
-        }).then(res=>{
-          if(res.data.code === 1){
-            this.$message.info('验证码已发送，请注意查收！');
-            this.countDown()
-          }else {
-            this.$message.error('该手机号码未被注册，请联系管理员！');
-          }
-        })
+        if(!(/^1(3|4|5|6|7|8|9)\d{9}$/.test(this.telVal))){
+          this.$message.error('请输入正确的手机号码！');
+        }else {
+          this.$axios({
+            url: '/api/v2/user/verifiPhone',
+            method: 'post',
+            params: {
+              mobileNo: this.telVal
+            }
+          }).then(res=>{
+            if(res.data.code === 1){
+              this.$message.info('验证码已发送，请注意查收！');
+              this.countDown()
+            }else {
+              this.$message.error('该手机号码未被注册，请联系管理员！');
+            }
+          })
+        }
       },
       // 重置密码的确认按钮
       btnSure(){
-        this.$axios({
-          url: '/api/v2/user/forgetPassword',
-          method: 'post',
-          params: {
-            mobileNo: this.telVal,
-            newPassword: this.newPsw,
-            confirmPassword: this.confirmPsw
-          }
-        }).then(res=>{
-          if(res.data.code === 1){
-            this.isShow.verify = false
-            this.isShow.reset = false
-            this.isShow.complete = true
+        if(this.newPsw.length<6 || this.confirmPsw.length<6){
+          this.$message.info('密码长度不能小于6！');
+        }else {
+          this.$axios({
+            url: '/api/v2/user/forgetPassword',
+            method: 'post',
+            params: {
+              mobileNo: this.telVal,
+              newPassword: this.newPsw,
+              confirmPassword: this.confirmPsw
+            }
+          }).then(res=>{
+            if(res.data.code === 1){
+              this.isShow.verify = false
+              this.isShow.reset = false
+              this.isShow.complete = true
 
-            this.stepTwoFinished = true
-          }else {
-            this.$message.error(res.data.msg);
-          }
-        })
+              this.stepTwoFinished = true
+            }else {
+              this.$message.error(res.data.msg);
+            }
+          })
+        }
       },
       // 完成的返回登录按钮
       backLogin(){
@@ -216,7 +221,6 @@
     .find-password {
       width: 1030px;
       margin: 0 auto;
-      /*background-color: pink;*/
       .tips {
         font-size: 30px;
         margin: 80px 0 40px;
