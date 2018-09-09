@@ -36,7 +36,7 @@ const router = new Router({
       component: card
     },
     {
-      path: '/flowPool',
+      path: '/flowPool/:type',
       name: 'flowPool',
       component: flowPool
     },

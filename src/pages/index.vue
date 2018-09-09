@@ -1,7 +1,5 @@
 <template>
   <div class="index-wrap">
-    <dream-header></dream-header>
-    <dream-slide></dream-slide>
     <div class="content">
       <!-- 公司名称和账户余额 -->
       <div class="name-balance">
@@ -81,14 +79,10 @@
 </template>
 
 <script>
-  import dreamHeader from '../components/dreamHeader/dreamHeader.vue';
-  import dreamSlide from '../components/dreamSlide/dreamSlide.vue';
   import VeRing from "v-charts/lib/ring.common";
   import VePie from "v-charts/lib/pie.common";
   export default {
     components: {
-      dreamHeader,
-      dreamSlide,
       VeRing,
       VePie
     },

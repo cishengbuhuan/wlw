@@ -1,7 +1,5 @@
 <template>
   <div class="card-wrap">
-    <dream-header></dream-header>
-    <dream-slide></dream-slide>
     <div class="content">
       <!-- 今日卡况 -->
       <div class="card-info">
@@ -111,14 +109,8 @@
 </template>
 
 <script>
-  import dreamHeader from '../components/dreamHeader/dreamHeader.vue'
-  import dreamSlide from '../components/dreamSlide/dreamSlide.vue'
   import {timestampToTime,format} from '../api/dataUtil'
   export default {
-    components: {
-      dreamHeader,
-      dreamSlide
-    },
     data() {
       return {
         totalCount: 0,

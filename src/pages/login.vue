@@ -72,8 +72,7 @@
           account: '',
           password: '',
           code: '',
-          imgSrc: '',
-//          baseUrl: 'http://192.168.1.5:8090'
+          imgSrc: ''
         },
         bg: {
           width: '100%',

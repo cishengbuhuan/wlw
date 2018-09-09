@@ -1,7 +1,5 @@
 <template>
   <div class="recharge-wrap">
-    <dream-header></dream-header>
-    <dream-slide></dream-slide>
     <div class="content">
       <div class="recharge-box">
         <div class="title">账户充值</div>
@@ -57,13 +55,7 @@
 </template>
 
 <script>
-  import dreamHeader from '../components/dreamHeader/dreamHeader.vue'
-  import dreamSlide from '../components/dreamSlide/dreamSlide.vue'
   export default {
-    components: {
-      dreamHeader,
-      dreamSlide
-    },
     data() {
       return {
         account: '成都快船有限公司',

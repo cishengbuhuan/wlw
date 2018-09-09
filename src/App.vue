@@ -1,103 +1,120 @@
 <template>
-  <div id="app">
-    <router-view/>
-  </div>
+	<div id="app">
+		<dream-header v-show="$route.name != 'login'"></dream-header>
+		<dream-slide v-show="$route.name != 'login'"></dream-slide>
+		<router-view/>
+	</div>
 </template>
 
 <script>
-export default {
-  name: 'App'
-}
+	import dreamHeader from './components/dreamHeader/dreamHeader.vue';
+	import dreamSlide from './components/dreamSlide/dreamSlide.vue';
+	export default {
+		components: {
+			dreamHeader,
+			dreamSlide
+		},
+		name: 'App'
+	}
 </script>
 
 <style>
-  #app {
-    width: 100%;
-    height: 100vh;
-  }
-/*公共样式--开始*/
-html, body, div, ul, li, h1, h2, h3, h4, h5, h6, p, dl, dt, dd, ol, form, input, textarea, th, td, select {
-  margin: 0;
-  padding: 0;
-}
-*{box-sizing: border-box;}
-html, body {
-  min-height: 100%;
-}
+	#app {
+		width: 100%;
+		height: 100vh;
+	}
 
-body {
-  font-family: "Microsoft YaHei";
-  font-size:14px;
-  color:#333;
-}
-h1, h2, h3, h4, h5, h6{font-weight:normal;}
-ul,ol {
-  list-style: none;
-}
+	/*公共样式--开始*/
+	html, body, div, ul, li, h1, h2, h3, h4, h5, h6, p, dl, dt, dd, ol, form, input, textarea, th, td, select {
+		margin: 0;
+		padding: 0;
+	}
 
-img {
-  border: none;
-  vertical-align: middle;
-}
+	* {
+		box-sizing: border-box;
+	}
 
-a {
-  text-decoration: none;
-  color: #232323;
-}
+	html, body {
+		min-height: 100%;
+	}
 
-table {
-  border-collapse: collapse;
-  table-layout: fixed;
-}
+	body {
+		font-family: "Microsoft YaHei";
+		font-size: 14px;
+		color: #333;
+	}
 
-input, textarea {
-  outline: none;
-  border: none;
-  background-color: transparent !important;
-}
+	h1, h2, h3, h4, h5, h6 {
+		font-weight: normal;
+	}
 
-textarea {
-  resize: none;
-  overflow: auto;
-}
+	ul, ol {
+		list-style: none;
+	}
 
-.clearfix {
-  zoom: 1;
-}
+	img {
+		border: none;
+		vertical-align: middle;
+	}
 
-.clearfix:after {
-  content: ".";
-  width: 0;
-  height: 0;
-  visibility: hidden;
-  display: block;
-  clear: both;
-  overflow:hidden;
-}
+	a {
+		text-decoration: none;
+		color: #232323;
+	}
 
-.fl {
-  float: left
-}
+	table {
+		border-collapse: collapse;
+		table-layout: fixed;
+	}
 
-.fr {
-  float: right
-}
+	input, textarea {
+		outline: none;
+		border: none;
+		background-color: transparent !important;
+	}
 
-.tl {
-  text-align: left;
-}
+	textarea {
+		resize: none;
+		overflow: auto;
+	}
 
-.tc {
-  text-align: center
-}
+	.clearfix {
+		zoom: 1;
+	}
 
-.tr {
-  text-align: right;
-}
+	.clearfix:after {
+		content: ".";
+		width: 0;
+		height: 0;
+		visibility: hidden;
+		display: block;
+		clear: both;
+		overflow: hidden;
+	}
 
-.ellipse {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+	.fl {
+		float: left
+	}
+
+	.fr {
+		float: right
+	}
+
+	.tl {
+		text-align: left;
+	}
+
+	.tc {
+		text-align: center
+	}
+
+	.tr {
+		text-align: right;
+	}
+
+	.ellipse {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
 </style>

@@ -1,7 +1,5 @@
 <template>
   <div class="message-wrap">
-    <dream-header></dream-header>
-    <dream-slide></dream-slide>
     <div class="content">
       <!-- 系统消息 -->
       <div class="msg-box">
@@ -37,14 +35,8 @@
 </template>
 
 <script>
-  import dreamHeader from '../components/dreamHeader/dreamHeader.vue'
-  import dreamSlide from '../components/dreamSlide/dreamSlide.vue'
   import {timestampToTime} from '../api/dataUtil'
   export default {
-    components: {
-      dreamHeader,
-      dreamSlide
-    },
     data() {
       return {
         totalCount: 0,

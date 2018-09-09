@@ -1,7 +1,5 @@
 <template>
   <div class="cardDetail-wrap">
-    <dream-header></dream-header>
-    <dream-slide></dream-slide>
     <div class="content">
       卡详情
     </div>
@@ -9,13 +7,7 @@
 </template>
 
 <script>
-  import dreamHeader from '../components/dreamHeader/dreamHeader.vue'
-  import dreamSlide from '../components/dreamSlide/dreamSlide.vue'
   export default {
-    components: {
-      dreamHeader,
-      dreamSlide
-    },
     data() {
       return {
 

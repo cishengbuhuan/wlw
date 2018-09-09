@@ -35,6 +35,28 @@ Vue.prototype.$axios = axios;
 
 Vue.config.productionTip = false
 
+
+axios.interceptors.request.use(config => {
+	config.params = Object.assign({_token: localStorage.getItem('_token')},config.params)
+	return config
+},err => {
+	return Promise.reject(err)
+})
+//
+axios.interceptors.response.use(function (response) {
+	// token 已过期，重定向到登录页面
+	if (response.data.code == 110){
+		console.log(response.data)
+		localStorage.removeItem('_token')
+		this.$router.replace('/login')
+	}
+	return response
+}, function (error) {
+	// Do something with response error
+	return Promise.reject(error)
+})
+
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
@@ -46,41 +68,5 @@ new Vue({
 Vue.use(VCharts)
 
 
-axios.interceptors.request.use(config => {
-  config.params = Object.assign({_token: localStorage.getItem('_token')},config.params)
-  return config
-},err => {
-  return Promise.reject(err)
-})
-//
-axios.interceptors.response.use(function (response) {
-  // token 已过期，重定向到登录页面
-  if (response.data.code == 110){
-    console.log(response.data)
-    localStorage.removeItem('_token')
-    this.$router.replace('/login')
-  }
-  return response
-}, function (error) {
-  // Do something with response error
-  return Promise.reject(error)
-})
 
 
-// Vue.http.interceptors.push((request, next) => {
-//
-//   let token = localStorage.getItem('_token')
-//   if (token) {
-//     if (request.body) {
-//       request.body._token = token
-//     } else {
-//       request.url += request.url.indexOf('?') >= 0 ? '&_token=' + token : '?_token=' + token
-//     }
-//   }
-//   next((response) => {
-//     if (response.body.code == 110) {
-//       config.login = false;
-//       localStorage.removeItem('_token');
-//     }
-//   })
-// })

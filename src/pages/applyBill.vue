@@ -1,7 +1,5 @@
 <template>
   <div class="bill-wrap">
-    <dream-header></dream-header>
-    <dream-slide></dream-slide>
     <div class="content">
       <!-- 发票信息 -->
       <div class="bill-info">
@@ -89,13 +87,7 @@
 </template>
 
 <script>
-  import dreamHeader from '../components/dreamHeader/dreamHeader.vue'
-  import dreamSlide from '../components/dreamSlide/dreamSlide.vue'
   export default {
-    components: {
-      dreamHeader,
-      dreamSlide
-    },
     data() {
       return {
         navIndex: 0,
