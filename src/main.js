@@ -6,10 +6,12 @@ import router from './router'
 import axios from 'axios'
 import VCharts from 'v-charts'
 import 'element-ui/lib/theme-chalk/index.css'
-import { Dropdown, DropdownMenu, DropdownItem, MessageBox, Message,
-  Col, Row, Table, DatePicker, Input, Pagination, Menu, MenuItem,
-  Loading, TableColumn, Form, FormItem, Button, Tag, Tabs,
-  TabPane, Notification, Submenu, MenuItemGroup, Select, Option } from 'element-ui';
+import {
+	Dropdown, DropdownMenu, DropdownItem, MessageBox, Message,
+	Col, Row, Table, DatePicker, Input, Pagination, Menu, MenuItem,
+	Loading, TableColumn, Form, FormItem, Button, Tag, Tabs,
+	TabPane, Notification, Submenu, MenuItemGroup, Select, Option
+} from 'element-ui';
 
 
 // axios.defaults.baseURL = 'http://192.168.1.14:8090';
@@ -18,11 +20,11 @@ axios.defaults.baseURL = 'http://www.tangjinqian.cn:8080/matrix';
 // axios.defaults.timeout = 10000;
 
 Vue.use(Col).use(Row).use(Table).use(DatePicker)
-  .use(Input).use(Pagination).use(Menu).use(MenuItem)
-  .use(Loading).use(TableColumn).use(Form).use(FormItem)
-  .use(Button).use(Tag).use(Tabs).use(TabPane).use(Submenu)
-  .use(MenuItemGroup).use(Dropdown).use(DropdownMenu).use(DropdownItem)
-  .use(Select).use(Option)
+	.use(Input).use(Pagination).use(Menu).use(MenuItem)
+	.use(Loading).use(TableColumn).use(Form).use(FormItem)
+	.use(Button).use(Tag).use(Tabs).use(TabPane).use(Submenu)
+	.use(MenuItemGroup).use(Dropdown).use(DropdownMenu).use(DropdownItem)
+	.use(Select).use(Option)
 
 
 Vue.prototype.$msgbox = MessageBox;
@@ -37,15 +39,15 @@ Vue.config.productionTip = false
 
 
 axios.interceptors.request.use(config => {
-	config.params = Object.assign({_token: localStorage.getItem('_token')},config.params)
+	config.params = Object.assign({_token: localStorage.getItem('_token')}, config.params)
 	return config
-},err => {
+}, err => {
 	return Promise.reject(err)
 })
 //
 axios.interceptors.response.use(function (response) {
 	// token 已过期，重定向到登录页面
-	if (response.data.code == 110){
+	if (response.data.code == 110) {
 		console.log(response.data)
 		localStorage.removeItem('_token')
 		this.$router.replace('/login')
@@ -59,10 +61,10 @@ axios.interceptors.response.use(function (response) {
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',
-  router,
-  components: { App },
-  template: '<App/>'
+	el: '#app',
+	router,
+	components: {App},
+	template: '<App/>'
 })
 
 Vue.use(VCharts)
