@@ -13,9 +13,9 @@
 				<img class="head" :src="user.headImg">
 				<div class="name">
 					<el-dropdown trigger="click" @command="signOut">
-            <span class="el-dropdown-link">
-              {{ user.nickname }}<i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
+			            <span class="el-dropdown-link">
+			              {{ user.nickname }}<i class="el-icon-arrow-down el-icon--right"></i>
+			            </span>
 						<el-dropdown-menu slot="dropdown">
 							<el-dropdown-item>退出登录</el-dropdown-item>
 						</el-dropdown-menu>

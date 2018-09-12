@@ -5,35 +5,42 @@
 			<div class="line"></div>
 			<img class="logo" src="../../static/images/company-logo.png">
 		</header>
-		<!-- 登录表单 -->
-		<div class="login-form">
-			<div class="title">账号登录</div>
-			<div class="form">
-				<!-- 账号 -->
-				<div class="tel">
-					<input type="tel" v-model="user.account" placeholder="请输入账号" @change="loadCode">
-				</div>
-				<!-- 密码 -->
-				<div class="psw">
-					<input type="password" v-model="user.password" placeholder="请输入密码" @change="loadCode">
-				</div>
-				<!-- 图形验证码 -->
-				<div class="img-code" v-show="codeShow">
-					<input type="text" placeholder="请输入图形验证码" v-model="user.code">
-					<img :src="user.imgSrc" alt="验证码" class="img" @click="refreshImg">
-				</div>
-				<!-- 记住密码和忘记密码 -->
-				<div class="remember-forget">
-					<div class="remember">
-						<input type="checkbox">
-						<span>记住账号</span>
+		<div class="content">
+			<!-- 文字信息 -->
+			<div class="info">
+				<h3>物联网管理平台</h3>
+				<p>thoughtInternet of things Management Platform</p>
+			</div>
+			<!-- 登录表单 -->
+			<div class="login-form">
+				<div class="title">账号登录</div>
+				<div class="form">
+					<!-- 账号 -->
+					<div class="tel">
+						<input type="tel" v-model="user.account" placeholder="请输入账号" maxlength="11" @change="loadCode">
 					</div>
-					<router-link to="/forget">
-						<div class="forget">忘记密码</div>
-					</router-link>
+					<!-- 密码 -->
+					<div class="psw">
+						<input type="password" v-model="user.password" placeholder="请输入密码" @change="loadCode">
+					</div>
+					<!-- 图形验证码 -->
+					<div class="img-code" v-show="codeShow">
+						<input type="text" placeholder="请输入图形验证码" v-model="user.code">
+						<img :src="user.imgSrc" alt="验证码" class="img" @click="refreshImg">
+					</div>
+					<!-- 记住密码和忘记密码 -->
+					<div class="remember-forget">
+						<div class="remember">
+							<input type="checkbox" v-model="isRemember">
+							<span>记住账号</span>
+						</div>
+						<router-link to="/forget">
+							<div class="forget">忘记密码</div>
+						</router-link>
+					</div>
+					<!-- 登录按钮 -->
+					<div class="btn-login" @click="btnLogin">立即登录</div>
 				</div>
-				<!-- 登录按钮 -->
-				<div class="btn-login" @click="btnLogin">立即登录</div>
 			</div>
 		</div>
 		<!--<footer>-->
@@ -79,35 +86,42 @@
 				bg: {
 					width: '100%',
 					minHeight: '100vh',
-					background: "url(" + require('../../static/images/login-bg.png') + ") no-repeat",
+					background: "url(" + require('../../static/images/login-bg.jpg') + ") no-repeat",
 					backgroundSize: '100% 100%',
 					position: 'relative'
-				}
+				},
+				isRemember: true
 			};
 		},
 		mounted() {
-//      this.loadCode()
+//          this.loadCode()
 		},
 		methods: {
 			btnLogin() {
-				this.$axios({
-					url: '/api/v1/login',
-					method: 'post',
-					params: {
-						userCode: this.user.account,
-						password: this.user.password,
-						code: this.user.code
-					}
-				}).then(res => {
-					let code = res.data.code;
-					if (code == 1) {
-						localStorage.setItem('_token', res.data.data.token);
-						this.$router.push({path: '/index'})
-					} else if (code == 0) {
-						this.$message(res.data.msg);
-						this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-					}
-				})
+				if (!(/^1(3|4|5|6|7|8|9)\d{9}$/.test(this.user.account))) {
+					this.$message.error('请输入正确的手机号码！');
+				}else{
+					this.$axios({
+						url: '/api/v1/login',
+						method: 'post',
+						params: {
+							userCode: this.user.account,
+							password: this.user.password,
+							code: this.user.code
+						}
+					}).then(res => {
+						let code = res.data.code;
+						if (code == 1) {
+							localStorage.setItem('_token', res.data.data.token);
+							this.$router.push({path: '/index'})
+						} else if (code == 0) {
+							this.$message(res.data.msg);
+//							this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+//						    this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+						    this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+						}
+					})
+				}
 			},
 			// 账号和密码不为空
 			loadCode() {
@@ -115,13 +129,17 @@
 					return
 				}
 				this.codeShow = true;
-				this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account
+//				this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account
+//				this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account
+				this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account
 			},
 			// 点击刷新验证码
 			refreshImg() {
 				this.user.imgSrc = '';
 				this.$nextTick(() => {
-					this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+//					this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+//					this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+					this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
 				})
 			}
 		}
@@ -152,67 +170,82 @@
 				height: 60px;
 			}
 		}
-		.login-form {
-			width: 23%;
-			height: 350px;
-			border-radius: 5px;
-			background-color: #fff;
-			position: absolute;
-			top: 210px;
-			right: 5.2%;
-			padding: 0 42px;
-			.title {
-				font-size: 22px;
-				height: 76px;
-				line-height: 76px;
-				text-align: center;
+		.content {
+			/* 文字信息 */
+			.info {
+				margin-top: 100px;
+				margin-left: 300px;
+				color: #fff;
+				h3 {
+					font-size: 70px;
+				}
+				p {
+					font-size: 22px;
+				}
 			}
-			.form {
-				/* 账号和密码 */
-				.tel, .psw {
-					width: 100%
-					height: 46px
-					border-bottom: 1px solid #ddd;
-					input {
-						width: 100%
-						height: 100%
-					}
-				}
-				/* 图形验证码 */
-				.img-code {
-					display: flex;
-					height: 60px;
-					border-bottom: 1px solid #ddd;
-					input {
-						width: 100%;
-					}
-					.img {
-						width: 78px;
-						height: 38px;
-						margin-top: 14px;
-						cursor: pointer;
-					}
-				}
-				/* 记住密码和忘记密码 */
-				.remember-forget {
-					display: flex;
-					justify-content: space-between;
-					.forget {
-						cursor: pointer;
-					}
-				}
-				/* 登录按钮 */
-				.btn-login {
-					width: 100%;
-					height: 36px;
-					line-height: 36px;
-					border-radius: 5px;
+			/* 登录表单 */
+			.login-form {
+				width: 23%;
+				height: 350px;
+				border-radius: 5px;
+				background-color: #fff;
+				position: absolute;
+				top: 210px;
+				right: 5.2%;
+				padding: 0 42px;
+				.title {
+					font-size: 22px;
+					height: 76px;
+					line-height: 76px;
 					text-align: center;
-					font-size: 16px;
-					cursor: pointer;
-					background-color: #5769b1;
-					margin: 18px auto 0;
-					color: #fff;
+				}
+				.form {
+					/* 账号和密码 */
+					.tel, .psw {
+						width: 100%
+						height: 46px
+						border-bottom: 1px solid #ddd;
+						input {
+							width: 100%
+							height: 100%
+						}
+					}
+					/* 图形验证码 */
+					.img-code {
+						display: flex;
+						height: 60px;
+						border-bottom: 1px solid #ddd;
+						input {
+							width: 100%;
+						}
+						.img {
+							width: 78px;
+							height: 38px;
+							margin-top: 14px;
+							cursor: pointer;
+						}
+					}
+					/* 记住密码和忘记密码 */
+					.remember-forget {
+						display: flex;
+						justify-content: space-between;
+						.forget {
+							cursor: pointer;
+						}
+					}
+					/* 登录按钮 */
+					.btn-login {
+						width: 100%;
+						height: 36px;
+						line-height: 36px;
+						border-radius: 5px;
+						text-align: center;
+						font-size: 16px;
+						cursor: pointer;
+						background-color: #5769b1;
+						margin: 18px auto 0;
+						color: #fff;
+					}
 				}
 			}
 		}

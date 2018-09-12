@@ -14,8 +14,9 @@ import {
 } from 'element-ui';
 
 
+axios.defaults.baseURL = 'http://www.91dream.net/matrix';
 // axios.defaults.baseURL = 'http://192.168.1.14:8090';
-axios.defaults.baseURL = 'http://www.tangjinqian.cn:8080/matrix';
+// axios.defaults.baseURL = 'http://www.tangjinqian.cn:8080/matrix';
 // axios.defaults.baseURL = 'http://47.96.232.174/matrix';
 // axios.defaults.timeout = 10000;
 
@@ -50,7 +51,9 @@ axios.interceptors.response.use(function (response) {
 	if (response.data.code == 110) {
 		console.log(response.data)
 		localStorage.removeItem('_token')
-		this.$router.replace('/login')
+
+		window.location.href = 'http://www.91dream.net/#/login'
+		Message.error({message: response.data.msg});
 	}
 	return response
 }, function (error) {
@@ -68,7 +71,3 @@ new Vue({
 })
 
 Vue.use(VCharts)
-
-
-
-

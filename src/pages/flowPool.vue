@@ -39,7 +39,7 @@
 						<span>使用率：{{ baseInfo.usageRate }}%</span>
 						<span>已超出：{{ baseInfo.overview }}M</span>
 						<span>预警数：{{ baseInfo.warnNumber }}个</span>
-						<span>报警卡数：{{ baseInfo.alarmCardNumber }}个</span>
+						<span>超套卡数：{{ baseInfo.alarmCardNumber }}个</span>
 					</div>
 				</div>
 			</div>
@@ -48,7 +48,7 @@
 				<div class="table-header">
 					<!-- 搜索框 -->
 					<div class="search-box">
-						<input type="text" placeholder="请输入ICCID或者卡号" v-model="numVal">
+						<input type="text" placeholder="请输入卡号查询" v-model="numVal">
 						<div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
 					</div>
 					<!-- 联动选择器 -->
@@ -157,9 +157,10 @@
 			this.baseSettings = {
 				labelLine: 'show',
 				label: {
-					position: 'inside'
+//					position: 'inside'
+					show: false
 				},
-				radius: 160,
+				radius: 120,
 				offsetY: 200,
 			}
 
@@ -201,7 +202,7 @@
 						rows: []
 					}
 				},
-				totalCount: 134,
+				totalCount: 0,
 				pageSize: 10,
 				pageNo: 1,
 				areaValue: '',
@@ -402,6 +403,14 @@
 			},
 			// 获取表格 数据
 			getTableData() {
+				let reg = /.*[\u4e00-\u9fa5]+.*$/;
+				if (reg.test(this.numVal)) {
+					this.$message({
+						type: 'info',
+						message: '请输入正确的卡号或ICCID'
+					});
+					return
+				}
 				this.$axios({
 					url: '/api/v2/device/devicePageList',
 					method: 'post',

@@ -132,7 +132,7 @@
 						num: 0
 					},
 					{
-						title: '停机数',
+						title: '离线数',
 						num: 0
 					},
 					{
@@ -272,9 +272,7 @@
 						this.tableData.push({
 							sortNum: data[i].no,
 							cardNum: data[i].cardNumber,
-							iccid: data[i].netWork === 1 ? data[i].cmIccid :
-								data[i].netWork === 2 ? data[i].cuIccid :
-									data[i].ctIccid,
+							iccid: data[i].iccid,
 							operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
 							flowPackage: data[i].packages,
 							message: data[i].msgNo,
@@ -288,12 +286,12 @@
 										data[i].cardType === 4 ? '2*2' :
 											data[i].cardType === 5 ? '5*6' :
 												data[i].cardType === 6 ? 'eSim' : '其他',
-							system: data[i].cardType === 2 ? '2G' :
-								data[i].cardType === 3 ? '3G' :
-									data[i].cardType === 4 ? '4G' :
-										data[i].cardType === 5 ? '5G' :
-											data[i].cardType === 6 ? 'NB' :
-												data[i].cardType === 7 ? 'emtc' : '',
+							system: data[i].networkType === 1 ? '5G' :
+								data[i].networkType === 2 ? '4G' :
+									data[i].networkType === 3 ? '3G' :
+										data[i].networkType === 4 ? '2G' :
+											data[i].networkType === 5 ? 'NB' :
+												data[i].networkType === 6 ? 'EMTC' : '',
 							cardStatus: data[i].onlineStatus === 1 ? '在线' :
 								data[i].onlineStatus === 0 ? '离线' : ''
 						})

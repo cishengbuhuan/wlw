@@ -1,7 +1,7 @@
 <template>
 	<div id="app">
-		<dream-header v-show="$route.name != 'login'"></dream-header>
-		<dream-slide v-show="$route.name != 'login'"></dream-slide>
+		<dream-header v-if="$route.name != 'login' && $route.name != 'forget'"></dream-header>
+		<dream-slide v-if="$route.name != 'login' && $route.name != 'forget'"></dream-slide>
 		<router-view/>
 	</div>
 </template>
