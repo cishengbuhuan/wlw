@@ -94,9 +94,9 @@
 								type="daterange"
 								align="right"
 								unlink-panels
-								range-separator="到"
-								start-placeholder="计费时间"
-								end-placeholder="结束时间">
+								range-separator="至"
+								start-placeholder="计费时间起"
+								end-placeholder="计费时间止">
 						</el-date-picker>
 						<div class="btn-inquire" @click="pickChange">查询</div>
 					</div>
@@ -108,16 +108,16 @@
 							@sort-change='sortChange'
 							border
 							style="width: 100%">
-						<el-table-column prop="sortNum" label="序号" align="center"></el-table-column>
+						<el-table-column prop="sortNum" width='100' label="序号" align="center"></el-table-column>
 						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
-						<el-table-column prop="flowPackage" label="流量池套餐" width='70' align="center"></el-table-column>
-						<el-table-column prop="flowUsage" sortable='custom' label="本月已使用流量" align="center">
+						<el-table-column prop="flowPackage" label="流量池套餐" align="center"></el-table-column>
+						<el-table-column prop="flowUsage" sortable='custom' width='150' label="本月已使用流量" align="center">
 							<template slot-scope="scope">
 								{{ scope.row.flowUsage.toFixed(2) }}MB
 							</template>
 						</el-table-column>
-						<el-table-column prop="message" label="短信" align="center"></el-table-column>
+						<el-table-column prop="message" width='70' label="短信" align="center"></el-table-column>
 						<el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
 						<!--<el-table-column prop="operate" label="操作" align="center">-->
@@ -132,7 +132,7 @@
 							:page-size="pageSize"
 							:current-page="pageNo"
 							:total="totalCount"
-							:page-sizes="[5, 10, 20]"
+							:page-sizes="[20, 50, 100]"
 							@size-change="changeSize"
 							@current-change="changePageNo">
 					</el-pagination>
@@ -161,7 +161,7 @@
 					show: false
 				},
 				radius: 120,
-				offsetY: 200,
+				offsetY: 150,
 			}
 
 			this.baseExtend = {
@@ -176,7 +176,11 @@
 						borderRadius: '50%',
 						padding: [0, 0, 0, 70],
 					}
-				}
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{b}:{c}M"
+				},
 			}
 			return {
 				noPoolId: false,
@@ -203,7 +207,7 @@
 					}
 				},
 				totalCount: 0,
-				pageSize: 10,
+				pageSize: 20,
 				pageNo: 1,
 				areaValue: '',
 				statusValue: '',
@@ -453,6 +457,7 @@
 			// 状态的下拉框的值发生变化的时候触发
 			toggleStatus(val) {
 				this.status = val;
+				this.pageNo = 1;
 				this.getTableData()
 			},
 			// 选择日期
@@ -503,7 +508,7 @@
 				}
 				.info-chart {
 					width: 100%;
-					padding-bottom: 70px;
+					padding-bottom: 30px;
 					.no-more {
 						font-size: 30px;
 						color: #999;
@@ -524,6 +529,7 @@
 						display: flex;
 						justify-content: space-between;
 						padding: 0 70px;
+						margin-top: -100px;
 						/*span {
 						  margin-right: 50px;
 						}*/
@@ -538,17 +544,17 @@
 				border-radius: 5px;
 				.table-header {
 					display: flex;
-					flex-wrap: wrap;
-					/*justify-content space-between*/
+					/*flex-wrap: wrap;*/
+					justify-content space-between
 					/* 搜索框 */
 					.search-box {
-						width: 400px;
+						width: 300px;
 						height: 40px;
 						border-radius: 5px
 						border: 1px solid #dcdfe6;
 						display: flex;
 						justify-content: space-between;
-						margin-right: 60px;
+						margin-right: 10px;
 						margin-bottom: 30px;
 						input {
 							width: 100%;
@@ -665,7 +671,7 @@
 					}
 				}
 				.table-box {
-					margin-top: 40px;
+					/*margin-top: 40px;*/
 					.more {
 						cursor: pointer;
 						color: mainBlue;

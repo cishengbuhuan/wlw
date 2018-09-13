@@ -28,7 +28,10 @@
 						    :key="index">
 							<input type="tel" v-model="item.number" disabled>
 						</li>
-						<li><input type="tel" v-model="customAmount" placeholder="自定义金额"></li>
+						<li><input type="tel"
+						           @focus="inputFocus"
+						           @blur="inputBlur"
+						           @click="chooseCustomize" v-model="customAmount"></li>
 					</ul>
 					<div class="button-recharge" @click="btnRecharge">立即充值</div>
 					<div class="user-protocol">我已同意<span @click="alertProtocol">《用户协议》</span><input type="checkbox"
@@ -75,7 +78,9 @@
 				modalShow: false,
 				checked: true,
 				// 自定义金额
-				customAmount: null
+				customAmount: '自定义金额',
+				// 选中的金额
+				selectedAmount: ''
 			};
 		},
 		mounted() {
@@ -124,6 +129,25 @@
 					this.rechargeData[i].isSelected = false;
 				}
 				this.rechargeData[index].isSelected = true;
+				this.selectedAmount = this.rechargeData[index].number;
+			},
+			// 点击自定义金额
+			chooseCustomize(){
+				for (let i = 0; i < this.rechargeData.length; i++) {
+					this.rechargeData[i].isSelected = false;
+				}
+			},
+			// 自定义金额的聚焦事件
+			inputFocus(){
+				this.customAmount = ''
+				this.selectedAmount = this.customAmount
+			},
+			// 自定义金额的失焦事件
+			inputBlur(){
+				if(this.customAmount == '') {
+					this.customAmount = '自定义金额'
+				}
+				this.selectedAmount = this.customAmount
 			},
 			// 点击立即充值按钮
 			btnRecharge() {
@@ -209,6 +233,7 @@
 						margin-bottom: 30px;
 					}
 					ul {
+						width: 470px;
 						display: flex;
 						justify-content: space-between;
 						flex-wrap: wrap;

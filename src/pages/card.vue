@@ -44,11 +44,11 @@
 									:value="item.value">
 							</el-option>
 						</el-select>
-						<!-- 制式 -->
+						<!-- 种类 -->
 						<el-select v-model="systemValue"
 						           clearable
 						           @change="toggleSystem"
-						           placeholder="请选择制式">
+						           placeholder="请选择种类">
 							<el-option
 									v-for="item in selectData.systemOptions"
 									:key="item.value"
@@ -65,9 +65,9 @@
 								type="daterange"
 								align="right"
 								unlink-panels
-								range-separator="到"
-								start-placeholder="计费时间"
-								end-placeholder="结束时间">
+								range-separator="至"
+								start-placeholder="计费时间起"
+								end-placeholder="计费时间止">
 						</el-date-picker>
 						<div class="btn-inquire" @click="pickChange">查询</div>
 					</div>
@@ -83,13 +83,13 @@
 						<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 						<el-table-column prop="flowPackage" label="流量池套餐" width='70' align="center"></el-table-column>
-						<el-table-column prop="message" label="短信" align="center"></el-table-column>
-						<el-table-column prop="flowUsage" sortable='custom' label="本月已使用流量"
+						<el-table-column prop="message" label="短信(已使用)" align="center"></el-table-column>
+						<el-table-column prop="flowUsage" width="90" sortable='custom' label="本月已使用流量"
 						                 align="center"></el-table-column>
 						<el-table-column prop="flowOverage" sortable='custom' label="本月剩余流量"
 						                 align="center"></el-table-column>
-						<el-table-column prop="startTime" label="计费时间" align="center"></el-table-column>
-						<el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
+						<el-table-column prop="startTime" label="计费时间" width='100' align="center"></el-table-column>
+						<el-table-column prop="endTime" label="到期时间" width='100' align="center"></el-table-column>
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
 						<el-table-column prop="system" label="制式" align="center"></el-table-column>
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
@@ -100,7 +100,7 @@
 							:page-size="pageSize"
 							:current-page="pageNo"
 							:total="totalCount"
-							:page-sizes="[5, 10, 20]"
+							:page-sizes="[20, 50, 100]"
 							@size-change="changeSize"
 							@current-change="changePageNo">
 					</el-pagination>
@@ -117,7 +117,7 @@
 		data() {
 			return {
 				totalCount: 0,
-				pageSize: 5,
+				pageSize: 20,
 				pageNo: 1,
 				areaValue: '',
 				statusValue: '',
@@ -178,19 +178,19 @@
 						},
 						{
 							value: '2',
-							system: '双切'
+							system: '双切micro'
 						},
 						{
 							value: '3',
-							system: '三切'
+							system: '三切nano'
 						},
 						{
 							value: '4',
-							system: '2*2'
+							system: '2*2贴片'
 						},
 						{
 							value: '5',
-							system: '5*6'
+							system: '5*6贴片'
 						},
 						{
 							value: '6',
@@ -276,9 +276,9 @@
 							operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
 							flowPackage: data[i].packages,
 							message: data[i].msgNo,
-							flowUsage: data[i].usageMonth + 'M',
-							flowOverage: data[i].flowOverage + 'M',
-							startTime: timestampToTime(data[i].serveTime),
+							flowUsage: data[i].usageMonth.toFixed(2) + 'M',
+							flowOverage: data[i].flowOverage.toFixed(2) + 'M',
+							startTime: timestampToTime(data[i].chargeTime),
 							endTime: timestampToTime(data[i].endTime),
 							cardKind: data[i].cardType === 1 ? '大卡' :
 								data[i].cardType === 2 ? '双切' :
@@ -327,11 +327,13 @@
 			// 状态 的下拉框的值发生变化的时候触发
 			toggleStatus(val) {
 				this.status = val;
+				this.pageNo = 1
 				this.getTableData()
 			},
 			// 制式 的下拉框的值发生变化的时候触发
 			toggleSystem(val) {
 				this.netWorkType = val;
+				this.pageNo = 1
 				this.getTableData()
 			},
 			// 流量的排序
@@ -347,7 +349,7 @@
 					this.direct = 'desc'
 				} else if (column.prop == 'flowOverage' && column.order == 'descending') {
 					this.sortData = 'usage_month'
-					this.direct = 'desc'
+					this.direct = 'asc'
 				}
 				this.getTableData()
 			}
@@ -437,7 +439,7 @@
 					.cascader {
 						display: flex;
 						.el-select {
-							margin-right: 10px;
+							margin-right: 60px;
 						}
 						.el-select:last-child {
 							margin-right: 0;

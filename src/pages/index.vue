@@ -52,7 +52,7 @@
 						<!--&lt;!&ndash; 没有卡的时候 &ndash;&gt;-->
 					<!--</div>-->
 					<div class="chart-item" v-for="(item,index) in card" :key="index">
-						<div class="title">{{ item.title }}:{{ item.totalCard }}</div>
+						<div class="title">{{ item.title }}：{{ item.totalCard }}</div>
 						<!-- 图片提示信息 -->
 						<img class="img-info" :src="item.bgImgNoData" v-show="item.totalCard == 0">
 						<img class="img-info" :src="item.bgImgHaveData" v-show="item.totalCard != 0">
@@ -69,9 +69,9 @@
 									<div class="remark"><i></i><span>已停卡</span></div>
 									<div class="num">{{ item.tips.stop }}</div>
 								</div>
-								<!-- 已消费 -->
+								<!-- 已欠费 -->
 								<div class="consumed tips-item">
-									<div class="remark"><i></i><span>已消费</span></div>
+									<div class="remark"><i></i><span>已欠费</span></div>
 									<div class="num">{{ item.tips.consumed }}</div>
 								</div>
 							</div>
@@ -86,9 +86,9 @@
 									<div class="remark"><i></i><span>已销卡</span></div>
 									<div class="num">{{ item.tips.sold }}</div>
 								</div>
-								<!-- 未知 -->
+								<!-- 未获取 -->
 								<div class="unknown tips-item">
-									<div class="remark"><i></i><span>未知</span></div>
+									<div class="remark"><i></i><span>未获取</span></div>
 									<div class="num">{{ item.tips.unknown }}</div>
 								</div>
 							</div>
@@ -137,7 +137,7 @@
 						<!--</div>-->
 					<!--</div>-->
 					<div class="chart-item-group" v-for="(item,index) in flowData" :key="index">
-						<div class="flow-name">单卡限量:{{ item.flowSize }}M</div>
+						<div class="flow-name">单卡限量:{{ item.flowSize.toFixed(0) }}M</div>
 						<div class="chart-item" v-for="(itemSon,indexSon) in item.rowsData" :key="indexSon">
 							<ve-pie :data="itemSon" :settings="flowSettings"
 							        :colors="itemSon.colors"
@@ -191,7 +191,7 @@
 						title: '移动',
 						totalCard: 0,
 						bgImgNoData: require('../../static/images/card-yd.jpg'),
-						bgImgHaveData: require('../../static/images/card-yd-active.jpg'),
+						bgImgHaveData: require('../../static/images/card-yd-active.png'),
 						tips: {
 							active: '--',
 							stop: '--',
@@ -205,7 +205,7 @@
 						title: '联通',
 						totalCard: 0,
 						bgImgNoData: require('../../static/images/card-lt.jpg'),
-						bgImgHaveData: require('../../static/images/card-lt-active.jpg'),
+						bgImgHaveData: require('../../static/images/card-lt-active.png'),
 						tips: {
 							active: '--',
 							stop: '--',
@@ -219,7 +219,7 @@
 						title: '电信',
 						totalCard: 0,
 						bgImgNoData: require('../../static/images/card-dx.jpg'),
-						bgImgHaveData: require('../../static/images/card-dx-active.jpg'),
+						bgImgHaveData: require('../../static/images/card-dx-active.png'),
 						tips: {
 							active: '--',
 							stop: '--',
@@ -402,7 +402,7 @@
 							let parentObj = {
 								rowsData: []
 							};
-							parentObj.flowSize = data[i].flowSize;
+							parentObj.flowSize = Number(data[i].flowSize);
 							for(let j=0; j<data[i].flowData.length; j++){
 								let obj = {
 									columns: ['status','number'],
@@ -503,11 +503,11 @@
 			/* 系统消息 */
 			.system-msg {
 				width: 100%;
-				height: 180px;
 				border-radius: 5px;
 				border: 1px solid #ddd;
 				padding-left: 40px;
 				padding-top: 20px;
+				padding-bottom: 20px;
 				margin-bottom: 20px;
 				.msg-title {
 					display: flex;
@@ -636,7 +636,7 @@
 									}
 								}
 							}
-							/* 已消费 */
+							/* 已欠费 */
 							.consumed {
 								.remark {
 									i {
@@ -660,7 +660,7 @@
 									}
 								}
 							}
-							/* 未知 */
+							/* 未获取 */
 							.unknown {
 								.remark {
 									i {
