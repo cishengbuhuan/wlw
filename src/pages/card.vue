@@ -3,11 +3,42 @@
 		<div class="content">
 			<!-- 今日卡况 -->
 			<div class="card-info">
-				<div class="info-title">今日卡况</div>
+				<div class="info-title"><i class="line"></i>今日卡况</div>
 				<div class="info-box">
-					<div class="info-item" v-for="(item,index) in cardInfo" :key="index">
-						<span>{{ item.title }}</span>
-						<div class="num">{{ item.num }}</div>
+					<!-- 总卡数 -->
+					<div class="info-item total">
+						<span><i></i>总卡数</span>
+						<div class="num">
+							{{ cardInfo.total }}
+						</div>
+					</div>
+					<!-- 在线数 -->
+					<div class="info-item online">
+						<span><i></i>在线数</span>
+						<div class="num">
+							{{ cardInfo.online }}
+						</div>
+					</div>
+					<!-- 离线数 -->
+					<div class="info-item offline">
+						<span><i></i>离线数</span>
+						<div class="num">
+							{{ cardInfo.offline }}
+						</div>
+					</div>
+					<!-- 欠费数 -->
+					<div class="info-item arrears">
+						<span><i></i>欠费数</span>
+						<div class="num">
+							{{ cardInfo.arrears }}
+						</div>
+					</div>
+					<!-- 沉默数 -->
+					<div class="info-item silence">
+						<span><i></i>沉默数</span>
+						<div class="num">
+							{{ cardInfo.silence }}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -21,18 +52,6 @@
 					</div>
 					<!-- 联动选择器 -->
 					<div class="cascader">
-						<!-- 地区运营商 -->
-						<!--<el-select v-model="areaValue"-->
-						<!--@change="toggleArea"-->
-						<!--placeholder="请选择地区">-->
-						<!--<el-option-->
-						<!--v-for="item in selectData.areaOptions"-->
-						<!--:key="item.value"-->
-						<!--:label="item.area"-->
-						<!--:value="item.value">-->
-						<!--</el-option>-->
-						<!--</el-select>-->
-						<!-- 状态 -->
 						<el-select v-model="statusValue"
 						           clearable
 						           @change="toggleStatus"
@@ -62,6 +81,7 @@
 						<span>时间：</span>
 						<el-date-picker
 								v-model="timeValue"
+								@change="pickChange"
 								type="daterange"
 								align="right"
 								unlink-panels
@@ -93,6 +113,11 @@
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
 						<el-table-column prop="system" label="制式" align="center"></el-table-column>
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
+						<el-table-column prop="operate" label="操作" align="center">
+							<template slot-scope="scope">
+								<span class="more" @click="goDetail(scope.row)">查看详情</span>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -122,43 +147,15 @@
 				areaValue: '',
 				statusValue: '',
 				systemValue: '',
-				cardInfo: [
-					{
-						title: '总卡数',
-						num: 0
-					},
-					{
-						title: '在线数',
-						num: 0
-					},
-					{
-						title: '离线数',
-						num: 0
-					},
-					{
-						title: '欠费数',
-						num: 0
-					},
-					{
-						title: '沉默数',
-						num: 0
-					}
-				],
+				cardInfo: {
+					total: '',
+					online: '',
+					offline: '',
+					arrears: '',
+					silence: ''
+				},
 				// 联动选择的数据
 				selectData: {
-					// 地区运营商
-					areaOptions: [
-						{
-							value: '5',
-							area: '海门移动',
-							netWork: 5
-						},
-						{
-							value: '7',
-							area: '北京移动',
-							netWork: 7
-						}
-					],
 					// 状态
 					statusOptions: [
 						{
@@ -198,6 +195,10 @@
 						},
 						{
 							value: '7',
+							system: 'NB'
+						},
+						{
+							value: '8',
 							system: '其他'
 						}
 					]
@@ -229,13 +230,12 @@
 					url: '/api/v2/device/getAllDeviceStatus',
 					method: 'post'
 				}).then(res => {
-					console.log(res.data.data)
 					let data = res.data.data;
-					this.cardInfo[0].num = data.totalCard
-					this.cardInfo[1].num = data.activeNo
-					this.cardInfo[2].num = data.stopNo
-					this.cardInfo[3].num = data.debetNo
-					this.cardInfo[4].num = data.unactiveNo
+					this.cardInfo.total = data.totalCard
+					this.cardInfo.online = data.activeNo
+					this.cardInfo.offline = data.stopNo
+					this.cardInfo.arrears = data.debetNo
+					this.cardInfo.silence = data.unactiveNo
 				})
 			},
 			// 获取表格 数据
@@ -293,7 +293,8 @@
 											data[i].networkType === 5 ? 'NB' :
 												data[i].networkType === 6 ? 'EMTC' : '',
 							cardStatus: data[i].onlineStatus === 1 ? '在线' :
-								data[i].onlineStatus === 0 ? '离线' : ''
+								data[i].onlineStatus === 0 ? '离线' : '',
+							deviceId: data[i].deviceId
 						})
 					}
 				})
@@ -310,19 +311,15 @@
 			},
 			// 选择日期
 			pickChange() {
-				if (this.timeValue == '') {
+				if (!this.timeValue) {
 					this.beginTime = ''
 					this.endTime = ''
+					this.getTableData();
 					return
 				}
 				this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
 				this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
 				this.getTableData();
-			},
-			// 运营商 的下拉框的值发生变化的时候触发
-			toggleArea(val) {
-				this.netWork = val;
-				this.getTableData()
 			},
 			// 状态 的下拉框的值发生变化的时候触发
 			toggleStatus(val) {
@@ -352,6 +349,16 @@
 					this.direct = 'asc'
 				}
 				this.getTableData()
+			},
+			// 跳转到详情页
+			goDetail(data) {
+				let deviceId = data.deviceId
+				this.$router.push({
+					path:'/cardDetail',
+					query:{
+						deviceId: deviceId
+					}
+				})
 			}
 		}
 	};
@@ -378,18 +385,77 @@
 				.info-title {
 					font-size: 24px;
 					font-weight: 500;
+					display: flex;
+					.line {
+						width: 6px;
+						height: 28px;
+						display: block;
+						background-color: mainBlue;
+						margin-right: 5px;
+					}
 				}
 				.info-box {
 					display: flex;
 					justify-content: space-around;
 					text-align: center;
 					margin-top: 30px;
-					span {
-						font-size: 22px;
+					.info-item {
+						span {
+							font-size: 22px;
+							display: flex;
+							i {
+								display: block;
+								width: 14px;
+								height: 14px;
+								border-radius: 50%;
+								margin: 7px 10px 0 0;
+								background-color: mainBlue;
+							}
+						}
+						.num {
+							font-size: 32px;
+							margin-top: 20px;
+						}
 					}
-					.num {
-						font-size: 32px;
-						margin-top: 20px;
+					/* 总卡数 */
+					.total {
+						span {
+							i {
+								background-color: mainBlue;
+							}
+						}
+					}
+					/* 在线数 */
+					.online {
+						span {
+							i {
+								background-color: #72ff4c;
+							}
+						}
+					}
+					/* 离线数 */
+					.offline {
+						span {
+							i {
+								background-color: #ff4c59;
+							}
+						}
+					}
+					/* 欠费数 */
+					.arrears {
+						span {
+							i {
+								background-color: #ff0012;
+							}
+						}
+					}
+					/* 沉默数 */
+					.silence {
+						span {
+							i {
+								background-color: #999999;
+							}
+						}
 					}
 				}
 			}
@@ -529,6 +595,10 @@
 				}
 				.table-box {
 					margin-top: 40px;
+					.more {
+						cursor: pointer;
+						color: mainBlue;
+					}
 					.el-pagination {
 						text-align: center;
 						margin-top: 40px;

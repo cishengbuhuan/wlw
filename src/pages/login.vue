@@ -95,32 +95,46 @@
 		},
 		mounted() {
 //          this.loadCode()
+			this.rememberAccount()
 		},
 		methods: {
+			// 记住账号
+			rememberAccount(){
+				// 如果点击了记住账号
+				if(this.isRemember) {
+					this.user.account = localStorage.getItem('account');
+					this.user.password = localStorage.getItem('password');
+				}
+			},
 			btnLogin() {
 				if (!(/^1(3|4|5|6|7|8|9)\d{9}$/.test(this.user.account))) {
 					this.$message.error('请输入正确的手机号码！');
 				}else{
-					this.$axios({
-						url: '/api/v1/login',
-						method: 'post',
-						params: {
-							userCode: this.user.account,
-							password: this.user.password,
-							code: this.user.code
-						}
-					}).then(res => {
-						let code = res.data.code;
-						if (code == 1) {
-							localStorage.setItem('_token', res.data.data.token);
-							this.$router.push({path: '/index'})
-						} else if (code == 0) {
-							this.$message(res.data.msg);
+					if(this.codeShow == false){
+						this.codeShow = true
+						this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+					}else {
+						this.$axios({
+							url: '/api/v1/login',
+							method: 'post',
+							params: {
+								userCode: this.user.account,
+								password: this.user.password,
+								code: this.user.code
+							}
+						}).then(res => {
+							let code = res.data.code;
+							if (code == 1) {
+								localStorage.setItem('_token', res.data.data.token);
+								this.$router.push({path: '/index'})
+							} else if (code == 0) {
+								this.$message(res.data.msg);
 //							this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
 //						    this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-						    this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-						}
-					})
+								this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+							}
+						})
+					}
 				}
 			},
 			// 账号和密码不为空
@@ -129,6 +143,11 @@
 					return
 				}
 				this.codeShow = true;
+				// 把账号和密码保存在localStorage里面
+				localStorage.setItem('account', this.user.account);
+				localStorage.setItem('password', this.user.password);
+
+
 //				this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account
 //				this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account
 				this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account
@@ -229,6 +248,7 @@
 					.remember-forget {
 						display: flex;
 						justify-content: space-between;
+						margin-top: 5px;
 						.forget {
 							cursor: pointer;
 						}

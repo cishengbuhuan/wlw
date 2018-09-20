@@ -24,12 +24,12 @@
 					<!-- 饼图 -->
 					<div class="chart" v-if="!noPoolId">
 						<div class="chart-item">
-							<ve-pie :data="baseInfo.usageData" :colors="usageColors" :settings="baseSettings"
-							        :extend="baseExtend"></ve-pie>
+							<ve-ring :data="baseInfo.usageData" :colors="usageColors" :settings="baseSettings"
+							        :extend="baseExtend"></ve-ring>
 						</div>
 						<div class="chart-item">
-							<ve-pie :data="baseInfo.alarmData" :colors="alarmColors" :settings="baseSettings"
-							        :extend="baseExtend"></ve-pie>
+							<ve-ring :data="baseInfo.alarmData" :colors="alarmColors" :settings="baseSettings"
+							        :extend="alarmExtend"></ve-ring>
 						</div>
 					</div>
 					<!-- tips -->
@@ -37,7 +37,7 @@
 						<span>总流量：{{ baseInfo.totalFlow }}M</span>
 						<span>单卡流量：{{ baseInfo.singleFlow }}M</span>
 						<span>使用率：{{ baseInfo.usageRate }}%</span>
-						<span>已超出：{{ baseInfo.overview }}M</span>
+						<span>已超出：{{ baseInfo.overview }}个</span>
 						<span>预警数：{{ baseInfo.warnNumber }}个</span>
 						<span>超套卡数：{{ baseInfo.alarmCardNumber }}个</span>
 					</div>
@@ -120,11 +120,11 @@
 						<el-table-column prop="message" width='70' label="短信" align="center"></el-table-column>
 						<el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
-						<!--<el-table-column prop="operate" label="操作" align="center">-->
-						<!--<template slot-scope="scope">-->
-						<!--<span class="more" @click="goDetail(scope.row)">{{ scope.row.operate }}</span>-->
-						<!--</template>-->
-						<!--</el-table-column>-->
+						<el-table-column prop="operate" label="操作" align="center">
+							<template slot-scope="scope">
+								<span class="more" @click="goDetail(scope.row)">查看详情</span>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -143,25 +143,23 @@
 </template>
 
 <script>
-	import VePie from "v-charts/lib/pie.common";
+	import VeRing from "v-charts/lib/ring.common";
 	import {timestampToTime, format} from '../api/dataUtil'
 	import router from 'vue-router'
 
 	export default {
 		components: {
-			VePie
+			VeRing
 		},
 		data() {
 			this.usageColors = ['#bbbbbb', '#4cb2ff', '#da2627']
 			this.alarmColors = ['#4cb2ff', '#e3a51e', '#da2627']
 			this.baseSettings = {
-				labelLine: 'show',
 				label: {
-//					position: 'inside'
 					show: false
 				},
-				radius: 120,
-				offsetY: 150,
+				radius: ['120','80'],
+				offsetY: 150
 			}
 
 			this.baseExtend = {
@@ -180,6 +178,24 @@
 				tooltip : {
 					trigger: 'item',
 					formatter: "{b}:{c}M"
+				},
+			}
+			this.alarmExtend = {
+				legend: {
+					orient: 'vertical',
+					align: 'center',
+					top: 100,
+					left: 0,
+					itemWidth: 11,
+					itemHeight: 11,
+					textStyle: {
+						borderRadius: '50%',
+						padding: [0, 0, 0, 70],
+					}
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{b}:{c}个"
 				},
 			}
 			return {
@@ -445,14 +461,21 @@
 							endTime: timestampToTime(data[i].endTime),
 							cardStatus: data[i].onlineStatus === 1 ? '在线' :
 								data[i].onlineStatus === 0 ? '离线' : '',
-							operate: '查看详情'
+							deviceId: data[i].deviceId
 						})
 					}
 				})
 			},
 			// 跳转到详情页
-			goDetail() {
-				this.$router.push({path: '/index'})
+			goDetail(data) {
+				let deviceId = data.deviceId
+				this.$router.push({
+					path:'/cardDetail',
+					query:{
+						deviceId: deviceId
+					}
+				})
+//				console.log(data)
 			},
 			// 状态的下拉框的值发生变化的时候触发
 			toggleStatus(val) {

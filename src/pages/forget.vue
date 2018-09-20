@@ -117,6 +117,7 @@
 						url: '/api/v2/user/verifiCode',
 						method: 'post',
 						params: {
+							mobileNo: this.telVal,
 							code: this.codeVal
 						}
 					}).then(res => {

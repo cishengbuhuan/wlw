@@ -4,6 +4,7 @@ import Router from 'vue-router'
 import login from '../pages/login.vue'
 import index from '../pages/index.vue'
 import card from '../pages/card.vue'
+import cardDetail from '../pages/cardDetail.vue'
 import flowPool from '../pages/flowPool.vue'
 import account from '../pages/account.vue'
 import recharge from '../pages/recharge.vue'
@@ -70,7 +71,13 @@ const router = new Router({
 			path: '/bill',
 			name: 'bill',
 			component: bill
-		}
+		},
+		// 卡详情
+		{
+			path: '/cardDetail',
+			name: 'cardDetail',
+			component: cardDetail
+		},
 	]
 })
 

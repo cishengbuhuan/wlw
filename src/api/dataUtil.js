@@ -10,6 +10,44 @@ export function timestampToTime(timestamp) {
   return Y+M+D;
 }
 
+
+// 转化卡种类
+export function translateCardKind(i){
+	if(i ===1 ) {
+		return '大卡'
+	}else if(i === 2){
+		return '双切'
+	}else if(i === 3){
+		return '三切'
+	}else if(i === 4){
+		return '2*2'
+	}else if(i === 5){
+		return '5*6'
+	}else if(i === 6){
+		return 'eSim'
+	}else{
+		return '其他'
+	}
+}
+// 转化制式
+export function translateSystem(i){
+	if(i ===1 ) {
+		return '5G'
+	}else if(i === 2){
+		return '4G'
+	}else if(i === 3){
+		return '3G'
+	}else if(i === 4){
+		return '2G'
+	}else if(i === 5){
+		return 'NB'
+	}else if(i === 6){
+		return 'EMTC'
+	}else{
+		return ''
+	}
+}
+
 export function format(timestamp, formats) {
   // formats格式包括
   // 1. Y-m-d

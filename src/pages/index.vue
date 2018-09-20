@@ -24,7 +24,9 @@
 			<!-- 系统消息 -->
 			<div class="system-msg">
 				<div class="msg-title">
-					<div class="left">公告
+					<div class="left">
+						<i class="line"></i>
+						公告
 						<div class="icon" :style="msgTitleIcon"></div>
 					</div>
 					<router-link to="/message">
@@ -41,7 +43,9 @@
 			</div>
 			<!-- 卡片统计 -->
 			<div class="card-count">
-				<div class="card-title">卡片统计</div>
+				<div class="card-title">
+					<i class="line"></i>卡片统计
+				</div>
 				<div class="chart">
 					<!--<div class="no-info" v-show="cardShow">暂时没有数据</div>-->
 					<!--<div class="chart-item" v-show="!cardShow" v-for="(item,index) in cardData" :key="index">-->
@@ -100,7 +104,9 @@
 			<div class="flow-count">
 				<!-- 流量统计的header -->
 				<div class="flow-title">
-					<span>流量统计</span>
+					<span>
+						<i class="line"></i>流量统计
+					</span>
 					<div class="used">
 						<div class="icon"></div>
 						已使用
@@ -180,8 +186,7 @@
 				tooltip : {
 					trigger: 'item',
 					formatter: "{b}:{c}M ({d}%)"
-				},
-//				color: ['#bbbbbb', '#4cb2ff', '#da2627']
+				}
 			}
 
 			return {
@@ -517,6 +522,13 @@
 					.left {
 						font-size: 20px;
 						display: flex;
+						.line {
+							display: block;
+							width: 6px;
+							height: 28px;
+							background-color: mainBlue;
+							margin-right: 5px;
+						}
 					}
 					.more {
 						font-size: 16px;
@@ -555,7 +567,15 @@
 				.card-title {
 					font-size: 20px;
 					color: #000;
+					display: flex;
 					/*border-bottom: 1px solid red;*/
+					.line {
+						width: 6px;
+						height: 28px;
+						display: block;
+						background-color: mainBlue;
+						margin-right: 5px;
+					}
 				}
 				.chart {
 					display: flex;
@@ -689,6 +709,15 @@
 					span {
 						font-size: 20px;
 						margin-right: 35px;
+						display: flex;
+						.line {
+							width: 6px;
+							height: 28px;
+							display: block;
+							background-color: mainBlue;
+							margin-right: 5px;
+							margin-top: 5px;
+						}
 					}
 					.used, .unused, .exceeded {
 						line-height: 40px;
