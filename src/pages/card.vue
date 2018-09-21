@@ -113,11 +113,11 @@
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
 						<el-table-column prop="system" label="制式" align="center"></el-table-column>
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
-						<el-table-column prop="operate" label="操作" align="center">
-							<template slot-scope="scope">
-								<span class="more" @click="goDetail(scope.row)">查看详情</span>
-							</template>
-						</el-table-column>
+						<!--<el-table-column prop="operate" label="操作" align="center">-->
+							<!--<template slot-scope="scope">-->
+								<!--<span class="more" @click="goDetail(scope.row)">查看详情</span>-->
+							<!--</template>-->
+						<!--</el-table-column>-->
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -276,8 +276,8 @@
 							operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
 							flowPackage: data[i].packages,
 							message: data[i].msgNo,
-							flowUsage: data[i].usageMonth.toFixed(2) + 'M',
-							flowOverage: data[i].flowOverage.toFixed(2) + 'M',
+							flowUsage: data[i].usageMonth == null ? null : data[i].usageMonth.toFixed(2) + 'M',
+							flowOverage: data[i].flowOverage == null ? null : data[i].flowOverage.toFixed(2) + 'M',
 							startTime: timestampToTime(data[i].chargeTime),
 							endTime: timestampToTime(data[i].endTime),
 							cardKind: data[i].cardType === 1 ? '大卡' :

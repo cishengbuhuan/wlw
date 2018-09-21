@@ -46,20 +46,20 @@ axios.interceptors.request.use(config => {
 	return Promise.reject(err)
 })
 //
-// axios.interceptors.response.use(function (response) {
-// 	// token 已过期，重定向到登录页面
-// 	if (response.data.code == 110) {
-// 		console.log(response.data)
-// 		localStorage.removeItem('_token')
-//
-// 		window.location.href = 'http://www.91dream.net/#/login'
-// 		Message.error({message: response.data.msg});
-// 	}
-// 	return response
-// }, function (error) {
-// 	// Do something with response error
-// 	return Promise.reject(error)
-// })
+axios.interceptors.response.use(function (response) {
+	// token 已过期，重定向到登录页面
+	if (response.data.code == 110) {
+		console.log(response.data)
+		localStorage.removeItem('_token')
+
+		window.location.href = 'http://www.91dream.net/#/login'
+		Message.error({message: response.data.msg});
+	}
+	return response
+}, function (error) {
+	// Do something with response error
+	return Promise.reject(error)
+})
 
 
 /* eslint-disable no-new */
