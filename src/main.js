@@ -15,7 +15,7 @@ import {
 
 
 axios.defaults.baseURL = 'http://www.91dream.net/matrix';
-// axios.defaults.baseURL = 'http://192.168.1.14:8090';
+// axios.defaults.baseURL = 'http://192.168.1.10:8090';
 // axios.defaults.baseURL = 'http://www.tangjinqian.cn:8080/matrix';
 // axios.defaults.baseURL = 'http://47.96.232.174/matrix';
 // axios.defaults.timeout = 10000;

@@ -116,11 +116,11 @@
 						<el-table-column prop="message" width='70' label="短信" align="center"></el-table-column>
 						<el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
-						<!--<el-table-column prop="operate" label="操作" align="center">-->
-							<!--<template slot-scope="scope">-->
-								<!--<span class="more" @click="goDetail(scope.row)">查看详情</span>-->
-							<!--</template>-->
-						<!--</el-table-column>-->
+						<el-table-column prop="operate" label="操作" align="center">
+							<template slot-scope="scope">
+								<span class="more" @click="goDetail(scope.row)">查看详情</span>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -277,6 +277,8 @@
 				this.numVal = '';
 				this.defaultPoolId = '';
 				this.packageValue = '';
+				this.packageOptions = []
+				this.tableData = []
 
 				this.getPackageOptions(type);
 				this.getPieUsage(type);

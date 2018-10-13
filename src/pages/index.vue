@@ -348,7 +348,7 @@
 					let data = res.data.data
 					for (let i = 0; i < data.length; i++) {
 						this.systemMsg.push({
-							msg: data[i].title
+							msg: data[i].content
 						})
 					}
 				})

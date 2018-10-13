@@ -25,7 +25,7 @@
 					</div>
 					<!-- 图形验证码 -->
 					<div class="img-code" v-show="codeShow">
-						<input type="text" placeholder="请输入图形验证码" v-model="user.code">
+						<input type="number" placeholder="请输入图形验证码" maxlength="4" v-model="user.code">
 						<img :src="user.imgSrc" alt="验证码" class="img" @click="refreshImg">
 					</div>
 					<!-- 记住密码和忘记密码 -->
@@ -112,6 +112,7 @@
 				}else{
 					if(this.codeShow == false){
 						this.codeShow = true
+//						this.user.imgSrc = 'http://192.168.1.10:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
 						this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
 					}else {
 						this.$axios({
@@ -130,7 +131,7 @@
 							} else if (code == 0) {
 								this.$message(res.data.msg);
 //							this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-//						    this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+//						    this.user.imgSrc = 'http://192.168.1.10:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
 								this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
 							}
 						})
@@ -149,7 +150,7 @@
 
 
 //				this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account
-//				this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account
+//				this.user.imgSrc = 'http://192.168.1.10:8090/api/v1/image?userCode=' + this.user.account
 				this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account
 			},
 			// 点击刷新验证码
@@ -157,7 +158,7 @@
 				this.user.imgSrc = '';
 				this.$nextTick(() => {
 //					this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-//					this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+//					this.user.imgSrc = 'http://192.168.1.10:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
 					this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
 				})
 			}

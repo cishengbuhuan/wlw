@@ -124,44 +124,52 @@
 			},
 			// 删除所选中的
 			deleteAllSelect() {
-				this.$confirm('是否删除所选账号?', '提示', {
-					confirmButtonText: '确定',
-					cancelButtonText: '取消',
-					type: 'warning'
-				}).then(() => {
-					let allTel = ''
-					for (let i = 0; i < this.accountData.length; i++) {
-						if (this.accountData[i].isChecked === true) {
-							this.selectArr.push(this.accountData[i])
-						}
+				let allTel = ''
+				for (let i = 0; i < this.accountData.length; i++) {
+					if (this.accountData[i].isChecked === true) {
+						this.selectArr.push(this.accountData[i])
 					}
-					// 循环所选中的数组，获得所有的手机号
-					for (let j = 0; j < this.selectArr.length; j++) {
-						allTel += ',' + this.selectArr[j].account
-					}
-					this.$axios({
-						url: '/api/v2/user/deleteAll',
-						method: 'post',
-						params: {
-							mobile: allTel.substring(1, allTel.length)
-						}
-					}).then(res => {
-						this.modalIsShow = false;
-						this.accountData = [];
-						this.allChecked = false;
-						this.getAccountList()
-						this.$message({
-							type: 'success',
-							message: '删除成功!'
-						});
-					}).catch(res => {
-						this.$message({type: 'info', message: res.msg});
-					})
+				}
+				// 循环所选中的数组，获得所有的手机号
+				for (let j = 0; j < this.selectArr.length; j++) {
+					allTel += ',' + this.selectArr[j].account
+				}
+				if(this.selectArr == 0){
+					this.$message({
+						type: 'info',
+						message: '请至少选择一个删除的选项！'
+					});
+				}else{
+					this.$confirm('是否删除所选账号?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
 
-					this.$message({type: 'success', message: '删除成功!'});
-				}).catch(() => {
-					this.$message({type: 'info', message: '已取消删除'});
-				});
+						this.$axios({
+							url: '/api/v2/user/deleteAll',
+							method: 'post',
+							params: {
+								mobile: allTel.substring(1, allTel.length)
+							}
+						}).then(res => {
+							this.modalIsShow = false;
+							this.accountData = [];
+							this.allChecked = false;
+							this.getAccountList()
+							this.$message({
+								type: 'success',
+								message: '删除成功!'
+							});
+						}).catch(res => {
+							this.$message({type: 'info', message: res.msg});
+						})
+
+						this.$message({type: 'success', message: '删除成功!'});
+					}).catch(() => {
+						this.$message({type: 'info', message: '已取消删除'});
+					});
+				}
 			},
 			// 删除一行
 			deleteThisRow(index) {
@@ -202,6 +210,7 @@
 				this.user.account = this.accountData[index].account;
 			},
 			saveEdit(index) {
+//				if(){}
 				this.$axios({
 					url: '/api/v2/user/update',
 					method: 'post',

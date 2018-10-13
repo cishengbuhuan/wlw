@@ -14,21 +14,12 @@
 							</div>
 						</div>
 						<div class="item">
-							<img class="icon icon2" src="../../static/images/base-info-icon2.png">
-							<div class="info-data">
-								<div class="data-item">本月流量: {{ baseInfo.flowMonth }}</div>
-								<div class="data-item">本月已使用: {{ baseInfo.usageMonth }}</div>
-							</div>
-						</div>
-						<div class="item">
 							<img class="icon icon3" src="../../static/images/base-info-icon3.png">
 							<div class="info-data">
 								<div class="data-item">卡种类: {{ baseInfo.cardKind }}</div>
 								<div class="data-item">卡状态: {{ baseInfo.cardStatus }}</div>
 							</div>
 						</div>
-					</div>
-					<div class="row2">
 						<div class="item">
 							<img class="icon icon4" src="../../static/images/base-info-icon4.png">
 							<div class="info-data">
@@ -36,11 +27,19 @@
 								<div class="data-item">卡制式: {{ baseInfo.system }}</div>
 							</div>
 						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 流量信息 -->
+			<div class="flow-info">
+				<div class="tips"><i></i>流量信息</div>
+				<div class="info-content">
+					<div class="row1">
 						<div class="item">
-							<img class="icon icon5" src="../../static/images/base-info-icon5.png">
+							<img class="icon icon2" src="../../static/images/base-info-icon2.png">
 							<div class="info-data">
-								<div class="data-item">流量池套餐: {{ baseInfo.flowPackages }}</div>
-								<div class="data-item">单卡流量: {{ baseInfo.singleFlow }}</div>
+								<div class="data-item">本月套餐流量: {{ baseInfo.flowMonth }}</div>
+								<div class="data-item">本月已使用: {{ baseInfo.usageMonth }}</div>
 							</div>
 						</div>
 						<div class="item">
@@ -50,7 +49,7 @@
 								<div class="data-item">结束时间: {{ baseInfo.endTime }}</div>
 							</div>
 						</div>
-						<div class="single">
+						<div class="item single">
 							<img class="icon-single" src="../../static/images/base-info-icon7.png">
 							<div class="info-data">已使用短信: {{ baseInfo.usageMsg }}</div>
 						</div>
@@ -66,10 +65,11 @@
 						<span>时间：</span>
 						<el-date-picker
 								v-model="timeValue"
+								@change="pickChange"
 								type="daterange"
 								align="right"
 								unlink-panels
-								range-separator="到"
+								range-separator="至"
 								start-placeholder="开始时间"
 								end-placeholder="结束时间">
 						</el-date-picker>
@@ -86,7 +86,7 @@
 </template>
 
 <script>
-	import {timestampToTime,translateCardKind,translateSystem} from '../api/dataUtil'
+	import {format,timestampToTime,translateCardKind,translateSystem} from '../api/dataUtil'
 	import VeLine from "v-charts/lib/line.common";
 	export default {
 		components: {
@@ -145,19 +145,18 @@
 				},
 				chartData: {
 					columns: ['date', 'usage'],
-					rows: [
-						{ 'date': '09-01', 'usage': 1393 },
-						{ 'date': '09-02', 'usage': 3530 },
-						{ 'date': '09-03', 'usage': 2923 },
-						{ 'date': '09-04', 'usage': 1723 },
-						{ 'date': '09-05', 'usage': 3792 },
-						{ 'date': '09-06', 'usage': 4593 }
-					]
+					rows: []
 				},
 				timeValue: '',
 				// 预警值
 				warningStatus: 0,
-				deviceId: ''
+				deviceId: '',
+				// 起始时间
+				beginTime: '',
+				endTime: '',
+
+				pageSize: 50,
+				pageNo: 1
 			};
 		},
 		mounted() {
@@ -185,8 +184,8 @@
 					console.log(data)
 					this.baseInfo.cardNumber = data.cardNumber
 					this.baseInfo.iccid = data.iccid
-					this.baseInfo.flowMonth = ''
-					this.baseInfo.usageMonth = (data.usageMonth/1024).toFixed(2) + 'MB'
+					this.baseInfo.flowMonth = data.poolName
+					this.baseInfo.usageMonth = (data.usageMonth/1024).toFixed(2) + 'M'
 					this.baseInfo.cardKind = translateCardKind(data.cardType)
 					this.baseInfo.cardStatus = data.onlineStatus === 1 ? '在线' : data.onlineStatus === 0 ? '离线' : '',
 					this.baseInfo.operator = data.netWork === 1 ? '移动' : data.netWork === 2 ? '联通' : '电信'
@@ -196,8 +195,48 @@
 					this.baseInfo.startTime = timestampToTime(data.chargeTime)
 					this.baseInfo.endTime = timestampToTime(data.endTime)
 					this.baseInfo.usageMsg = data.msgNo
+
+
+					this.getFlowData()
 				})
-			}
+			},
+			// 获取到折线图数据
+			getFlowData(){
+				this.$axios({
+					url: '/api/v2/device/getLog',
+					method: 'post',
+					params: {
+						cardNo: this.baseInfo.cardNumber,
+						beginTime: this.beginTime,
+						endTime: this.endTime,
+						pageSize: this.pageSize,
+						pageNo: this.pageNo
+					}
+				}).then(res=>{
+					let data = res.data.data
+//					console.log(data)
+					this.chartData.rows = []
+					for(let i=0; i<data.length; i++){
+						this.chartData.rows.push({
+							date: timestampToTime(data[i].insertTime),
+							usage: data[i].usageYesterday
+						})
+						console.log(timestampToTime(data[i].insertTime))
+					}
+				})
+			},
+			// 选择日期
+			pickChange() {
+				if (!this.timeValue) {
+					this.beginTime = ''
+					this.endTime = ''
+					this.getFlowData();
+					return
+				}
+				this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
+				this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
+				this.getFlowData();
+			},
 		}
 	};
 </script>
@@ -213,7 +252,7 @@
 			padding: 20px;
 			overflow-y: scroll;
 			/* 基本信息 */
-			.base-info {
+			.base-info, .flow-info {
 				width: 100%;
 				border: 1px solid #ddd;
 				border-radius: 5px;
@@ -236,12 +275,13 @@
 				}
 				.info-content {
 					padding: 20px 50px;
-					.row1, .row2 {
+					.row1, .row2, .row3 {
 						display: flex;
 						margin-bottom: 20px;
 						.item {
 							display: flex;
-							margin-right: 60px;
+							flex: 1;
+							justify-content: center;
 							.icon {
 								width: 58px;
 								height: 72px;
@@ -253,7 +293,7 @@
 							.info-data {
 								margin-left: 5px;
 								.data-item {
-									font-size: 20px;
+									font-size: 18px;
 									height: 60px;
 									line-height: 60px;
 								}
