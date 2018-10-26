@@ -219,7 +219,7 @@
 					for(let i=0; i<data.length; i++){
 						this.chartData.rows.push({
 							date: timestampToTime(data[i].insertTime),
-							usage: data[i].usageYesterday
+							usage: (data[i].usageYesterday / 1024).toFixed(2)
 						})
 						console.log(timestampToTime(data[i].insertTime))
 					}

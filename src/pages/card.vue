@@ -45,13 +45,8 @@
 			<!-- 流量池表格 -->
 			<div class="flow-table">
 				<div class="table-header">
-					<!-- 搜索框 -->
-					<div class="search-box">
-						<input type="text" placeholder="请输入ICCID或者卡号" v-model="numVal">
-						<div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
-					</div>
-					<!-- 联动选择器 -->
-					<div class="cascader">
+					<!-- 下拉框组 -->
+					<div class="select-group">
 						<el-select v-model="statusValue"
 						           clearable
 						           @change="toggleStatus"
@@ -75,21 +70,41 @@
 									:value="item.value">
 							</el-option>
 						</el-select>
+						<!-- 套餐类型 -->
+						<el-select v-model="packagesTypeValue"
+						           clearable
+						           @change="togglePackagesType"
+						           placeholder="请选择套餐类型">
+							<el-option
+									v-for="item in selectData.packagesOptions"
+									:key="item.value"
+									:label="item.packages"
+									:value="item.value">
+							</el-option>
+						</el-select>
 					</div>
-					<!-- 时间查询 -->
-					<div class="time-inquire">
-						<span>时间：</span>
-						<el-date-picker
-								v-model="timeValue"
-								@change="pickChange"
-								type="daterange"
-								align="right"
-								unlink-panels
-								range-separator="至"
-								start-placeholder="计费时间起"
-								end-placeholder="计费时间止">
-						</el-date-picker>
-						<div class="btn-inquire" @click="pickChange">查询</div>
+					<!-- 搜索框和时间过滤 -->
+					<div class="search-group">
+						<!-- 搜索框 -->
+						<div class="search-box">
+							<input type="text" placeholder="请输入ICCID或者卡号" v-model="numVal">
+							<div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
+						</div>
+						<!-- 时间查询 -->
+						<div class="time-inquire">
+							<span>时间：</span>
+							<el-date-picker
+									v-model="timeValue"
+									@change="pickChange"
+									type="daterange"
+									align="right"
+									unlink-panels
+									range-separator="至"
+									start-placeholder="计费时间起"
+									end-placeholder="计费时间止">
+							</el-date-picker>
+							<div class="btn-inquire" @click="pickChange">查询</div>
+						</div>
 					</div>
 				</div>
 				<div class="table-box">
@@ -103,6 +118,7 @@
 						<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 						<el-table-column prop="flowPackage" label="流量池套餐" width='70' align="center"></el-table-column>
+						<el-table-column prop="packageType" label="套餐类型" width='70' align="center"></el-table-column>
 						<el-table-column prop="message" label="短信(已使用)" align="center"></el-table-column>
 						<el-table-column prop="flowUsage" width="90" sortable='custom' label="本月已使用流量"
 						                 align="center"></el-table-column>
@@ -136,7 +152,7 @@
 </template>
 
 <script>
-	import {timestampToTime, format} from '../api/dataUtil'
+	import {timestampToTime, format, translatePackages} from '../api/dataUtil'
 
 	export default {
 		data() {
@@ -147,6 +163,7 @@
 				areaValue: '',
 				statusValue: '',
 				systemValue: '',
+				packagesTypeValue: '',
 				cardInfo: {
 					total: '',
 					online: '',
@@ -201,6 +218,25 @@
 							value: '8',
 							system: '其他'
 						}
+					],
+					// 套餐类型
+					packagesOptions: [
+						{
+							value: '1',
+							packages: '月'
+						},
+						{
+							value: '2',
+							packages: '半年'
+						},
+						{
+							value: '3',
+							packages: '季'
+						},
+						{
+							value: '4',
+							packages: '年'
+						},
 					]
 				},
 				timeValue: '',
@@ -216,7 +252,8 @@
 				defaultNetWorkType: '',
 				// 表格流量排序
 				sortData: '',
-				direct: ''
+				direct: '',
+
 			};
 		},
 		mounted() {
@@ -261,7 +298,8 @@
 						startTime: this.beginTime,
 						endTime: this.endTime,
 						sort: this.sortData,
-						direct: this.direct
+						direct: this.direct,
+						cardPackage: this.packagesTypeValue
 					}
 				}).then(res => {
 					console.log(res.data)
@@ -275,6 +313,7 @@
 							iccid: data[i].iccid,
 							operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
 							flowPackage: data[i].packages,
+							packageType: translatePackages(data[i].packageType),
 							message: data[i].msgNo,
 							flowUsage: data[i].usageMonth == null ? null : data[i].usageMonth.toFixed(2) + 'M',
 							flowOverage: data[i].flowOverage == null ? null : data[i].flowOverage.toFixed(2) + 'M',
@@ -333,6 +372,12 @@
 				this.pageNo = 1
 				this.getTableData()
 			},
+			// 套餐 的下拉框的值发生变化的时候触发
+			togglePackagesType(val){
+				this.packagesTypeValue = val;
+				this.pageNo = 1
+				this.getTableData()
+			},
 			// 流量的排序
 			sortChange(column, prop, order) {
 				if (column.prop == 'flowUsage' && column.order == 'ascending') {
@@ -348,6 +393,7 @@
 					this.sortData = 'usage_month'
 					this.direct = 'asc'
 				}
+				this.pageNo = 1
 				this.getTableData()
 			},
 			// 跳转到详情页
@@ -469,40 +515,8 @@
 					display: flex;
 					flex-wrap: wrap;
 					/*justify-content space-between*/
-					/* 搜索框 */
-					.search-box {
-						width: 400px;
-						height: 40px;
-						border-radius: 5px
-						border: 1px solid #dcdfe6;
-						display: flex;
-						justify-content: space-between;
-						margin-right: 60px;
-						margin-bottom: 30px;
-						input {
-							width: 100%;
-							height: 100%;
-							padding-left: 20px;
-							font-size: 16px;
-							color: #606266;
-						}
-						input:
-						:-webkit-input-placeholder {
-							color: #999;
-						}
-						.btn-search {
-							width: 56px;
-							height: 100%;
-							line-height: 40px;
-							border-left: 1px solid #dcdfe6;
-							font-size: 24px;
-							color: #cbcccd;
-							text-align: center;
-							cursor: pointer;
-						}
-					}
-					/* 联动选择器 */
-					.cascader {
+					/* 下拉框组 */
+					.select-group {
 						display: flex;
 						.el-select {
 							margin-right: 60px;
@@ -573,23 +587,60 @@
 							margin-right: 0;
 						}
 					}
-					/* 时间查询 */
-					.time-inquire {
-						line-height: 40px;
+					/* 搜索框和时间过滤 */
+					.search-group {
 						display: flex;
-						span {
-							font-size: 16px;
-						}
-						.btn-inquire {
-							width: 90px;
+						margin-top: 20px;
+						/* 搜索框 */
+						.search-box {
+							width: 360px;
 							height: 40px;
+							border-radius: 5px
+							border: 1px solid #dcdfe6;
+							display: flex;
+							justify-content: space-between;
+							margin-right: 60px;
+							margin-bottom: 30px;
+							input {
+								width: 100%;
+								height: 100%;
+								padding-left: 20px;
+								font-size: 16px;
+								color: #606266;
+							}
+							input:
+							:-webkit-input-placeholder {
+								color: #999;
+							}
+							.btn-search {
+								width: 56px;
+								height: 100%;
+								line-height: 40px;
+								border-left: 1px solid #dcdfe6;
+								font-size: 24px;
+								color: #cbcccd;
+								text-align: center;
+								cursor: pointer;
+							}
+						}
+						/* 时间查询 */
+						.time-inquire {
 							line-height: 40px;
-							border: 1px solid #999;
-							border-radius: 5px;
-							text-align: center;
-							cursor: pointer;
-							font-size: 16px;
-							margin-left: 40px;
+							display: flex;
+							span {
+								font-size: 16px;
+							}
+							.btn-inquire {
+								width: 90px;
+								height: 40px;
+								line-height: 40px;
+								border: 1px solid #999;
+								border-radius: 5px;
+								text-align: center;
+								cursor: pointer;
+								font-size: 16px;
+								margin-left: 40px;
+							}
 						}
 					}
 				}

@@ -18,25 +18,67 @@
 						</div>
 					</div>
 				</div>
-				<!-- 充值 -->
+				<!-- 充值方式 -->
 				<div class="recharge">
-					<div class="recharge-title">充值金额</div>
-					<ul>
-						<li v-for="(item,index) in rechargeData"
-						    :class="{ current : item.isSelected }"
-						    @click="chooseThis(index)"
-						    :key="index">
-							<input type="tel" v-model="item.number" disabled>
-						</li>
-						<li><input type="tel"
-						           @focus="inputFocus"
-						           @blur="inputBlur"
-						           @click="chooseCustomize" v-model="customAmount"></li>
-					</ul>
-					<div class="button-recharge" @click="btnRecharge">立即充值</div>
-					<div class="user-protocol">我已同意<span @click="alertProtocol">《用户协议》</span><input type="checkbox"
-					                                                                                v-model="checked">
+					<!-- 支付宝充值 -->
+					<div class="alipay" v-show="wayIndex == 0">
+						<div class="recharge-title">充值金额</div>
+						<ul>
+							<li v-for="(item,index) in rechargeData"
+							    :class="[{current: item.isChecked}]"
+							    @click="toggleRechargeAmount(index)"
+							    :key="index">
+								{{ item.number }}
+							</li>
+							<li :class="[{current: customAmount != '自定义金额'}]">
+								<input type="tel"
+								       @blur="toggleHolder(1)"
+								       @focus="toggleHolder(0)"
+								       v-model="customAmount">
+							</li>
+						</ul>
+						<div class="button-recharge" @click="btnRecharge">立即充值</div>
 					</div>
+					<!-- 银行转帐 -->
+					<div class="bank" v-show="wayIndex == 1">
+						<div>正在积极开发中，敬请期待～</div>
+						<!--<el-form ref="form" :model="form" label-width="90px">-->
+							<!--<el-form-item label="转账银行：">-->
+								<!--<el-input v-model="form.bank"></el-input>-->
+							<!--</el-form-item>-->
+							<!--<el-form-item label="转账账号：">-->
+								<!--<el-input v-model="form.transferAccount"></el-input>-->
+							<!--</el-form-item>-->
+							<!--<el-form-item label="入款账号：">-->
+								<!--<el-input v-model="form.depositAccount"></el-input>-->
+							<!--</el-form-item>-->
+							<!--<el-form-item label="充值金额：">-->
+								<!--<el-input v-model="form.amount"></el-input>-->
+							<!--</el-form-item>-->
+							<!--<el-form-item label="充值时间：">-->
+								<!--<el-date-picker-->
+										<!--v-model="form.rechargeTime"-->
+										<!--type="date"-->
+										<!--placeholder="选择日期">-->
+								<!--</el-date-picker>-->
+							<!--</el-form-item>-->
+							<!--<el-form-item label="凭证上传：">-->
+								<!--<el-upload-->
+										<!--action="123"-->
+										<!--ref="upload">-->
+									<!--<div class="btn-upload">选择文件</div>-->
+								<!--</el-upload>-->
+							<!--</el-form-item>-->
+							<!--<el-button>重置</el-button>-->
+							<!--<el-button>提交</el-button>-->
+						<!--</el-form>-->
+					</div>
+				</div>
+
+				<div class="user-protocol">
+					我已同意
+					<span @click="alertProtocol">《用户协议》</span>
+					<input type="checkbox" v-model="checked">
 				</div>
 			</div>
 		</div>
@@ -49,7 +91,125 @@
 					<span>用户协议</span>
 				</div>
 				<div class="box-content">
-
+					<div class="title">
+						<span>甲方：{{ account }}</span>
+						<span>乙方：上海梦初想通信公司</span>
+					</div>
+					<h5>
+						一、甲方郑重承诺遵守用户协议的有关条款，如有违反本用户协议有关条款的行为，由甲方承担由此带来的一切民事、行政和刑事责任。
+					</h5>
+					<h5>
+						二、甲方承诺遵守《中华人民共和国计算机信息系统安全保护条例》和《计算机信息网络国际联网安全保护管理办法》等国家有关法律、法规和行政规章制度。
+					</h5>
+					<h5>
+						三、甲方保证不利用国际互联网危害国家安全、泄露国家秘密，不侵犯国家的、社会的、集体的利益和公民的合法权益，不从事违法犯罪活动。
+					</h5>
+					<h5>
+						四、甲方承诺严格按照国家相关的法律法规做好甲方应用软件的网络信息安全管理工作，不得使用乙方提供的任何产品进行违反国家法律法规的犯罪活动，
+						若违反本用户协议有关条款和国家相关法律法规的，甲方直接承担相应法律责任，造成第三方财产损失的，由甲方直接赔偿，乙方不承担任何责任。
+					</h5>
+					<h5>
+						五、甲方承诺建立健全各项互联网安全管理制度和落实各项安全保护技术措施。
+					</h5>
+					<h5>
+						六、甲方承诺不制作、复制、查阅和传播下列信息：
+					</h5>
+					<p>
+						（1）反对宪法所确定的基本原则的；
+					</p>
+					<p>
+						（2）危害国家安全，泄露国家机密，颠覆国家政权，破坏国家统一的；
+					</p>
+					<p>
+						（3）损害国家荣誉和利益的；
+					</p>
+					<p>
+						（4）煽动民族仇恨、民族歧视，破坏民族团结的；
+					</p>
+					<p>
+						（5）破坏国家宗教政策，宣扬邪教和封建迷信的；
+					</p>
+					<p>
+						（6）散布谣言，扰乱社会秩序，破坏社会稳定的；
+					</p>
+					<p>
+						（7）散布淫秽、色情、赌博、暴力、凶杀、恐怖或者教唆犯罪的；
+					</p>
+					<p>
+						（8）侮辱或者诽谤他人，侵害他人合法权益的；
+					</p>
+					<p>
+						（9）煽动非法集会、结社、游行、示威、聚众扰乱社会秩序；
+					</p>
+					<p>
+						（10）以非法民间组织名义活动；
+					</p>
+					<p>
+						（11）含有法律、行政法规禁止的其他内容；
+					</p>
+					<p>
+						（12）表现或隐晦表现性行为、令人产生性联想、具有挑逗性或者侮辱性的内容；
+					</p>
+					<p>
+						（13）对人体性部位的直接暴露和描写；
+					</p>
+					<p>
+						（14）对性行为、性过程、性方式的描述或者带有性暗示、性挑逗的语言；
+					</p>
+					<p>
+						（15）对性部位描述、暴露，或者只用很小遮盖物的内容；
+					</p>
+					<p>
+						（16）全身或者隐私部位未着衣物，仅用肢体掩盖隐私部位的内容；
+					</p>
+					<p>
+						（17）带有侵犯个人隐私性质的走光、偷拍、漏点等内容；
+					</p>
+					<p>
+						（18）以挑逗性标题吸引点击的；
+					</p>
+					<p>
+						（19）相关部门禁止传播的色情、低俗小说、音视频内容，包括一些电影的删节片断；
+					</p>
+					<p>
+						（20）一夜情、换妻、SM等不正当交友信息；
+					</p>
+					<p>
+						（21）情色动漫；
+					</p>
+					<p>
+						（22）宣扬血腥暴力、恶意谩骂、侮辱他人等内容；
+					</p>
+					<p>
+						（23）非法的性用品广告和性病治疗广告；
+					</p>
+					<p>
+						（24）未经他人允许或利用“人肉搜索”恶意传播他人隐私。
+					</p>
+					<h5>
+						七、甲方承诺不从事下列危害计算机信息网络安全的活动：
+					</h5>
+					<p>
+						（1）未经允许，进入计算机信息网络或者使用计算机信息网络资源的；
+					</p>
+					<p>
+						（2）未经允许，对计算机信息网络功能进行删除、修改或者增加的；
+					</p>
+					<p>
+						（3）未经允许，对计算机信息网络中存储或者传输的数据和应用程序进行删除、修改或者增加的；
+					</p>
+					<p>
+						（4）故意制作、传播计算机病毒等破坏性程序的；
+					</p>
+					<p>
+						（5）其他危害计算机信息网络安全的。
+					</p>
+					<h5>
+						八、甲方承诺当计算机信息系统发生重大安全事故时，立即采取应急措施，保留有关原始记录，并在24小时内向市公安局网监分局报告。
+					</h5>
+					<h5>
+						九、本用户协议自签署之日起施行。
+					</h5>
 				</div>
 				<div class="box-footer">
 					<div class="btn-sure" @click="sure">确认</div>
@@ -80,7 +240,14 @@
 				// 自定义金额
 				customAmount: '自定义金额',
 				// 选中的金额
-				selectedAmount: ''
+				selectedAmount: '',
+				form: {
+					bank: '',
+					transferAccount: '',
+					depositAccount: '',
+					amount: '',
+					rechargeTime: ''
+				}
 			};
 		},
 		mounted() {
@@ -92,10 +259,11 @@
 				this.wayIndex = index
 			},
 			alertProtocol() {
-				this.modalShow = false;
+				this.modalShow = true;
 			},
 			sure() {
 				this.modalShow = false;
+				this.checked = true;
 			},
 			// 获取到用户信息
 			getUserInfo() {
@@ -118,40 +286,73 @@
 					for (let i = 0; i < data.length; i++) {
 						this.rechargeData.push({
 							number: data[i].amount,
-							isSelected: data[i].check
+							isChecked: false
 						})
 					}
 				})
 			},
-			// 切换所选金额
-			chooseThis(index) {
-				for (let i = 0; i < this.rechargeData.length; i++) {
-					this.rechargeData[i].isSelected = false;
+
+			toggleRechargeAmount(index){
+				let amount = this.rechargeData
+				for (let i = 0; i < amount.length; i++) {
+					amount[i].isChecked = false;
 				}
-				this.rechargeData[index].isSelected = true;
-				this.selectedAmount = this.rechargeData[index].number;
+				amount[index].isChecked = true;
+				this.customAmount = '自定义金额'
+				this.selectedAmount = Number(amount[index].number);
 			},
-			// 点击自定义金额
-			chooseCustomize(){
-				for (let i = 0; i < this.rechargeData.length; i++) {
-					this.rechargeData[i].isSelected = false;
+
+			toggleHolder(state) {
+				if (!state) {
+					this.customAmount = ''
+					for (let i = 0; i < this.rechargeData.length; i++) {
+						this.rechargeData[i].isChecked = false;
+					}
+				} else {
+					if (this.customAmount == '') {
+						this.customAmount = '自定义金额'
+					}
 				}
-			},
-			// 自定义金额的聚焦事件
-			inputFocus(){
-				this.customAmount = ''
-				this.selectedAmount = this.customAmount
-			},
-			// 自定义金额的失焦事件
-			inputBlur(){
-				if(this.customAmount == '') {
-					this.customAmount = '自定义金额'
-				}
-				this.selectedAmount = this.customAmount
 			},
 			// 点击立即充值按钮
 			btnRecharge() {
-				this.$message({type: 'info', message: '系统更新中...'});
+//				this.$message({type: 'info', message: '系统更新中...'});
+				if(this.selectedAmount == ''){
+					this.$message.error('请先选择充值金额！');
+					return
+				}
+				if(!this.checked){
+					this.$message.error('请先勾选用户协议！');
+					return
+				}
+
+				this.$axios({
+					url: '/api/v2/account/top/alipay/account',
+					method: 'post',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+					},
+					params: {
+						orderNo: '12345',
+						totalAmount: this.selectedAmount,
+						orderName: '物联网卡系统充值',
+						shopDescription: '系统充值'
+					}
+				}).then(res => {
+					const div = document.createElement('div')
+//					console.log(document.forms[0])
+//					console.log(res.data)
+					div.innerHTML = res.data
+					document.body.appendChild(div)
+					document.forms.punchout_form.submit()
+				})
+			}
+		},
+		watch: {
+			'customAmount'(val) {
+				if (val != '自定义金额') {
+					this.selectedAmount = val
+				}
 			}
 		}
 	};
@@ -225,53 +426,63 @@
 						}
 					}
 				}
-				/* 充值 */
+				/* 充值方式 */
 				.recharge {
-					.recharge-title {
-						font-size: 22px;
-						color: #999;
-						margin-bottom: 30px;
-					}
-					ul {
-						width: 470px;
-						display: flex;
-						justify-content: space-between;
-						flex-wrap: wrap;
-						li {
-							width: 120px;
-							height: 40px;
-							line-height: 40px;
-							border-radius: 5px;
-							border: 1px solid #666;
-							margin-bottom: 40px;
-							input {
-								width: 100%;
-								height: 100%;
+					/* 支付宝充值 */
+					.alipay {
+						.recharge-title {
+							font-size: 22px;
+							color: #999;
+							margin-bottom: 30px;
+						}
+						ul {
+							width: 470px;
+							display: flex;
+							justify-content: space-between;
+							flex-wrap: wrap;
+							li {
+								width: 120px;
+								height: 40px;
+								line-height: 40px;
+								border: 1px solid #999;
+								border-radius: 5px;
 								font-size: 20px;
 								text-align: center;
 								cursor: pointer;
+								margin-bottom: 40px;
+								input {
+									width: 100%;
+									height: 100%;
+									font-size: 20px;
+									text-align: center;
+									color: #333;
+								}
+							}
+							.current {
+								color: mainBlue;
+								border-color: mainBlue;
 							}
 						}
-						.current {
+						.button-recharge {
+							width: 160px;
+							height: 40px;
+							line-height: 40px;
+							border-radius: 5px;
 							background-color: mainBlue;
-							border: none;
-						}
-					}
-					.button-recharge {
-						width: 160px;
-						height: 40px;
-						line-height: 40px;
-						border-radius: 5px;
-						text-align: center;
-						border: 1px solid #666;
-						font-size: 20px;
-						cursor: pointer;
-						margin-bottom: 30px;
-					}
-					.user-protocol {
-						span {
+							color: #fff;
+							font-size: 18px;
+							text-align: center;
 							cursor: pointer;
 						}
+					}
+					/* 银行转帐 */
+					.bank {
+
+					}
+				}
+				.user-protocol {
+					span {
+						cursor: pointer;
 					}
 				}
 			}
@@ -321,6 +532,25 @@
 					height: 420px;
 					background-color: #f3f3f3;
 					border-radius: 5px;
+					overflow: scroll;
+					padding: 5px;
+					.title {
+						display: flex;
+						justify-content: space-between;
+						span {
+							font-size: 18px;
+							font-weight: 500;
+						}
+					}
+					h5 {
+						font-size: 16px;
+						margin-top: 10px;
+						font-weight: 400;
+					}
+					p {
+						text-indent: 2em;
+						font-size: 14px;
+					}
 				}
 				.box-footer {
 					.btn-sure {
@@ -340,5 +570,3 @@
 		}
 	}
 </style>
-
-

@@ -47,6 +47,20 @@ export function translateSystem(i){
 		return ''
 	}
 }
+// 转化套餐
+export function translatePackages(i){
+	if(i ===1 ) {
+		return '月'
+	}else if(i === 2){
+		return '半年'
+	}else if(i === 3){
+		return '季'
+	}else if(i === 4){
+		return '年'
+	}else{
+		return ''
+	}
+}
 
 export function format(timestamp, formats) {
   // formats格式包括

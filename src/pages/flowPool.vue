@@ -86,6 +86,7 @@
 						<!--</el-option>-->
 						<!--</el-select>-->
 					</div>
+					<br>
 					<!-- 时间查询 -->
 					<div class="time-inquire">
 						<span>时间：</span>
@@ -112,6 +113,7 @@
 						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 						<el-table-column prop="flowPackage" label="流量池套餐" align="center"></el-table-column>
+						<!--<el-table-column prop="packageType" label="套餐类型" align="center"></el-table-column>-->
 						<el-table-column prop="flowUsage" sortable='custom' width='150' label="本月已使用流量" align="center"></el-table-column>
 						<el-table-column prop="message" width='70' label="短信" align="center"></el-table-column>
 						<el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
@@ -140,7 +142,7 @@
 
 <script>
 	import VeRing from "v-charts/lib/ring.common";
-	import {timestampToTime, format} from '../api/dataUtil'
+	import {timestampToTime, format, translatePackages} from '../api/dataUtil'
 	import router from 'vue-router'
 
 	export default {
@@ -442,7 +444,8 @@
 						endTime: this.endTime,
 						sort: this.sortData,
 						direct: this.direct,
-						netWork: this.netWork
+						netWork: this.netWork,
+						cardPackage: this.packagesTypeValue
 					}
 				}).then(res => {
 					let data = res.data.data;
@@ -454,6 +457,7 @@
 							cardNum: data[i].cardNumber,
 							operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
 							flowPackage: data[i].packages,
+							packageType: translatePackages(data[i].packageType),
 							flowUsage: data[i].usageMonth == null ? null : data[i].usageMonth.toFixed(2)+'MB',
 							message: data[i].msgNo,
 							endTime: timestampToTime(data[i].endTime),
