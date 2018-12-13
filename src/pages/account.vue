@@ -26,7 +26,7 @@
 					<!-- 消费记录 -->
 					<div class="consumption-record" v-if="index == 0">
 						<el-table
-								:data="consumptionData"
+								:data="consumption.consumptionData"
 								style="width: 100%">
 							<el-table-column prop="type" label="消费类型" align="center"></el-table-column>
 							<el-table-column prop="amount" label="消费金额" align="center"></el-table-column>
@@ -35,18 +35,18 @@
 							<el-table-column prop="remark" label="备注" align="center"></el-table-column>
 						</el-table>
 						<el-pagination
-								v-if="totalCount > pageSize"
+								v-if="consumption.totalCount > consumption.pageSize"
 								layout="prev, pager, next"
-								:page-size='pageSize'
-								:current-page="pageNo"
-								:total="totalCount"
+								:page-size='consumption.pageSize'
+								:current-page="consumption.pageNo"
+								:total="consumption.totalCount"
 								@current-change="pageConsumption">
 						</el-pagination>
 					</div>
 					<!-- 充值记录 -->
 					<div class="recharge-record" v-if="index == 1">
 						<el-table
-								:data="rechargeData"
+								:data="recharge.rechargeData"
 								style="width: 100%">
 							<el-table-column prop="amount" label="充值金额" align="center"></el-table-column>
 							<el-table-column prop="time" label="充值时间" align="center"></el-table-column>
@@ -54,12 +54,12 @@
 							<el-table-column prop="remark" label="备注" align="center"></el-table-column>
 						</el-table>
 						<el-pagination
-								v-if="totalCount > pageSize"
+								v-if="recharge.totalCount > recharge.pageSize"
 								layout="prev, pager, next"
-								:page-size='pageSize'
-								:current-page="pageNo"
-								:total="totalCount"
-								@current-change="pageConsumption">
+								:page-size='recharge.pageSize'
+								:current-page="recharge.pageNo"
+								:total="recharge.totalCount"
+								@current-change="pageRecharge">
 						</el-pagination>
 					</div>
 				</div>
@@ -69,6 +69,8 @@
 </template>
 
 <script>
+	import {timestampToTime, translateRechargeType} from '../api/dataUtil'
+
 	export default {
 		data() {
 			return {
@@ -79,13 +81,23 @@
 				},
 				index: 0,
 				// 消费记录
-				consumptionData: [],
+				consumption: {
+					// 表格数据
+					consumptionData: [],
+					// 分页
+					totalCount: 0,
+					pageSize: 10,
+					pageNo: 1
+				},
 				// 充值记录
-				rechargeData: [],
-				// 分页
-				totalCount: 0,
-				pageSize: 3,
-				pageNo: 1
+				recharge: {
+					// 表格数据
+					rechargeData: [],
+					// 分页
+					totalCount: 0,
+					pageSize: 10,
+					pageNo: 1
+				},
 			};
 		},
 		mounted() {
@@ -124,18 +136,19 @@
 					method: 'post',
 					params: {
 						type: 1,
-						pageNo: this.pageNo,
-						pageSize: this.pageSize
+						pageNo: this.consumption.pageNo,
+						pageSize: this.consumption.pageSize
 					}
 				}).then(res => {
 					let data = res.data.data;
-					this.totalCount = res.data.totalCount
+					this.consumption.consumptionData = []
+					this.consumption.totalCount = res.data.totalCount
 					for (let i = 0; i < data.length; i++) {
-						this.consumptionData.push({
-							type: data[i].remark,
+						this.consumption.consumptionData.push({
+							type: data[i].payType == 1 ? '月租扣款' : '超流扣款',
 							amount: data[i].amount,
-							time: data[i].tradeTime,
-							way: data[i].type,
+							time: timestampToTime(Number(data[i].createTime) * 1000),
+							way: this.getPayWay(data[i].payWay),
 							remark: data[i].remark
 						})
 					}
@@ -153,28 +166,45 @@
 					method: 'post',
 					params: {
 						type: 2,
-						pageNo: this.pageNo,
-						pageSize: this.pageSize
+						pageNo: this.recharge.pageNo,
+						pageSize: this.recharge.pageSize
 					}
 				}).then(res => {
 					let data = res.data.data;
 					console.log(data)
-					this.totalCount = res.data.totalCount
+					this.recharge.rechargeData = []
+					this.recharge.totalCount = res.data.totalCount
 					for (let i = 0; i < data.length; i++) {
-						this.rechargeData.push({
+						this.recharge.rechargeData.push({
 							amount: data[i].amount,
-							time: data[i].tradeTime,
-							way: data[i].type,
+							time: timestampToTime(Number(data[i].createTime) * 1000),
+							way: translateRechargeType(data[i].payType),
 							remark: data[i].remark
 						})
 					}
 				})
 			},
-			// 分页(消费记录)
-			pageConsumption(val) {
+			// 分页(充值记录)
+			pageRecharge(val) {
 				this.pageNo = val;
 				this.getRechargeRecords()
 			},
+			// 扣款方式
+			getPayWay(i) {
+				if (i == 1) {
+					return '月扣'
+				} else if (i == 2) {
+					return '季度扣'
+				} else if (i == 3) {
+					return '半年扣'
+				} else if (i == 4) {
+					return '年扣'
+				} else if (i == 5) {
+					return '后付'
+				} else {
+					return ''
+				}
+			}
 		}
 	};
 </script>
@@ -193,7 +223,7 @@
 			.admin-data {
 				width: 100%;
 				height: 200px;
-				border: 1px solid #ddd;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
 				display: flex;
 				padding-left: 100px;
@@ -235,7 +265,7 @@
 			/* 交易记录 */
 			.record {
 				width: 100%;
-				border: 1px solid #ddd;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
 				.record-header {
 					height: 106px;

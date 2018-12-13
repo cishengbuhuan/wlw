@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import axios from 'axios'
+import {baseUrl} from './api/dataUtil'
 import VCharts from 'v-charts'
 import 'element-ui/lib/theme-chalk/index.css'
 import {
@@ -12,12 +13,12 @@ import {
 	Loading, TableColumn, Form, FormItem, Button, Tag, Tabs,
 	TabPane, Notification, Submenu, MenuItemGroup, Select, Option, Upload
 } from 'element-ui';
+// 引入echarts
+import echarts from 'echarts'
 
+Vue.prototype.$echarts = echarts 
 
-axios.defaults.baseURL = 'http://www.91dream.net/matrix';
-// axios.defaults.baseURL = 'http://192.168.1.26:8090';
-// axios.defaults.baseURL = 'http://www.tangjinqian.cn:8080/matrix';
-// axios.defaults.baseURL = 'http://47.96.232.174/matrix';
+axios.defaults.baseURL = baseUrl;
 // axios.defaults.timeout = 10000;
 
 Vue.use(Col).use(Row).use(Table).use(DatePicker)
@@ -40,7 +41,7 @@ Vue.config.productionTip = false
 
 
 axios.interceptors.request.use(config => {
-	config.params = Object.assign({_token: localStorage.getItem('_token')}, config.params)
+	config.params = Object.assign({_token: sessionStorage.getItem('_token')}, config.params)
 	return config
 }, err => {
 	return Promise.reject(err)
@@ -50,10 +51,8 @@ axios.interceptors.response.use(function (response) {
 	// token 已过期，重定向到登录页面
 	if (response.data.code == 110) {
 		console.log(response.data)
-		localStorage.removeItem('_token')
-
-		// window.location.href = 'http://www.tangjinqian.cn:8080/#/login'
-		window.location.href = 'http://www.91dream.net/#/login'
+		sessionStorage.removeItem('_token')
+		router.push('/login')
 		Message.error({message: response.data.msg});
 	}
 	return response

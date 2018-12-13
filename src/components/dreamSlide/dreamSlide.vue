@@ -33,7 +33,7 @@
 	export default {
 		data() {
 			return {
-				index: '1',
+				index: '',
 				menus: [
 					{
 						title: '首页',
@@ -48,6 +48,16 @@
 								titleTwo: '卡片列表',
 								path: '/card',
 								index: '2-1'
+							},
+							{
+								titleTwo: '单卡列表',
+								path: '/singleCard',
+								index: '2-2'
+							},
+							{
+								titleTwo: '卡片操作',
+								path: '/cardOperate',
+								index: '2-3'
 							}
 						]
 					},
@@ -57,19 +67,19 @@
 						menuTwo: [
 							{
 								titleTwo: '中国移动',
-								path: '/flowPool/1',
+								path: '/ydFlow',
 								index: '3-1',
 								type: 1
 							},
 							{
 								titleTwo: '中国联通',
-								path: '/flowPool/2',
+								path: '/ltFlow',
 								index: '3-2',
 								type: 2
 							},
 							{
 								titleTwo: '中国电信',
-								path: '/flowPool/3',
+								path: '/dxFlow',
 								index: '3-3',
 								type: 3
 							}
@@ -110,13 +120,36 @@
 			};
 		},
 		mounted() {
+			if(this.$route.name === 'index') {
+				this.index = '1'
+			}else if(this.$route.name === 'card') {
+				this.index = '2-1'
+			}else if(this.$route.name === 'singleCard') {
+				this.index = '2-2'
+			}else if(this.$route.name === 'cardOperate') {
+				this.index = '2-3'
+			}else if(this.$route.name === 'ydFlow') {
+				this.index = '3-1'
+			}else if(this.$route.name === 'ltFlow') {
+				this.index = '3-2'
+			}else if(this.$route.name === 'dxFlow') {
+				this.index = '3-3'
+			}else if(this.$route.name === 'account') {
+				this.index = '4-1'
+			}else if(this.$route.name === 'manage') {
+				this.index = '4-2'
+			}else if(this.$route.name === 'recharge') {
+				this.index = '4-3'
+			}else if(this.$route.name === 'message') {
+				this.index = '4-4'
+			}
 		},
 		methods: {
 			handleOpen(key, keyPath) {
-				console.log(key, keyPath);
+				// console.log(key, keyPath);
 			},
 			handleClose(key, keyPath) {
-				console.log(key, keyPath);
+				// console.log(key, keyPath);
 			},
 			toPath(path) {
 //				console.log(path)

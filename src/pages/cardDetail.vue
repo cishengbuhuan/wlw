@@ -65,15 +65,16 @@
 						<span>时间：</span>
 						<el-date-picker
 								v-model="timeValue"
-								@change="pickChange"
 								type="daterange"
 								align="right"
 								unlink-panels
+								:clearable="isClearable"
 								range-separator="至"
 								start-placeholder="开始时间"
 								end-placeholder="结束时间">
 						</el-date-picker>
-						<div class="btn-search" @click="changeTime">查询</div>
+						<div class="btn-search" @click="pickChange">查询</div>
+						<div class="btn-export" @click="btnExport">导出</div>
 					</div>
 					<!-- 折线图 -->
 					<div class="chart">
@@ -86,8 +87,13 @@
 </template>
 
 <script>
-	import {format,timestampToTime,translateCardKind,translateSystem} from '../api/dataUtil'
+	import {
+		format, timestampToTime,
+		translateCardKind, translateSystem,
+		startDate, endDate, baseUrl
+	} from '../api/dataUtil'
 	import VeLine from "v-charts/lib/line.common";
+
 	export default {
 		components: {
 			VeLine
@@ -147,7 +153,7 @@
 					columns: ['date', 'usage'],
 					rows: []
 				},
-				timeValue: '',
+				timeValue: [],
 				// 预警值
 				warningStatus: 0,
 				deviceId: '',
@@ -156,44 +162,56 @@
 				endTime: '',
 
 				pageSize: 50,
-				pageNo: 1
+				pageNo: 1,
+				isClearable: false,
+
+				// 下载的href
+				baseUrl: `${baseUrl}/api/importLog`,
+				uploadHref: ''
 			};
+		},
+		created() {
+			// 设置默认日期为当前日期
+			this.timeValue[0] = startDate
+			this.timeValue[1] = endDate
+			this.beginTime = startDate
+			this.endTime = endDate
+//			console.log(startDate)
 		},
 		mounted() {
 			this.deviceIdChange()
 			this.getBaseInfo()
 		},
 		methods: {
-			deviceIdChange(){
+			deviceIdChange() {
 				this.deviceId = this.$route.query.deviceId
 				console.log(this.deviceId)
 			},
-			changeTime(){
-
-			},
 			// 获取到基本信息
-			getBaseInfo(){
+			getBaseInfo() {
 				this.$axios({
 					url: '/api/v2/device/getDeviceDetail',
 					method: 'post',
 					params: {
 						deviceId: this.deviceId
 					}
-				}).then(res=>{
+				}).then(res => {
 					let data = res.data.data
 					console.log(data)
 					this.baseInfo.cardNumber = data.cardNumber
 					this.baseInfo.iccid = data.iccid
 					this.baseInfo.flowMonth = data.poolName
-					this.baseInfo.usageMonth = (data.usageMonth/1024).toFixed(2) + 'M'
+					this.baseInfo.usageMonth = (data.usageMonth / 1024).toFixed(2) + 'M'
 					this.baseInfo.cardKind = translateCardKind(data.cardType)
 					this.baseInfo.cardStatus = data.onlineStatus === 1 ? '在线' : data.onlineStatus === 0 ? '离线' : '',
-					this.baseInfo.operator = data.netWork === 1 ? '移动' : data.netWork === 2 ? '联通' : '电信'
+						this.baseInfo.operator = data.netWork === 1 ? '移动' : data.netWork === 2 ? '联通' : '电信'
 					this.baseInfo.system = translateSystem(data.networkType)
 					this.baseInfo.flowPackages = data.packages
 					this.baseInfo.singleFlow = data.usageMonth
-					this.baseInfo.startTime = timestampToTime(data.chargeTime)
-					this.baseInfo.endTime = timestampToTime(data.endTime)
+//					this.baseInfo.startTime = timestampToTime(Number(data.chargeTime))
+//					this.baseInfo.endTime = timestampToTime(Number(data.endTime))
+					this.baseInfo.startTime = data.chargeTime.split(' ')[0]
+					this.baseInfo.endTime = data.endTime.split(' ')[0]
 					this.baseInfo.usageMsg = data.msgNo
 
 
@@ -201,7 +219,7 @@
 				})
 			},
 			// 获取到折线图数据
-			getFlowData(){
+			getFlowData() {
 				this.$axios({
 					url: '/api/v2/device/getLog',
 					method: 'post',
@@ -212,16 +230,15 @@
 						pageSize: this.pageSize,
 						pageNo: this.pageNo
 					}
-				}).then(res=>{
+				}).then(res => {
 					let data = res.data.data
 //					console.log(data)
 					this.chartData.rows = []
-					for(let i=0; i<data.length; i++){
+					for (let i = 0; i < data.length; i++) {
 						this.chartData.rows.push({
-							date: timestampToTime(data[i].insertTime),
+							date: data[i].insertTime.split(' ')[0],
 							usage: (data[i].usageYesterday / 1024).toFixed(2)
 						})
-						console.log(timestampToTime(data[i].insertTime))
 					}
 				})
 			},
@@ -236,6 +253,22 @@
 				this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
 				this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
 				this.getFlowData();
+			},
+			// 导出表格
+			btnExport() {
+				let token = sessionStorage.getItem('_token'),
+					cardNo = this.baseInfo.cardNumber ? this.baseInfo.cardNumber : this.baseInfo.iccid,
+					beginTime = this.beginTime,
+					endTime = this.endTime
+				this.uploadHref = `${this.baseUrl}?_token=${token}
+						&cardNo=${cardNo}&beginTime=${beginTime}
+						&endTime=${endTime}`
+
+				console.log(this.uploadHref)
+				let iframe = document.createElement('iframe');
+				iframe.src = this.uploadHref
+				document.body.appendChild(iframe)
+				iframe.style.display = 'none'
 			},
 		}
 	};
@@ -254,7 +287,7 @@
 			/* 基本信息 */
 			.base-info, .flow-info {
 				width: 100%;
-				border: 1px solid #ddd;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
 				margin-bottom: 20px;
 				.tips {
@@ -320,7 +353,7 @@
 			/* 折线统计图 */
 			.polyline-chart {
 				width: 100%;
-				border: 1px solid #ddd;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
 				margin-bottom: 20px;
 				.tips {
@@ -351,7 +384,7 @@
 						span {
 							margin-right: 10px;
 						}
-						.btn-search {
+						.btn-search, .btn-export {
 							width: 90px;
 							height: 40px;
 							border: 1px solid #ddd;

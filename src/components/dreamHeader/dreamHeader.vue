@@ -56,7 +56,9 @@
 			// 退出登录
 			signOut() {
 				console.log('退出')
-				localStorage.removeItem('_token');
+				sessionStorage.removeItem('_token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('companyId');
 				this.$router.push({path: '/login'})
 			}
 		}

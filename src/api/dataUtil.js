@@ -3,13 +3,12 @@ export function timestampToTime(timestamp) {
   let Y,M,D,h,m,s;
   Y = date.getFullYear() + '-';
   M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-  D = date.getDate() + ' ';
+  D = date.getDate();
   h = date.getHours() + ':';
   m = date.getMinutes() + ':';
   s = date.getSeconds();
   return Y+M+D;
 }
-
 
 // 转化卡种类
 export function translateCardKind(i){
@@ -61,6 +60,23 @@ export function translatePackages(i){
 		return ''
 	}
 }
+// 转化充值方式
+export function translateRechargeType(i){
+	if(i ===1 ) {
+		return '平台充值'
+	}else if(i === 2){
+		return '支付宝'
+	}else if(i === 3){
+		return '线下转账'
+	}else{
+		return ''
+	}
+}
+
+// 返回本月的1号到当前天数日期
+export const startDate = `${new Date().getFullYear()}-${new Date().getMonth()+1}-01`
+export const endDate = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()-1}`
+
 
 export function format(timestamp, formats) {
   // formats格式包括
@@ -98,3 +114,10 @@ export function format(timestamp, formats) {
     })[matches];
   });
 }
+
+
+export const baseUrl = 'http://www.91dream.net:8090'
+// export const baseUrl = 'http://47.96.232.174:8091'
+
+
+

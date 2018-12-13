@@ -1,5 +1,5 @@
 <template>
-	<div class="card-wrap">
+	<div class="singleCard-wrap">
 		<div class="content">
 			<!-- 今日卡况 -->
 			<div class="card-info">
@@ -356,7 +356,7 @@
 				modalRemark: false,
 				deviceId: '',
 				// 是否为单卡
-				isSingle: 2
+				isSingle: 1
 			};
 		},
 		mounted() {
@@ -600,7 +600,7 @@
 
 <style lang="stylus" scoped>
 	mainBlue = #4cb2ff;
-	.card-wrap {
+	.singleCard-wrap {
 		padding-top: 50px;
 		padding-left: 200px;
 		.content {
@@ -873,7 +873,6 @@
 				height: 300px;
 				background-color: #fff;
 				transform: translate(-50%, -50%);
-				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				position: absolute;
 				left: 50%;
 				top: 50%;

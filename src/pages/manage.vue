@@ -315,7 +315,7 @@
 			.admin-data {
 				width: 100%;
 				height: 200px;
-				border: 1px solid #bbb;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
 				display: flex;
 				padding-left: 100px;
@@ -346,7 +346,7 @@
 			/* 账户信息 */
 			.account-info {
 				width: 100%;
-				border: 1px solid #bbb;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
 				.info-header {
 					height: 110px;

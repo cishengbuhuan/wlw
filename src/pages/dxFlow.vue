@@ -1,9 +1,10 @@
 <template>
-	<div class="yd-flowPool-wrap">
+	<div class="flowPool-wrap">
 		<div class="content">
 			<!-- 基本信息 -->
 			<div class="base-info">
 				<div class="info-header">
+					<!-- 套餐 -->
 					<el-select v-model="packageValue"
 					           @change="packageChange"
 					           value-key="value"
@@ -15,6 +16,7 @@
 								:value="item.value">
 						</el-option>
 					</el-select>
+					<!-- 类型 -->
 					<el-select v-model="packageTypeValue"
 					           @change="packageTypeChange"
 					           value-key="value"
@@ -27,24 +29,19 @@
 						</el-option>
 					</el-select>
 				</div>
-				<!-- 基本信息的饼图 -->
-				<div class="info-chart">
-					<div class="no-more" v-if="noPoolId">
-						没有相关数据
-					</div>
-					<!-- 饼图 -->
-					<div class="chart" v-if="!noPoolId">
-						<div class="chart-item">
-							<ve-ring :data="baseInfo.usageData" :colors="usageColors" :settings="baseSettings"
-							        :extend="baseExtend"></ve-ring>
-						</div>
-						<div class="chart-item">
-							<ve-ring :data="baseInfo.alarmData" :colors="alarmColors" :settings="baseSettings"
-							        :extend="alarmExtend"></ve-ring>
-						</div>
+				<!-- 基本信息的柱状图 -->
+				<div class="info-content">
+					<!-- 柱状图 -->
+					<div class="chart-bar">
+						<ve-bar :data="flowData"
+						        :settings="flowSettings"
+						        :colors="colors"
+						        class="bar"
+						        :extend="flowExtend">
+						</ve-bar>
 					</div>
 					<!-- tips -->
-					<div class="chart-tips" v-if="!noPoolId">
+					<div class="chart-tips">
 						<span>总流量：{{ baseInfo.totalFlow }}M</span>
 						<span>单卡流量：{{ baseInfo.singleFlow }}M</span>
 						<span>使用率：{{ baseInfo.usageRate }}%</span>
@@ -64,17 +61,6 @@
 					</div>
 					<!-- 联动选择器 -->
 					<div class="cascader">
-						<!-- 地区运营商 -->
-						<!--<el-select v-model="areaValue"-->
-						<!--placeholder="请选择地区">-->
-						<!--<el-option-->
-						<!--v-for="item in selectData.areaOptions"-->
-						<!--:key="item.value"-->
-						<!--:label="item.area"-->
-						<!--:value="item.value">-->
-						<!--</el-option>-->
-						<!--</el-select>-->
-						<!-- 状态 -->
 						<el-select v-model="statusValue"
 						           clearable
 						           @change="toggleStatus"
@@ -86,16 +72,6 @@
 									:value="item.value">
 							</el-option>
 						</el-select>
-						<!-- 制式 -->
-						<!--<el-select v-model="systemValue"-->
-						<!--placeholder="请选择制式">-->
-						<!--<el-option-->
-						<!--v-for="item in selectData.systemOptions"-->
-						<!--:key="item.value"-->
-						<!--:label="item.system"-->
-						<!--:value="item.value">-->
-						<!--</el-option>-->
-						<!--</el-select>-->
 					</div>
 					<br>
 					<!-- 时间查询 -->
@@ -119,6 +95,7 @@
 							:data="tableData"
 							@sort-change='sortChange'
 							border
+							v-loading="loading"
 							style="width: 100%">
 						<el-table-column prop="sortNum" width='100' label="序号" align="center"></el-table-column>
 						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
@@ -126,7 +103,8 @@
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 						<el-table-column prop="flowPackage" label="流量池套餐" align="center"></el-table-column>
 						<!--<el-table-column prop="packageType" label="套餐类型" align="center"></el-table-column>-->
-						<el-table-column prop="flowUsage" sortable='custom' width='150' label="本月已使用流量" align="center"></el-table-column>
+						<el-table-column prop="flowUsage" sortable='custom' width='150' label="本月已使用流量"
+						                 align="center"></el-table-column>
 						<el-table-column prop="message" width='70' label="短信" align="center"></el-table-column>
 						<el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
@@ -153,93 +131,89 @@
 </template>
 
 <script>
-	import VeRing from "v-charts/lib/ring.common";
+	import VeBar from "v-charts/lib/bar.common";
 	import {timestampToTime, format, translatePackages} from '../api/dataUtil'
 	import router from 'vue-router'
 
 	export default {
 		components: {
-			VeRing
+			VeBar
 		},
 		data() {
-			this.usageColors = ['#bbbbbb', '#4cb2ff', '#da2627']
-			this.alarmColors = ['#4cb2ff', '#e3a51e', '#da2627']
-			this.baseSettings = {
-				label: {
-					show: false
+			this.flowSettings = {
+				stack: {
+					'xxx': ['usage', 'unused', 'exceeded']
 				},
-				radius: ['120','80'],
-				offsetY: 150
+				legendName: {
+					'usage': '已使用',
+					'unused': '未使用',
+					'exceeded': '已超出'
+				},
+				labelMap: {
+					'usage': '已使用',
+					'unused': '未使用',
+					'exceeded': '已超出'
+				}
 			}
-
-			this.baseExtend = {
-				legend: {
-					orient: 'vertical',
-					align: 'center',
-					top: 100,
-					left: 0,
-					itemWidth: 11,
-					itemHeight: 11,
-					textStyle: {
-						borderRadius: '50%',
-						padding: [0, 0, 0, 70],
+			this.flowExtend = {
+				tooltip: {
+					formatter: function (params) {
+						return `流量池: ${params[0].axisValue}</br>
+								<span style='display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: ${params[0].color};'></span>${params[0].seriesName}: ${params[0].value}M</br>
+								<span style='display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: ${params[1].color};'></span>${params[1].seriesName}: ${params[1].value}M`
 					}
 				},
-				tooltip : {
-					trigger: 'item',
-					formatter: "{b}:{c}M"
-				},
-			}
-			this.alarmExtend = {
-				legend: {
-					orient: 'vertical',
-					align: 'center',
-					top: 100,
-					left: 0,
-					itemWidth: 11,
-					itemHeight: 11,
-					textStyle: {
-						borderRadius: '50%',
-						padding: [0, 0, 0, 70],
-					}
-				},
-				tooltip : {
-					trigger: 'item',
-					formatter: "{b}:{c}个"
-				},
+				barWidth: '60'
 			}
 			return {
-				noPoolId: false,
+				colors: ['#4cb2ff', '#bbbbbb', '#da2627'],
+				noPoolId: true,
 				packageTypeValue: '',
 				packageValue: '',
 				defaultPoolId: '',
 				defaultPackageType: '',
 				poolId: '',
 				packageType: '',
-				// 筛选的套餐
+				// 套餐的下拉框
 				packageOptions: [],
-				// 套餐类型的筛选
+				// 套餐类型的下拉框
 				packageTypeOptions: [],
-				// 饼状图数据
+				// 数据
 				baseInfo: {
 					totalFlow: 0,
 					singleFlow: 0,
 					usageRate: '',
 					overview: 0,
 					warnNumber: 0,
-					alarmCardNumber: 0,
-					usageData: {
-						columns: ['usage', 'number'],
-						rows: []
-					},
-					alarmData: {
-						columns: ['usage', 'number'],
-						rows: []
-					}
+					alarmCardNumber: 0
+				},
+				// 柱状图数据
+				flowDataDemo: {
+					columns: ['flowSize', 'usage', 'unused', 'exceeded'],
+					rows: [
+						{
+							'flowSize': 100,
+							'usage': 100,
+							'unused': 200,
+							'exceeded': 0
+						},
+						{
+							'flowSize': 200,
+							'usage': 100,
+							'unused': 0,
+							'exceeded': 200
+						}
+					]
+				},
+				flowData: {
+					columns: ['flowSize', 'usage', 'unused', 'exceeded'],
+					rows: []
 				},
 				totalCount: 0,
 				pageSize: 20,
 				pageNo: 1,
+				// 加载
+				loading: '',
 				areaValue: '',
 				statusValue: '',
 				systemValue: '',
@@ -264,16 +238,11 @@
 				// 表格流量排序
 				sortData: '',
 				direct: '',
-				netWork: ''
+				netWork: 3
 			};
-		},
-		beforeRouteUpdate(to, from, next) {
-			next()
-			this.typeChange()
 		},
 		mounted() {
 			this.getPackageOptions();
-			this.typeChange()
 		},
 		methods: {
 			// 改变当前页数
@@ -286,82 +255,84 @@
 				this.pageSize = val;
 				this.getTableData()
 			},
-			// 改变type的类型，即跳转不同的路由
-			typeChange() {
-				let type = this.$route.params.type
-				this.netWork = this.$route.params.type
-				this.timeValue = '';
-				this.beginTime = '';
-				this.endTime = '';
-				this.numVal = '';
-				this.defaultPoolId = '';
-				this.packageValue = '';
-				this.packageOptions = []
-				this.tableData = []
-
-				this.getPackageOptions(type);
-				this.getPieUsage(type);
-				this.getPieAlarm(type);
-				this.getTableData(type)
-				this.getPieTips(type)
-				this.getAlarmTips(type)
-			},
-			// 获取到套餐选项 和 套餐类型
-			getPackageOptions(type) {
-				this.$axios({
-					url: '/api/v2/pool/poolList',
+			// 获取到套餐
+			getPackageOptions() {
+				let that = this
+				that.$axios({
+					url: '/api/getPoolAndPack',
 					method: 'post',
 					params: {
-						netWork: type
+						netWork: this.netWork
 					}
 				}).then(res => {
-					let data = res.data.data.poolList;
-					let dataType = res.data.data.packageType
-					// 套餐
-					this.packageOptions = []
-					this.packageValue = data[0].name
-					this.defaultPoolId = data[0].poolId
+					// console.log(res.data.data)
+					let data = res.data.data
+					that.packageOptions = []
+					that.packageValue = data[0].name
+					that.defaultPoolId = data[0].poolId
 					for (let i = 0; i < data.length; i++) {
-						this.packageOptions.push({
+						that.packageOptions.push({
 							value: data[i].poolId,
 							flowPackage: data[i].name
 						})
 					}
-
-					// 套餐的类型
-					this.packageTypeOptions = []
-					this.packageTypeValue = dataType[0].packageType === 1 ? '月' :
-						dataType[0].packageType === 2 ? '半年' :
-							dataType[0].packageType === 3 ? '季' :
-								dataType[0].packageType === 4 ? '年' : ''
-					this.defaultPackageType = dataType[0].packageType
-					for (let i = 0; i < dataType.length; i++) {
-						this.packageTypeOptions.push({
-							value: dataType[i].packageType,
-							typePackage: dataType[i].packageType === 1 ? '月' :
-									dataType[i].packageType === 2 ? '半年' :
-									dataType[i].packageType === 3 ? '季' :
-									dataType[i].packageType === 4 ? '年' : ''
-						})
-					}
-					console.log(this.packageTypeOptions)
-					this.getPieTips();
-					this.getAlarmTips();
-					this.getPieUsage();
-					this.getPieAlarm();
-					this.getTableData();
+					that.getPackageType()
 				})
 			},
-			// 获取到饼状图下到相关信息
-			getPieTips() {
+			// 获取到套餐种类
+			getPackageType() {
+				let poolId = this.poolId ? this.poolId : this.defaultPoolId
+				let that = this
+				that.$axios({
+					url: '/api/getPoolAndPack',
+					method: 'post',
+					params: {
+						netWork: this.netWork,
+						poolId: poolId
+					}
+				}).then(res => {
+					// console.log(res.data.data)
+					let data = res.data.data
+//					debugger
+					if (data.length === 0) {
+						that.packageTypeOptions = []
+						that.packageTypeValue = ''
+						that.packageType = ''
+						that.defaultPackageType = ''
+
+						that.getBarInfo()
+						that.getTableData()
+						return
+					}
+					that.packageTypeOptions = []
+					that.packageTypeValue = ''
+					that.packageType = ''
+					that.defaultPackageType = ''
+					that.packageTypeValue = this.transformPackageType(data[0].packageType)
+					that.defaultPackageType = data[0].packageType
+					for (let i = 0; i < data.length; i++) {
+						that.packageTypeOptions.push({
+							value: data[i].packageType,
+							typePackage: this.transformPackageType(data[i].packageType)
+						})
+					}
+					that.getBarInfo()
+					that.getTableData()
+				})
+			},
+			// 获取到图表基本信息
+			getBarInfo() {
+				let that = this
 				let poolId = this.poolId ? this.poolId : this.defaultPoolId;
 				let packageType = this.packageType ? this.packageType : this.defaultPackageType;
-				if(poolId === ''){
-					this.noPoolId = true;
+//				console.log(poolId,packageType)
+				// 如果套餐和种类有一项为空，则不做请求直接return
+				if (!poolId || !packageType) {
+					that.noPoolId = true;
 					return
 				}
-				this.noPoolId = false;
-				this.$axios({
+				that.noPoolId = false;
+				that.$axios({
 					url: '/api/v2/pool/poolUsage',
 					method: 'post',
 					params: {
@@ -370,114 +341,47 @@
 					}
 				}).then(res => {
 					let data = res.data.data;
+
+					console.log(data)
 					// 总流量
-					this.baseInfo.totalFlow = data.total
+					that.baseInfo.totalFlow = data.cardInfo.total
 					// 单卡流量
-					this.baseInfo.singleFlow = data.dataSize
+					that.baseInfo.singleFlow = data.cardInfo.dataSize
 					// 使用率
-					this.baseInfo.usageRate = parseFloat(data.usage).toFixed(2)
-				})
-			},
-			getAlarmTips() {
-				let poolId = this.poolId ? this.poolId : this.defaultPoolId;
-				let packageType = this.packageType ? this.packageType : this.defaultPackageType;
-				if(poolId === ''){
-					this.noPoolId = true;
-					return
-				}
-				this.noPoolId = false;
-				this.$axios({
-					url: '/api/v2/pool/poolCardWarning',
-					method: 'post',
-					params: {
-						poolId: poolId,
-						packageType: packageType
-					}
-				}).then(res => {
-					let data = res.data.data;
-
+					that.baseInfo.usageRate = parseFloat(data.cardInfo.usage).toFixed(2)
 					// 已超出
-					this.baseInfo.overview = data.over
+					that.baseInfo.overview = data.cardNum.over
 					// 预警数
-					this.baseInfo.warnNumber = data.warn
-					// 报警卡数
-					this.baseInfo.alarmCardNumber = data.alarm
-				})
+					that.baseInfo.overview = data.cardNum.warn
+					// 超套卡数
+					that.baseInfo.overview = data.cardNum.alarm
 
-			},
-			// 获取到使用信息
-			getPieUsage() {
-				let poolId = this.poolId ? this.poolId : this.defaultPoolId;
-				let packageType = this.packageType ? this.packageType : this.defaultPackageType;
-				if(poolId === ''){
-					this.noPoolId = true;
-					return
-				}
-				this.$axios({
-					url: '/api/v2/pool/poolUsageChart',
-					method: 'post',
-					params: {
-						poolId: poolId,
-						packageType: packageType
-					}
-				}).then(res => {
-					let data = res.data.data;
-					this.baseInfo.usageData.rows = []
-					for (let i = 0; i < data.length; i++) {
-						this.baseInfo.usageData.rows.push({
-							usage: data[i].usage,
-							number: data[i].number
-						})
-					}
+					// 给柱状图追加数据
+					that.flowData.rows = []
+					that.flowData.rows.push({
+						flowSize: data.cardInfo.dataSize + 'M',
+						usage: data.cardInfo.poolUse,
+						unused: this.getUnused(data.cardInfo.total, data.cardInfo.poolUse),
+						exceeded: this.getExceeded(data.cardInfo.total, data.cardInfo.poolUse)
+					})
 				})
 			},
-			// 获取到预警图表
-			getPieAlarm() {
-				let poolId = this.poolId ? this.poolId : this.defaultPoolId;
-				let packageType = this.packageType ? this.packageType : this.defaultPackageType;
-				if(poolId === ''){
-					this.noPoolId = true;
-					return
-				}
-				this.$axios({
-					url: '/api/v2/pool/poolCardWarningChart',
-					method: 'post',
-					params: {
-						poolId: poolId,
-						packageType: packageType
-					}
-				}).then(res => {
-					let data = res.data.data;
-					this.baseInfo.alarmData.rows = []
-					for (let i = 0; i < data.length; i++) {
-						this.baseInfo.alarmData.rows.push({
-							usage: data[i].usage,
-							number: data[i].number
-						})
-					}
-				})
-			},
-			// 基本信息的下拉框的值发生变化的时候触发
+			// 套餐的下拉框的值发生变化的时候触发
 			packageChange(val) {
 				this.poolId = val;
-				this.getPieTips();
-				this.getAlarmTips();
-				this.getPieUsage();
-				this.getPieAlarm();
-				this.getTableData()
+				this.getPackageType()
+//				this.getBarInfo()
+//				this.getTableData()
 			},
 			// 套餐类型下拉框的值发生变化的时候触发
-			packageTypeChange(val){
+			packageTypeChange(val) {
 				this.packageType = val;
-				this.getPieTips();
-				this.getAlarmTips();
-				this.getPieUsage();
-				this.getPieAlarm();
-				this.getTableData()
+				this.getBarInfo();
 			},
 			// 获取表格 数据
 			getTableData() {
 				let reg = /.*[\u4e00-\u9fa5]+.*$/;
+				let packageType = this.packageType ? this.packageType : this.defaultPackageType;
 				if (reg.test(this.numVal)) {
 					this.$message({
 						type: 'info',
@@ -485,6 +389,7 @@
 					});
 					return
 				}
+				this.loading = true
 				this.$axios({
 					url: '/api/v2/device/devicePageList',
 					method: 'post',
@@ -499,7 +404,8 @@
 						sort: this.sortData,
 						direct: this.direct,
 						netWork: this.netWork,
-						cardPackage: this.packagesTypeValue
+						cardPackage: this.packagesTypeValue,
+						packageType: packageType
 					}
 				}).then(res => {
 					let data = res.data.data;
@@ -513,7 +419,7 @@
 							operator: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
 							flowPackage: data[i].packages,
 //							packageType: translatePackages(data[i].packageType),
-							flowUsage: !data[i].usageMonth ? 0 : parseFloat(data[i].usageMonth).toFixed(2)+'MB',
+							flowUsage: !data[i].usageMonth ? 0 : parseFloat(data[i].usageMonth).toFixed(2) + 'MB',
 							message: data[i].msgNo,
 //							endTime: timestampToTime(data[i].endTime),
 							endTime: data[i].endTime.split(' ')[0],
@@ -522,14 +428,15 @@
 							deviceId: data[i].deviceId
 						})
 					}
+					this.loading = false
 				})
 			},
 			// 跳转到详情页
 			goDetail(data) {
 				let deviceId = data.deviceId
 				this.$router.push({
-					path:'/cardDetail',
-					query:{
+					path: '/cardDetail',
+					query: {
 						deviceId: deviceId
 					}
 				})
@@ -543,13 +450,16 @@
 			},
 			// 选择日期
 			pickChange() {
-				if (this.timeValue == '') {
+				if (!this.timeValue) {
 					this.beginTime = ''
 					this.endTime = ''
+					this.pageNo = 1
+					this.getTableData();
 					return
 				}
 				this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
 				this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
+				this.pageNo = 1
 				this.getTableData();
 			},
 			// 流量的排序
@@ -562,6 +472,34 @@
 					this.direct = column.order.substring(0, 4)
 				}
 				this.getTableData()
+			},
+			// 处理返回的套餐类型
+			transformPackageType(i) {
+				if (i == 1) {
+					return '月'
+				} else if (i == 2) {
+					return '半年'
+				} else if (i == 3) {
+					return '季'
+				} else {
+					return '年'
+				}
+			},
+			// 处理未使用
+			getUnused(total, used) {
+				if (total > used) {
+					return total - used
+				} else {
+					return o
+				}
+			},
+			// 处理已超出
+			getExceeded(total, used) {
+				if (total > used) {
+					return 0
+				} else {
+					return used - total
+				}
 			}
 		}
 	};
@@ -569,7 +507,7 @@
 
 <style lang="stylus" scoped>
 	mainBlue = #4cb2ff;
-	.yd-flowPool-wrap {
+	.flowPool-wrap {
 		padding-top: 50px;
 		padding-left: 200px;
 		.content {
@@ -587,7 +525,8 @@
 				.info-header {
 					padding-left: 40px;
 				}
-				.info-chart {
+				/* 基本信息的柱状图 */
+				.info-content {
 					width: 100%;
 					padding-bottom: 30px;
 					.no-more {
@@ -596,12 +535,8 @@
 						text-align: center;
 					}
 					/* 饼图 */
-					.chart {
-						display: flex;
-						.chart-item {
-							flex: 1;
-							text-align: center;
-						}
+					.chart-bar {
+
 					}
 					/* tips */
 					.chart-tips {
@@ -610,7 +545,6 @@
 						display: flex;
 						justify-content: space-between;
 						padding: 0 70px;
-						margin-top: -100px;
 						/*span {
 						  margin-right: 50px;
 						}*/

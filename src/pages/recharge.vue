@@ -41,37 +41,42 @@
 					</div>
 					<!-- 银行转帐 -->
 					<div class="bank" v-show="wayIndex == 1">
-						<div>正在积极开发中，敬请期待～</div>
-						<!--<el-form ref="form" :model="form" label-width="90px">-->
-							<!--<el-form-item label="转账银行：">-->
-								<!--<el-input v-model="form.bank"></el-input>-->
-							<!--</el-form-item>-->
-							<!--<el-form-item label="转账账号：">-->
-								<!--<el-input v-model="form.transferAccount"></el-input>-->
-							<!--</el-form-item>-->
-							<!--<el-form-item label="入款账号：">-->
-								<!--<el-input v-model="form.depositAccount"></el-input>-->
-							<!--</el-form-item>-->
-							<!--<el-form-item label="充值金额：">-->
-								<!--<el-input v-model="form.amount"></el-input>-->
-							<!--</el-form-item>-->
-							<!--<el-form-item label="充值时间：">-->
-								<!--<el-date-picker-->
-										<!--v-model="form.rechargeTime"-->
-										<!--type="date"-->
-										<!--placeholder="选择日期">-->
-								<!--</el-date-picker>-->
-							<!--</el-form-item>-->
-							<!--<el-form-item label="凭证上传：">-->
-								<!--<el-upload-->
-										<!--action="123"-->
-										<!--ref="upload">-->
-									<!--<div class="btn-upload">选择文件</div>-->
-								<!--</el-upload>-->
-							<!--</el-form-item>-->
-							<!--<el-button>重置</el-button>-->
-							<!--<el-button>提交</el-button>-->
-						<!--</el-form>-->
+						<!--<div>正在积极开发中，敬请期待～</div>-->
+						<el-form ref="form" :model="form" label-width="90px">
+							<el-form-item label="转账银行：">
+								<el-input v-model="form.bank"></el-input>
+							</el-form-item>
+							<el-form-item label="转账账号：">
+								<el-input v-model="form.transferAccount"></el-input>
+							</el-form-item>
+							<el-form-item label="入款账号：">
+								<el-input v-model="form.depositAccount"></el-input>
+							</el-form-item>
+							<el-form-item label="充值金额：">
+								<el-input v-model="form.amount"></el-input>
+							</el-form-item>
+							<el-form-item label="充值时间：">
+								<el-date-picker
+										v-model="form.rechargeTime"
+										type="datetime"
+										placeholder="选择时间">
+								</el-date-picker>
+							</el-form-item>
+							<el-form-item label="凭证上传：">
+								<el-upload
+										action="http://192.168.1.22:8090/orderPay/certiUrlUpload"
+										:file-list="form.upFile"
+										list-type="picture"
+										:on-change="changeUpload"
+										:on-success="successUpload"
+										name="upfile"
+										ref="upload">
+									<div class="btn-upload">选择文件</div>
+								</el-upload>
+							</el-form-item>
+							<el-button @click="transferByBank(0)">重置</el-button>
+							<el-button @click="transferByBank(1)">提交</el-button>
+						</el-form>
 					</div>
 				</div>
 
@@ -220,6 +225,7 @@
 </template>
 
 <script>
+	import {format, translatePackages} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
@@ -246,7 +252,9 @@
 					transferAccount: '',
 					depositAccount: '',
 					amount: '',
-					rechargeTime: ''
+					rechargeTime: '',
+					upFile: [],
+					imgUrl: ''
 				}
 			};
 		},
@@ -346,6 +354,62 @@
 					document.body.appendChild(div)
 					document.forms.punchout_form.submit()
 				})
+			},
+
+			// 图片文件状态改变
+			changeUpload(file, fileList){
+				this.form.upFile = fileList
+			},
+			// 图片上传成功的钩子
+			successUpload(response, file, fileList){
+				this.form.imgUrl = response.object.tempFile
+			},
+			// 银行转账
+			transferByBank(i){
+				if(i===0){
+					this.form.bank = ''
+					this.form.transferAccount = ''
+					this.form.depositAccount = ''
+					this.form.amount = ''
+					this.form.rechargeTime = ''
+				}else {
+					let userId = sessionStorage.getItem('userId')
+					let companyId = sessionStorage.getItem('companyId')
+
+					let amount = this.form.amount,
+						transferBank = this.form.bank,
+						transferAccount = this.form.transferAccount,
+						incomeAccount = this.form.depositAccount,
+						createTime = format(new Date(this.form.rechargeTime).getTime(), "Y-m-d H:i:s"),
+						upFile = this.form.upFile,
+						imgUrl = this.form.imgUrl;
+					console.log(upFile)
+					console.log(createTime)
+					if(!amount || !transferBank || !transferAccount || !incomeAccount || !createTime || upFile.length === 0) {
+						this.$message.info('请先将表格填写完整！')
+					}else {
+						this.$axios({
+							url: '/orderPay/bankTrans',
+							method: 'post',
+							params: {
+								amount: amount,
+								transferBank: transferBank,
+								transferAccount: transferAccount,
+								incomeAccount: incomeAccount,
+								companyId: companyId,
+								payType: '3',
+								createTime: createTime,
+								userId: userId,
+								certiUrl: imgUrl
+							}
+						}).then(res => {
+							if(res.data.code === 100){
+								this.$message.success(res.data.info)
+//								this.$refs.upload.submit();
+							}
+						})
+					}
+				}
 			}
 		},
 		watch: {
@@ -370,7 +434,7 @@
 			overflow-y: scroll;
 			.recharge-box {
 				width: 100%;
-				border: 1px solid #ddd;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
 				padding-left: 100px;
 				padding-top: 50px;
@@ -477,7 +541,13 @@
 					}
 					/* 银行转帐 */
 					.bank {
-
+						width: 500px;
+						padding: 30px 30px 40px 30px;
+						box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
+						border-radius: 5px;
+						.el-input {
+							width: 300px;
+						}
 					}
 				}
 				.user-protocol {

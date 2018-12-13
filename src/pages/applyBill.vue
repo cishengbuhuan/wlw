@@ -131,7 +131,7 @@
 			.bill-info {
 				width: 100%;
 				border-radius: 5px;
-				border: 1px solid #ddd;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				padding: 50px 60px;
 				.info-header {
 					font-size: 24px;

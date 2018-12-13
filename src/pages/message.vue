@@ -133,9 +133,11 @@
 						this.msgData.push({
 							title: data[i].title,
 							info: data[i].content,
-							time: timestampToTime(data[i].createTime),
+							time: timestampToTime(Number(data[i].createTime)),
+//							time: data[i].createTime,
 							msgId: data[i].messageId
 						})
+						console.log(this.msgData.time[i])
 					}
 				})
 			},
@@ -162,7 +164,7 @@
 			.msg-box {
 				width: 100%;
 				height: 100%;
-				border: 1px solid #ddd;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
 				overflow-y: scroll;
 				.msg-title {

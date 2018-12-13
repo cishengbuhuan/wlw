@@ -1,15 +1,16 @@
 <template>
 	<div class="login-wrap" :style="bg">
-		<header>
-			<span>欢迎登录</span>
-			<div class="line"></div>
-			<img class="logo" src="../../static/images/company-logo.png">
-		</header>
+		<!--<header>-->
+			<!--<span>欢迎登录</span>-->
+			<!--<div class="line"></div>-->
+			<!--<img class="logo" src="../../static/images/company-logo.png">-->
+		<!--</header>-->
+		<header></header>
 		<div class="content">
 			<!-- 文字信息 -->
 			<div class="info">
 				<h3>物联网管理平台</h3>
-				<p>thoughtInternet of things Management Platform</p>
+				<p>Internet of Things Management Platform</p>
 			</div>
 			<!-- 登录表单 -->
 			<div class="login-form">
@@ -73,6 +74,7 @@
 </template>
 
 <script>
+	import {baseUrl} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
@@ -91,9 +93,7 @@
 					position: 'relative'
 				},
 				isRemember: true,
-//				baseUrl: 'http://192.168.1.26:8090',
-				baseUrl: 'http://www.91dream.net/matrix',
-//				baseUrl: 'http://www.tangjinqian.cn:8080/matrix',
+				baseUrl: baseUrl
 			};
 		},
 		mounted() {
@@ -105,8 +105,8 @@
 			rememberAccount(){
 				// 如果点击了记住账号
 				if(this.isRemember) {
-					this.user.account = localStorage.getItem('account');
-					this.user.password = localStorage.getItem('password');
+					this.user.account = sessionStorage.getItem('account');
+					this.user.password = sessionStorage.getItem('password');
 				}
 			},
 			btnLogin() {
@@ -128,7 +128,9 @@
 						}).then(res => {
 							let code = res.data.code;
 							if (code == 1) {
-								localStorage.setItem('_token', res.data.data.token);
+								sessionStorage.setItem('_token', res.data.data.token);
+								sessionStorage.setItem('userId', res.data.data.userId);
+								sessionStorage.setItem('companyId', res.data.data.companyId);
 								this.$router.push({path: '/index'})
 							} else if (code == 0) {
 								this.$message(res.data.msg);
@@ -144,9 +146,9 @@
 					return
 				}
 				this.codeShow = true;
-				// 把账号和密码保存在localStorage里面
-				localStorage.setItem('account', this.user.account);
-				localStorage.setItem('password', this.user.password);
+				// 把账号和密码保存在sessionStorage里面
+				sessionStorage.setItem('account', this.user.account);
+				sessionStorage.setItem('password', this.user.password);
 
 				this.user.imgSrc = this.baseUrl + '/api/v1/image?userCode=' + this.user.account
 			},
@@ -203,6 +205,7 @@
 				width: 23%;
 				height: 350px;
 				border-radius: 5px;
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				background-color: #fff;
 				position: absolute;
 				top: 210px;
