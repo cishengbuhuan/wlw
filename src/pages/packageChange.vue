@@ -48,6 +48,7 @@
 							<span>需变革套餐流量: </span>
 							<el-select v-model="newPackageFlow"
 							           clearable
+							           @change="getPackageChangeData"
 							           placeholder="请选择">
 								<el-option
 										v-for="item in newPackageOptions"
@@ -86,7 +87,7 @@
 			</div>
 		</div>
 		<!-- 处理结果弹出框 -->
-		<div class="modal-result" v-show="modalResult">
+		<div class="modal-result" v-show="modalResult" @click.self="modalResult = false">
 			<div class="result">
 				<div class="result-header">
 					<div class="icon"></div>
@@ -108,68 +109,38 @@
 </template>
 
 <script>
-	import {timestampToTime, format, translatePackages, baseUrl} from '../api/dataUtil'
+	import {translateSystem,translatePackages,getPackageFlow,timestampToTime} from '../api/dataUtil'
 
 	export default {
 		data() {
 			return {
-				cardNoStr: '1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123、1234567890123',
-				iccidStr: '12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、12345678901234567890、',
-				netWork: '移动',
-				system: '4G',
-				packageType: '月',
-				oldPackageFlow: '10M',
+				cardNoStr: '',
+				iccidStr: '',
+				netWork: '',
+				system: '',
+				packageType: '',
+				oldPackageFlow: '',
 				// 需变革套餐流量
 				newPackageFlow: '',
-				newPackageOptions: [
-					{
-						value: '1',
-						newPackage: '20M'
-					},
-					{
-						value: '2',
-						newPackage: '50M'
-					},
-					{
-						value: '3',
-						newPackage: '80M'
-					}
-				],
+				newPackageOptions: [],
 				// table
-				tableData: [
-					{
-						endDate: '2019-01-31',
-						remainTime: '30天',
-						totalCard: '100',
-						oldPrice: '123',
-						newPrice: '234',
-						needPrice: '111'
-					},
-					{
-						endDate: '2019-01-31',
-						remainTime: '30天',
-						totalCard: '100',
-						oldPrice: '123',
-						newPrice: '234',
-						needPrice: '111'
-					},
-					{
-						endDate: '2019-01-31',
-						remainTime: '30天',
-						totalCard: '100',
-						oldPrice: '123',
-						newPrice: '234',
-						needPrice: '111'
-					}
-				],
+				tableData: [],
 				loading: '',
 				totalPrice: '0',
 				// 处理结果的弹出框
 				modalResult: false,
-				resultSuccess: false
+				resultSuccess: false,
+
+				deviceIds: '',
+				userLimit: '',
+				netWorkValue: '',
+				netWorkType: '',
+				businessCard: '',
 			};
 		},
 		mounted() {
+			this.deviceIds = this.$route.params.deviceIds
+			this.getBaseInfo()
 		},
 		methods: {
 			// 确认按钮
@@ -177,13 +148,104 @@
 				if(i===0) {
 					this.$router.push({path: '/cardOperate'})
 				}else {
-
-					this.modalResult = true
+//					this.modalResult = true
+					this.$axios({
+						url: '/ucenterDevice/changeFlow',
+						method: 'post',
+						params: {
+							deviceIds: this.deviceIds,
+							userLimit: this.userLimit,
+							changeUserLimit: this.newPackageFlow,
+							netWork: this.netWorkValue,
+							netWorkType: this.netWorkType,
+							businessCard: this.businessCard
+						}
+					}).then(res => {
+						let data = res.data
+						console.log(data)
+						if(data.code == '100') {
+							this.$message.success(data.object)
+							this.$router.push({path: '/cardOperate'})
+						}else {
+							this.$message.error(data.object)
+						}
+					})
 				}
 			},
 			modalSure() {
 				this.modalResult = false
 				this.$router.push({path: '/cardOperate'})
+			},
+			// 获取到基本信息
+			getBaseInfo() {
+				this.$axios({
+					url: '/ucenterDevice/getDeviceInfos',
+					method: 'post',
+					params: {
+						deviceIds: this.deviceIds
+					}
+				}).then(res => {
+					console.log(res.data.object.cardInfos)
+					let cardInfos = res.data.object.cardInfos
+					let cardNumbers = cardInfos.cardNumbers
+					let iccids = cardInfos.iccids
+					this.cardNoStr = cardNumbers.replace(/,/g,'、')
+					this.iccidStr = iccids.replace(/,/g,'、')
+					// 运营商
+					this.netWork = cardInfos.netWork == 1 ? '移动' : cardInfos.netWork == 2 ? '联通' : '电信'
+					this.netWorkValue = cardInfos.netWork
+					// 制式
+					this.system = translateSystem(cardInfos.netWorkType)
+					this.netWorkType = cardInfos.netWorkType
+					// 原套餐流量
+					this.oldPackageFlow = cardInfos.userLimit + 'M'
+					this.userLimit = cardInfos.userLimit
+					// 套餐类型
+					this.packageType = translatePackages(cardInfos.packageType)
+					// 是否车联卡
+					this.businessCard = cardInfos.businessCard == '2' ? '2' : '1'
+					// 需变革套餐流量
+					let flow = res.data.object.flow
+					this.newPackageOptions = []
+					for(let i=0; i<flow.length; i++) {
+						this.newPackageOptions.push({
+							value: flow[i].flow,
+							newPackage: getPackageFlow(flow[i].flow)
+						})
+					}
+				})
+			},
+			// 获取到套餐变更的表格数据
+			getPackageChangeData() {
+				this.loading = true
+				this.$axios({
+					url: '/ucenterDevice/isChangeFlow',
+					method: 'post',
+					params: {
+						deviceIds: this.deviceIds,
+						userLimit: this.userLimit,
+						changeUserLimit: this.newPackageFlow,
+						netWork: this.netWorkValue,
+						netWorkType: this.netWorkType,
+						businessCard: this.businessCard
+					}
+				}).then(res => {
+					console.log(res.data.object)
+					let data = res.data.object.cardList
+					this.totalPrice = res.data.object.total
+					this.tableData = []
+					for(let i=0; i<data.length; i++) {
+						this.tableData.push({
+							endDate: timestampToTime(Number(data[i].endTime) * 1000),
+							remainTime: data[i].residueMonth + '月',
+							totalCard: data[i].totalCard,
+							oldPrice: data[i].price + '元',
+							newPrice: data[i].changePrice + '元',
+							needPrice: data[i].diffPrice + '元'
+						})
+					}
+					this.loading = false
+				})
 			}
 		}
 	};

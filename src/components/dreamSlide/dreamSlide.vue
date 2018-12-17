@@ -58,6 +58,11 @@
 								titleTwo: '卡片操作',
 								path: '/cardOperate',
 								index: '2-3'
+							},
+							{
+								titleTwo: '套餐变更查询',
+								path: '/packageChangeSearch',
+								index: '2-4'
 							}
 						]
 					},
@@ -128,6 +133,8 @@
 				this.index = '2-2'
 			}else if(this.$route.name === 'cardOperate') {
 				this.index = '2-3'
+			}else if(this.$route.name === 'packageChangeSearch') {
+				this.index = '2-4'
 			}else if(this.$route.name === 'ydFlow') {
 				this.index = '3-1'
 			}else if(this.$route.name === 'ltFlow') {

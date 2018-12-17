@@ -33,7 +33,7 @@
 			</div>
 		</div>
 		<!-- 处理结果弹出框 -->
-		<div class="modal-result" v-show="modalResult">
+		<div class="modal-result" v-show="modalResult" @click.self="modalResult = false">
 			<div class="result">
 				<div class="result-header">
 					<div class="icon"></div>

@@ -3,7 +3,7 @@ export function timestampToTime(timestamp) {
   let Y,M,D,h,m,s;
   Y = date.getFullYear() + '-';
   M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-  D = date.getDate();
+  D = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
   h = date.getHours() + ':';
   m = date.getMinutes() + ':';
   s = date.getSeconds();
@@ -58,6 +58,24 @@ export function translatePackages(i){
 		return '年'
 	}else{
 		return ''
+	}
+}
+// 获取到运营商
+export function getNetWork(i) {
+	if(i ===1 ) {
+		return '移动'
+	}else if(i === 2){
+		return '联通'
+	}else if(i === 3){
+		return '电信'
+	}
+}
+// 获取到套餐流量
+export function getPackageFlow(i) {
+	if(i <1000 ) {
+		return i + 'M'
+	}else {
+		return (i / 1024) + 'G'
 	}
 }
 // 转化充值方式
@@ -116,7 +134,8 @@ export function format(timestamp, formats) {
 }
 
 
-export const baseUrl = 'http://www.91dream.net:8090'
+export const baseUrl = 'http://192.168.1.27:8090'
+// export const baseUrl = 'http://www.91dream.net:8090'
 // export const baseUrl = 'http://47.96.232.174:8091'
 
 

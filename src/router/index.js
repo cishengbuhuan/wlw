@@ -6,6 +6,8 @@ import index from '../pages/index.vue'
 import card from '../pages/card.vue'
 import singleCard from '../pages/singleCard.vue'
 import cardOperate from '../pages/cardOperate.vue'
+import packageChangeSearch from '../pages/packageChangeSearch.vue'
+import changeDetail from '../pages/changeDetail.vue'
 import packageChange from '../pages/packageChange.vue'
 import cardActive from '../pages/cardActive.vue'
 import cardStop from '../pages/cardStop.vue'
@@ -59,6 +61,16 @@ const router = new Router({
 			path: '/packageChange',
 			name: 'packageChange',
 			component: packageChange
+		},
+		{
+			path: '/packageChangeSearch',
+			name: 'packageChangeSearch',
+			component: packageChangeSearch
+		},
+		{
+			path: '/changeDetail',
+			name: 'changeDetail',
+			component: changeDetail
 		},
 		{
 			path: '/cardActive',

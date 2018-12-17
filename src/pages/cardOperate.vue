@@ -17,51 +17,84 @@
 					<div class="tab-content" v-show="tabIndex != -1">
 						<!-- 套餐变更 -->
 						<div class="tab-item package-change" v-show="tabIndex == 0">
-							<!-- ICCID或者卡号 -->
-							<el-input
-									clearable
-									placeholder="请输入ICCID或者卡号"
-									class="input"
-									v-model="packageChange.cardNo">
-							</el-input>
-							<!-- 制式 -->
-							<el-select v-model="packageChange.system"
-							           clearable
-							           class="select"
-							           placeholder="请选择制式">
-								<el-option
-										v-for="item in packageChange.systemOptions"
-										:key="item.value"
-										:label="item.system"
-										:value="item.value">
-								</el-option>
-							</el-select>
-							<!-- 运营商 -->
-							<el-select v-model="packageChange.netWork"
-							           clearable
-							           class="select"
-							           placeholder="请选择运营商">
-								<el-option
-										v-for="item in packageChange.netWorkOptions"
-										:key="item.value"
-										:label="item.netWork"
-										:value="item.value">
-								</el-option>
-							</el-select>
-							<!-- 套餐流量 -->
-							<el-select v-model="packageChange.packageType"
-							           clearable
-							           class="select"
-							           placeholder="请选择套餐流量">
-								<el-option
-										v-for="item in packageChange.packageTypeOptions"
-										:key="item.value"
-										:label="item.packageType"
-										:value="item.value">
-								</el-option>
-							</el-select>
-							<!-- 查询按钮 -->
-							<div class="btn-search">查询</div>
+							<!-- tools -->
+							<div class="tools" v-if="!packageChange.noData">
+								<!-- ICCID或者卡号 -->
+								<el-input
+										clearable
+										placeholder="请输入ICCID或者卡号"
+										class="input"
+										v-model="packageChange.cardNo">
+								</el-input>
+								<!-- 运营商 -->
+								<el-select v-model="packageChange.netWork"
+								           clearable
+								           @change="loadPackageFlow"
+								           class="select"
+								           placeholder="请选择运营商">
+									<el-option
+											v-for="item in packageChange.netWorkOptions"
+											:key="item.value"
+											:label="item.netWork"
+											:value="item.value">
+									</el-option>
+								</el-select>
+								<!-- 套餐流量 -->
+								<el-select v-model="packageChange.packageFlow"
+								           v-show="packageChange.packageFlowShow"
+								           clearable
+								           class="select"
+								           placeholder="请选择套餐流量">
+									<el-option
+											v-for="item in packageChange.packageFlowOptions"
+											:key="item.value"
+											:label="item.packageFlow"
+											:value="item.value">
+									</el-option>
+								</el-select>
+								<!-- 制式 -->
+								<el-select v-model="packageChange.netWorkType"
+								           clearable
+								           class="select"
+								           placeholder="请选择制式">
+									<el-option
+											v-for="item in packageChange.netWorkTypeOptions"
+											:key="item.value"
+											:label="item.netWorkType"
+											:value="item.value">
+									</el-option>
+								</el-select>
+								<!-- 是否车联卡 -->
+								<el-select v-model="packageChange.isCLCard"
+								           clearable
+								           class="select"
+								           placeholder="请选择是否车联卡">
+									<el-option
+											v-for="item in packageChange.clCardOptions"
+											:key="item.value"
+											:label="item.isCLCard"
+											:value="item.value">
+									</el-option>
+								</el-select>
+								<!-- 流量计算 -->
+								<el-select v-model="packageChange.flowCalc"
+								           clearable
+								           class="select"
+								           placeholder="请选择流量计算方式">
+									<el-option
+											v-for="item in packageChange.flowCalcOptions"
+											:key="item.value"
+											:label="item.isSingle"
+											:value="item.value">
+									</el-option>
+								</el-select>
+								<!-- 查询按钮 -->
+								<div class="btn-search" @click="getTableData">查询</div>
+							</div>
+							<!-- 查询不到 -->
+							<div class="no-info" v-if="packageChange.noData">
+								当前账户无月套餐，暂不支持套餐更改
+							</div>
 						</div>
 						<!-- 激活 -->
 						<div class="tab-item card-active" v-show="tabIndex == 1">
@@ -85,7 +118,7 @@
 								</el-option>
 							</el-select>
 							<!-- 查询按钮 -->
-							<div class="btn-search">查询</div>
+							<div class="btn-search" @click="getTableData">查询</div>
 						</div>
 						<!-- 停卡 -->
 						<div class="tab-item card-stop" v-show="tabIndex == 2">
@@ -109,7 +142,7 @@
 								</el-option>
 							</el-select>
 							<!-- 查询按钮 -->
-							<div class="btn-search">查询</div>
+							<div class="btn-search" @click="getTableData">查询</div>
 						</div>
 					</div>
 				</div>
@@ -119,7 +152,7 @@
 				<!-- 工具栏 -->
 				<div class="tools" v-show="operateData.length">
 					<div class="btn-operate" @click="btnSelect">选取操作</div>
-					<div class="btn-batch">批量操作</div>
+					<!--<div class="btn-batch">批量操作</div>-->
 				</div>
 				<!-- 表格 -->
 				<div class="table">
@@ -140,8 +173,8 @@
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
 						<el-table-column prop="packageType" label="套餐类型" align="center"></el-table-column>
 						<el-table-column prop="system" label="制式" align="center"></el-table-column>
-						<el-table-column prop="startTime" label="计费时间" align="center"></el-table-column>
-						<el-table-column prop="endTime" label="到期时间" align="center"></el-table-column>
+						<el-table-column prop="batchTime" label="批次时间" width="110" align="center"></el-table-column>
+						<el-table-column prop="endTime" label="到期时间" width="110" align="center"></el-table-column>
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
 					</el-table>
 					<el-pagination
@@ -161,7 +194,7 @@
 </template>
 
 <script>
-	import {timestampToTime, format, translatePackages, baseUrl} from '../api/dataUtil'
+	import {timestampToTime, format, translatePackages, getNetWork, getPackageFlow} from '../api/dataUtil'
 
 	export default {
 		data() {
@@ -181,22 +214,7 @@
 					}
 				],
 				// 操作的表格
-				operateData: [
-					{
-						cardNo: '1',
-						iccid: '1234567',
-						netWork: '移动',
-						flowPackage: '10M',
-						flowUsage: '100M',
-						flowOverage: '20M',
-						cardStatus: '离线',
-						packageType: '年',
-						system: '4G',
-						startTime: '2018-02-01',
-						endTime: '2019-01-31',
-						cardKind: '三切'
-					}
-				],
+				operateData: [],
 				// 表格的相关数据
 				loading: '',
 				totalCount: 0,
@@ -207,41 +225,66 @@
 					// ICCID或者卡号
 					cardNo: '',
 					// 制式
-					system: '',
-					systemOptions: [
+					netWorkType: '',
+					netWorkTypeOptions: [
 						{
 							value: '1',
-							system: '4G'
+							netWorkType: '5G'
 						},
 						{
 							value: '2',
-							system: '2G'
+							netWorkType: '4G'
+						},
+						{
+							value: '3',
+							netWorkType: '3G'
+						},
+						{
+							value: '4',
+							netWorkType: '2G'
+						},
+						{
+							value: '5',
+							netWorkType: 'NB'
+						},
+						{
+							value: '6',
+							netWorkType: 'EMTC'
 						}
 					],
 					// 运营商
 					netWork: '',
-					netWorkOptions: [
+					netWorkOptions: [],
+					// 套餐流量
+					packageFlowShow: false,
+					packageFlow: '',
+					packageFlowOptions: [],
+					// 流量计算
+					flowCalc: '',
+					flowCalcOptions: [
 						{
 							value: '1',
-							netWork: '移动'
+							isSingle: '单卡'
 						},
 						{
 							value: '2',
-							netWork: '联通'
+							isSingle: '流量池'
 						}
 					],
-					// 套餐类型
-					packageType: '',
-					packageTypeOptions: [
+					// 是否车联卡
+					isCLCard: '',
+					clCardOptions: [
 						{
 							value: '1',
-							packageType: '年'
+							isCLCard: '普通卡'
 						},
 						{
 							value: '2',
-							packageType: '月'
+							isCLCard: '车联卡'
 						}
-					]
+					],
+					// 没有月套餐，就不支持更改套餐
+					noData: false
 				},
 				// 激活的筛选
 				active: {
@@ -257,6 +300,10 @@
 						{
 							value: '2',
 							netWork: '联通'
+						},
+						{
+							value: '3',
+							netWork: '电信'
 						}
 					]
 				},
@@ -287,36 +334,132 @@
 			};
 		},
 		mounted() {
+
 		},
 		methods: {
 			// 切换卡片操作的导航
 			toggleNav(index) {
 				this.tabIndex = index
+				// 如果是套餐变更
+				if(this.tabIndex === 0) {
+					// 获取到运营商
+					this.$axios({
+						url: '/api/getNetWorkByCom',
+						method: 'post'
+					}).then(res => {
+						console.log(res.data.object)
+						let data = res.data.object
+						if(!data.length) {
+							this.packageChange.noData = true
+							return
+						}
+						this.packageChange.noData = false
+						this.packageChange.netWorkOptions = []
+						for(let i=0; i<data.length; i++) {
+							this.packageChange.netWorkOptions.push({
+								value: data[i].netWork,
+								netWork: getNetWork(data[i].netWork)
+							})
+						}
+					})
+				}
+			},
+			// 加载套餐流量的数据
+			loadPackageFlow() {
+				let netWork = this.packageChange.netWork
+				this.$axios({
+					url: '/api/getPackagesSingle',
+					method: 'post',
+					params: {
+						// 运营商
+						netWork: netWork
+					}
+				}).then(res => {
+					console.log(res.data.object)
+					let data = res.data.object;
+					if(!data.length) {
+						this.packageChange.packageFlowShow = false
+						this.packageChange.packageFlow = ''
+						this.packageChange.packageFlowOptions = []
+						return
+					}
+					this.packageChange.packageFlowShow = true
+					this.packageChange.packageFlow = ''
+					this.packageChange.packageFlowOptions = []
+					for (let i = 0; i < data.length; i++) {
+						this.packageChange.packageFlowOptions.push({
+							value: data[i].userLimit,
+							packageFlow: getPackageFlow(data[i].userLimit),
+						})
+					}
+				})
 			},
 			// 获取表格 数据
 			getTableData() {
-				let reg = /.*[\u4e00-\u9fa5]+.*$/;
-				if (reg.test(this.numVal)) {
-					this.$message({
-						type: 'info',
-						message: '请输入正确的卡号或ICCID'
-					});
-					return
+				let tabIndex = this.tabIndex,
+					pageSize = this.pageSize,
+					pageNo = this.pageNo,
+					cardNo = this.tabIndex === 0 ? this.packageChange.cardNo : this.tabIndex === 1 ? this.active.cardNo : this.stopCard.cardNo,
+					netWorkType = this.tabIndex === 0 ? this.packageChange.netWorkType : '',
+					netWork = this.tabIndex === 0 ? this.packageChange.netWork : this.tabIndex === 1 ? this.active.netWork : this.stopCard.netWork,
+					userLimit = this.tabIndex === 0 ? this.packageChange.packageFlow : '',
+					isSingle = this.tabIndex === 0 ? this.packageChange.flowCalc : '',
+					businessCard = this.tabIndex === 0 ? this.packageChange.isCLCard : '',
+					packageType = 1
+				// 如果是套餐变更
+				if(tabIndex === 0) {
+					// 如果筛选框都没有值的话，则给出提示并且不去请求表格数据
+					if (!netWorkType || !netWork || !userLimit || !isSingle || !businessCard) {
+						this.$message.info('所有的筛选条件均不能为空');
+						return
+					}
+				}
+				// 如果是激活
+				else if(tabIndex === 1) {
+					// 如果筛选框都没有值的话，则给出提示并且不去请求表格数据
+					if(!netWork) {
+						this.$message.info('运营商不能为空');
+						return
+					}
+				}
+				// 如果是停卡
+				else if(tabIndex === 2) {
+					// 如果筛选框都没有值的话，则给出提示并且不去请求表格数据
+					if(!netWork) {
+						this.$message.info('运营商不能为空');
+						return
+					}
 				}
 				this.loading = true
 				this.$axios({
-					url: '',
+					url: '/api/v2/device/devicePageList',
 					method: 'post',
 					params: {
-
+						// 分页
+						pageSize: pageSize,
+						pageNo: pageNo,
+						// 卡号或者ICCID
+						cardNo: cardNo,
+						// 制式
+						netWorkType: netWorkType,
+						// 运营商
+						netWork: netWork,
+						// 套餐流量
+						userLimit: userLimit,
+						// 流量计算
+						isSingle: isSingle,
+						// 是否车联卡
+						businessCard: businessCard,
+						// 套餐类型
+						packageType: packageType
 					}
 				}).then(res => {
-//					console.log(res.data.data)
+					console.log(res.data.data)
 					let data = res.data.data;
 					this.totalCount = res.data.totalCount
-					this.tableData = []
+					this.operateData = []
 					for (let i = 0; i < data.length; i++) {
-						this.tableData.push({
+						this.operateData.push({
 							cardNo: data[i].cardNumber,
 							iccid: data[i].iccid,
 							netWork: data[i].netWork === 1 ? '移动' : data[i].netWork === 2 ? '联通' : '电信',
@@ -333,7 +476,7 @@
 										data[i].networkType === 4 ? '2G' :
 											data[i].networkType === 5 ? 'NB' :
 												data[i].networkType === 6 ? 'EMTC' : '',
-							startTime: data[i].startTime.split(' ')[0],
+							batchTime: data[i].chargeTime.split(' ')[0],
 							endTime: data[i].endTime.split(' ')[0],
 							cardKind: data[i].cardType === 1 ? '大卡' :
 								data[i].cardType === 2 ? '双切' :
@@ -341,6 +484,7 @@
 										data[i].cardType === 4 ? '2*2' :
 											data[i].cardType === 5 ? '5*6' :
 												data[i].cardType === 6 ? 'eSim' : '其他',
+							deviceId: data[i].deviceId
 						})
 					}
 					this.loading = false
@@ -372,7 +516,18 @@
 					if(!this.currentArr.length) {
 						this.$message.info('请先选择要操作的表格项')
 					}else {
-						this.$router.push({path: '/packageChange'})
+						let deviceIds = ''
+						for(let i=0; i<this.currentArr.length; i++) {
+							deviceIds += this.currentArr[i].deviceId + ','
+						}
+						deviceIds = deviceIds.slice(0,deviceIds.length-1)
+						console.log(deviceIds)
+						this.$router.push({
+							name: 'packageChange',
+							params: {
+								deviceIds: deviceIds
+							}
+						})
 					}
 				}
 				// 激活
@@ -464,6 +619,7 @@
 							.select {
 								width: 250px;
 								margin-right: 60px;
+								margin-bottom: 34px;
 							}
 							.btn-search {
 								width: 100px;

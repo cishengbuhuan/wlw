@@ -83,7 +83,7 @@
 							</el-option>
 						</el-select>
 						<!-- 制式 -->
-						<el-select v-model="netWorkTypeValue"
+						<el-select v-model="netWorkType"
 						           clearable
 						           @change="toggleNetWorkType"
 						           placeholder="请选择制式">
@@ -95,7 +95,7 @@
 							</el-option>
 						</el-select>
 						<!-- 运营商 -->
-						<el-select v-model="netWorkValue"
+						<el-select v-model="netWork"
 						           clearable
 						           @change="toggleNetWork"
 						           placeholder="请选择运营商">
@@ -151,13 +151,13 @@
 						                 align="center"></el-table-column>
 						<el-table-column prop="flowOverage" sortable='custom' label="本月剩余流量"
 						                 align="center"></el-table-column>
-						<el-table-column prop="startTime" label="计费时间" width='100' align="center"></el-table-column>
+						<el-table-column prop="startTime" label="批次时间" width='100' align="center"></el-table-column>
 						<el-table-column prop="endTime" label="到期时间" width='100' align="center"></el-table-column>
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
 						<el-table-column prop="system" label="制式" align="center"></el-table-column>
 						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
 						<el-table-column prop="remark" label="备注" align="center"></el-table-column>
-						<el-table-column prop="operate" label="操作" align="center">
+						<el-table-column label="操作" align="center">
 							<template slot-scope="scope">
 								<span class="more" @click="goDetail(scope.row)">查看详情</span>
 								<span class="remark" @click="btnRemark(scope.row)">备注</span>
@@ -217,8 +217,6 @@
 				areaValue: '',
 				statusValue: '',
 				kindValue: '',
-				netWorkTypeValue: '',
-				netWorkValue: '',
 				packagesTypeValue: '',
 				cardInfo: {
 					total: '',
@@ -409,7 +407,7 @@
 						endTime: this.endTime,
 						sort: this.sortData,
 						direct: this.direct,
-						cardPackage: this.packagesTypeValue,
+						packageType: this.packagesTypeValue,
 						cardType: this.cardType,
 						netWork: this.netWork
 					}
@@ -465,7 +463,7 @@
 					endTime = this.endTime,
 					sort = this.sortData,
 					direct = this.direct,
-					cardPackage = this.packagesTypeValue,
+					packageType = this.packagesTypeValue,
 					cardType = this.cardType,
 					isSingle = this.isSingle
 				this.uploadHref = `${this.baseUrl}?_token=${token}
@@ -473,7 +471,7 @@
 					&cardNo=${cardNo}&status=${status}
 					&netWorkType=${netWorkType}&startTime=${startTime}
 					&endTime=${endTime}&sort=${sort}
-					&direct=${direct}&cardPackage=${cardPackage}
+					&direct=${direct}&packageType=${packageType}
 					&cardType=${cardType}&isSingle=${isSingle}`
 				let iframe = document.createElement('iframe');
 				iframe.src = this.uploadHref
@@ -516,7 +514,7 @@
 				this.pageNo = 1
 				this.getTableData()
 			},
-			// 套餐 的下拉框的值发生变化的时候触发
+			// 套餐类型 的下拉框的值发生变化的时候触发
 			togglePackagesType(val) {
 				this.packagesTypeValue = val;
 				this.pageNo = 1
@@ -524,7 +522,7 @@
 			},
 			// 制式 的下拉框的值发生变化的时候触发
 			toggleNetWorkType(val) {
-				this.netWorkTypeValue = val;
+				this.netWorkType = val;
 				this.pageNo = 1
 				this.getTableData()
 			},
@@ -873,6 +871,7 @@
 				height: 300px;
 				background-color: #fff;
 				transform: translate(-50%, -50%);
+				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				position: absolute;
 				left: 50%;
 				top: 50%;
