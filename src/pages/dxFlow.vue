@@ -219,11 +219,11 @@
 				systemValue: '',
 				statusOptions: [
 					{
-						value: '1',
+						value: '0',
 						status: '在线'
 					},
 					{
-						value: '0',
+						value: '1',
 						status: '离线'
 					}
 				],
@@ -342,7 +342,7 @@
 				}).then(res => {
 					let data = res.data.data;
 
-					console.log(data)
+//					console.log(data)
 					// 总流量
 					that.baseInfo.totalFlow = data.cardInfo.total
 					// 单卡流量
@@ -423,8 +423,7 @@
 							message: data[i].msgNo,
 //							endTime: timestampToTime(data[i].endTime),
 							endTime: data[i].endTime.split(' ')[0],
-							cardStatus: data[i].onlineStatus === 1 ? '在线' :
-								data[i].onlineStatus === 0 ? '离线' : '',
+							cardStatus: data[i].cardStatus === 0 ? '在线' : '离线',
 							deviceId: data[i].deviceId
 						})
 					}

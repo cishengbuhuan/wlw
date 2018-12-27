@@ -114,6 +114,10 @@
 							<input type="text" placeholder="请输入ICCID或者卡号" v-model="numVal">
 							<div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
 						</div>
+						<div class="search-box">
+							<input type="text" placeholder="请输入备注内容搜索" v-model="searchRemark">
+							<div class="btn-search" @click="getTableData"><i class="el-icon-search"></i></div>
+						</div>
 						<!-- 时间查询 -->
 						<div class="time-inquire">
 							<span>时间：</span>
@@ -124,8 +128,8 @@
 									align="right"
 									unlink-panels
 									range-separator="至"
-									start-placeholder="计费时间起"
-									end-placeholder="计费时间止">
+									start-placeholder="批次时间起"
+									end-placeholder="批次时间止">
 							</el-date-picker>
 							<div class="btn-inquire" @click="pickChange">查询</div>
 							<!-- 导出 -->
@@ -145,17 +149,17 @@
 						<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 						<el-table-column prop="flowPackage" label="流量池套餐" width='70' align="center"></el-table-column>
-						<el-table-column prop="packageType" label="套餐类型" width='70' align="center"></el-table-column>
-						<el-table-column prop="message" label="短信(已使用)" align="center"></el-table-column>
 						<el-table-column prop="flowUsage" width="90" sortable='custom' label="本月已使用流量"
 						                 align="center"></el-table-column>
 						<el-table-column prop="flowOverage" sortable='custom' label="本月剩余流量"
 						                 align="center"></el-table-column>
+						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
+						<el-table-column prop="packageType" label="套餐类型" width='70' align="center"></el-table-column>
+						<el-table-column prop="system" label="制式" align="center"></el-table-column>
+						<!--<el-table-column prop="message" label="短信(已使用)" align="center"></el-table-column>-->
 						<el-table-column prop="startTime" label="批次时间" width='100' align="center"></el-table-column>
 						<el-table-column prop="endTime" label="到期时间" width='100' align="center"></el-table-column>
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
-						<el-table-column prop="system" label="制式" align="center"></el-table-column>
-						<el-table-column prop="cardStatus" label="卡状态" align="center"></el-table-column>
 						<el-table-column prop="remark" label="备注" align="center"></el-table-column>
 						<el-table-column label="操作" align="center">
 							<template slot-scope="scope">
@@ -230,11 +234,11 @@
 					// 状态
 					statusOptions: [
 						{
-							value: '1',
+							value: '0',
 							status: '在线'
 						},
 						{
-							value: '0',
+							value: '1',
 							status: '离线'
 						}
 					],
@@ -334,6 +338,7 @@
 				timeValue: '',
 				tableData: [],
 				numVal: '',
+				searchRemark: '',
 				beginTime: '',
 				endTime: '',
 				netWork: '',
@@ -398,13 +403,14 @@
 						pageSize: this.pageSize,
 						pageNo: this.pageNo,
 						cardNo: this.numVal,
+						remark: this.searchRemark,
 //                        area: this.netWork ? this.netWork : this.defaultNetWork,
 						status: this.status ? this.status : this.defaultStatus,
 						netWorkType: this.netWorkType ? this.netWorkType : this.defaultNetWorkType,
 
 
-						startTime: this.beginTime,
-						endTime: this.endTime,
+						start: this.beginTime,
+						end: this.endTime,
 						sort: this.sortData,
 						direct: this.direct,
 						packageType: this.packagesTypeValue,
@@ -425,11 +431,11 @@
 							flowPackage: data[i].packages,
 							packageType: translatePackages(data[i].packageType),
 							message: data[i].msgNo,
-							flowUsage: data[i].usageMonth == '' ? '' : parseFloat(data[i].usageMonth).toFixed(2) + 'M',
-							flowOverage: data[i].flowOverage == '' ? '' : parseFloat(data[i].flowOverage).toFixed(2) + 'M',
+							flowUsage: data[i].usageMonth === '' ? '' : parseFloat(data[i].usageMonth).toFixed(2) + 'M',
+							flowOverage: data[i].flowOverage === '' ? '' : parseFloat(data[i].flowOverage).toFixed(2) + 'M',
 //							startTime: timestampToTime(data[i].chargeTime),
 //							endTime: timestampToTime(data[i].endTime),
-							startTime: data[i].chargeTime.split(' ')[0],
+							startTime: data[i].serveTime.split(' ')[0],
 							endTime: data[i].endTime.split(' ')[0],
 							cardKind: data[i].cardType === 1 ? '大卡' :
 								data[i].cardType === 2 ? '双切' :
@@ -457,6 +463,7 @@
 					pageSize = this.pageSize,
 					pageNo = this.pageNo,
 					cardNo = this.numVal,
+					remark = this.searchRemark,
 					status = this.status ? this.status : this.defaultStatus,
 					netWorkType = this.netWorkType ? this.netWorkType : this.defaultNetWorkType,
 					startTime = this.beginTime,
@@ -467,7 +474,7 @@
 					cardType = this.cardType,
 					isSingle = this.isSingle
 				this.uploadHref = `${this.baseUrl}?_token=${token}
-					&pageSize=${pageSize}&pageNo=${pageNo}
+					&pageSize=${pageSize}&pageNo=${pageNo}&remark=${remark}
 					&cardNo=${cardNo}&status=${status}
 					&netWorkType=${netWorkType}&startTime=${startTime}
 					&endTime=${endTime}&sort=${sort}
@@ -580,7 +587,7 @@
 						}
 					}).then(res => {
 						let data = res.data
-						console.log(data)
+//						console.log(data)
 						if (data.code == 200) {
 							this.modalRemark = false
 							this.$message.success(data.message)
@@ -776,6 +783,7 @@
 					/* 搜索框和时间过滤 */
 					.search-group {
 						display: flex;
+						flex-wrap wrap
 						margin-top: 20px;
 						/* 搜索框 */
 						.search-box {

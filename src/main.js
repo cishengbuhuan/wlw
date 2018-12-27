@@ -53,7 +53,7 @@ axios.interceptors.response.use(function (response) {
 		console.log(response.data)
 		sessionStorage.removeItem('_token')
 		router.push('/login')
-		Message.error({message: response.data.msg});
+		Message.error({message: (response.data.msg || response.data.info)});
 	}
 	return response
 }, function (error) {
@@ -61,6 +61,14 @@ axios.interceptors.response.use(function (response) {
 	return Promise.reject(error)
 })
 
+
+// router.beforeEach((to, from, next) => {
+// 	/* 路由发生变化修改页面title */
+// 	if (to.meta.title) {
+// 		document.title = to.meta.title
+// 	}
+// 	next()
+// })
 
 /* eslint-disable no-new */
 new Vue({

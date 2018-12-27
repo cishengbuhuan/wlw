@@ -1,17 +1,17 @@
 <template>
-	<div class="packageChangeSearch-wrap">
+	<div class="stopRestore-wrap">
 		<div class="content">
-			<!-- 套餐变更查询 -->
-			<div class="package-change-search">
-				<div class="tips"><i class="line"></i>套餐变更查询</div>
+			<!-- 流量卡断复网详情 -->
+			<div class="stop-restore">
+				<div class="tips"><i class="line"></i>流量卡断复网详情</div>
 				<div class="search-box">
 					<!-- 工具栏 -->
 					<div class="tools">
-						<!-- 变更日期 -->
+						<!-- 操作时间 -->
 						<div class="date">
-							<span>变更日期: </span>
+							<span>操作时间: </span>
 							<el-date-picker
-									v-model="changeTime"
+									v-model="operateTime"
 									@change="btnChangeTime"
 									type="daterange"
 									align="right"
@@ -21,16 +21,16 @@
 									end-placeholder="结束时间">
 							</el-date-picker>
 						</div>
-						<!-- 变更状态 -->
-						<div class="status">
-							<span>变更状态: </span>
-							<el-select v-model="status"
+						<!-- 操作类型 -->
+						<div class="type">
+							<span>操作类型: </span>
+							<el-select v-model="type"
 							           clearable
-							           placeholder="请选择变更状态">
+							           placeholder="请选择操作类型">
 								<el-option
-										v-for="item in statusOptions"
+										v-for="item in typeOptions"
 										:key="item.value"
-										:label="item.status"
+										:label="item.type"
 										:value="item.value">
 								</el-option>
 							</el-select>
@@ -46,12 +46,12 @@
 								v-loading="loading"
 								style="width: 100%">
 							<el-table-column prop="sortNum" label="序号" align="center"></el-table-column>
-							<el-table-column prop="changeTime" width="200" label="变更时间" align="center"></el-table-column>
-							<el-table-column prop="endDate" label="到期日期" align="center"></el-table-column>
-							<el-table-column prop="remainTime" label="剩余时间" align="center"></el-table-column>
-							<el-table-column prop="totalCard" label="共计卡数" align="center"></el-table-column>
-							<el-table-column prop="needPrice" label="需支付费用" align="center"></el-table-column>
-							<el-table-column prop="status" label="变更状态" align="center"></el-table-column>
+							<el-table-column prop="operateTime" width="200" label="操作时间" align="center"></el-table-column>
+							<el-table-column prop="operateType" label="操作类型" align="center"></el-table-column>
+							<el-table-column prop="netWork" label="运营商" align="center"></el-table-column>
+							<el-table-column prop="needChangeCard" label="需变更卡数" align="center"></el-table-column>
+							<el-table-column prop="changeSuccess" label="变更成功" align="center"></el-table-column>
+							<el-table-column prop="changeFailure" label="变更失败" align="center"></el-table-column>
 							<el-table-column label="操作" align="center">
 								<template slot-scope="scope">
 									<span class="more" @click="changeDetail(scope.row)">变更详情</span>
@@ -76,27 +76,23 @@
 </template>
 
 <script>
-	import {timestampToTime, format, translatePackages, baseUrl} from '../api/dataUtil'
+	import {timestampToTime, format, translatePackages, baseUrl, getNetWork} from '../api/dataUtil'
 
 	export default {
 		data() {
 			return {
-				// 变更日期
-				changeTime: '',
-				// 变更状态
-				status: '',
-				statusOptions: [
+				// 操作时间
+				operateTime: '',
+				// 操作类型
+				type: '',
+				typeOptions: [
+					{
+						value: '0',
+						type: '停卡'
+					},
 					{
 						value: '1',
-						status: '成功'
-					},
-					{
-						value: '2',
-						status: '失败'
-					},
-					{
-						value: '3',
-						status: '待审核'
+						type: '复卡'
 					}
 				],
 				// table
@@ -133,29 +129,31 @@
 			getTableData() {
 				this.loading = true
 				this.$axios({
-					url: '/changeCardInfo/cardChangeInfo',
+					url: '/pauseActiveCard/activeAndPauseList',
 					method: 'post',
 					params: {
+						pageSize: this.pageSize,
+						pageNo: this.pageNo,
 						startTime: this.startTime,
 						endTime: this.endTime,
-						changeStatus: this.status
+						type: this.type
 					}
 				}).then(res => {
 					let data = res.data.data
-//					console.log(data)
+					console.log(data)
 
 					this.totalCount = res.data.totalCount
 					this.tableData = []
 					for(let i=0; i<data.length; i++) {
 						this.tableData.push({
 							sortNum: ((this.pageNo - 1) * this.pageSize) + i + 1,
-							changeTime: data[i].changeTime,
-							endDate: data[i].endTime.split(' ')[0],
-							remainTime: data[i].residueMonth ? data[i].residueMonth + '个月' : '',
-							totalCard: data[i].totalCard,
-							needPrice: data[i].priceDiff ? data[i].priceDiff + '元' : '',
-							status: this.getChangeStatus(data[i].changeStatus),
-							changeCardsId: data[i].changeCardsId
+							operateTime: data[i].createTime,
+							operateType: data[i].type == 1 ? '复卡' : '停卡',
+							netWork: getNetWork(data[i].netWork),
+							needChangeCard: data[i].totalCard,
+							changeSuccess: data[i].successCard,
+							changeFailure: data[i].failCard,
+							id: data[i].id
 						})
 					}
 					this.loading = false
@@ -163,23 +161,23 @@
 			},
 			// 跳转到变更详情
 			changeDetail(data) {
-				let changeCardsId = data.changeCardsId
+				let id = data.id
 				this.$router.push({
-					path: '/changeDetail',
+					path: '/stopRestoreDetail',
 					query: {
-						changeCardsId: changeCardsId
+						id: id
 					}
 				})
 			},
 			// 日期更改的时候
 			btnChangeTime() {
-				if (!this.changeTime) {
+				if (!this.operateTime) {
 					this.startTime = ''
 					this.endTime = ''
 					return
 				}
-				this.startTime = format(new Date(this.changeTime[0]).getTime(), "Y-m-d")
-				this.endTime = format(new Date(this.changeTime[1]).getTime(), "Y-m-d")
+				this.startTime = format(new Date(this.operateTime[0]).getTime(), "Y-m-d")
+				this.endTime = format(new Date(this.operateTime[1]).getTime(), "Y-m-d")
 			},
 			// 变更状态
 			getChangeStatus(i) {
@@ -199,7 +197,7 @@
 	mainBlue = #4cb2ff;
 	borderColor = #e7ebf3
 	buttonColor = #878787
-	.packageChangeSearch-wrap {
+	.stopRestore-wrap {
 		padding-top: 50px;
 		padding-left: 200px;
 		.content {
@@ -207,8 +205,8 @@
 			height: calc(100vh - 50px);
 			padding: 20px;
 			overflow-y: scroll;
-			/* 套餐变更查询 */
-			.package-change-search {
+			/* 流量卡断复网详情 */
+			.stop-restore {
 				width: 100%;
 				border-radius: 5px;
 				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
@@ -231,8 +229,8 @@
 					/* 工具栏 */
 					.tools {
 						display: flex;
-						/* 状态 */
-						.status {
+						/* 操作类型 */
+						.type {
 							margin-left: 40px;
 						}
 						.btn-search {

@@ -63,6 +63,16 @@
 								titleTwo: '套餐变更查询',
 								path: '/packageChangeSearch',
 								index: '2-4'
+							},
+							{
+								titleTwo: '流量卡断复网查询',
+								path: '/stopRestore',
+								index: '2-5'
+							},
+							{
+								titleTwo: '短信发送记录',
+								path: '/sendMsgRecord',
+								index: '2-6'
 							}
 						]
 					},
@@ -135,6 +145,10 @@
 				this.index = '2-3'
 			}else if(this.$route.name === 'packageChangeSearch') {
 				this.index = '2-4'
+			}else if(this.$route.name === 'storeRestore') {
+				this.index = '2-5'
+			}else if(this.$route.name === 'sendMsgRecord') {
+				this.index = '2-6'
 			}else if(this.$route.name === 'ydFlow') {
 				this.index = '3-1'
 			}else if(this.$route.name === 'ltFlow') {

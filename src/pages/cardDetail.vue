@@ -203,7 +203,7 @@
 					this.baseInfo.flowMonth = data.poolName
 					this.baseInfo.usageMonth = (data.usageMonth / 1024).toFixed(2) + 'M'
 					this.baseInfo.cardKind = translateCardKind(data.cardType)
-					this.baseInfo.cardStatus = data.onlineStatus === 1 ? '在线' : data.onlineStatus === 0 ? '离线' : '',
+					this.baseInfo.cardStatus = data.cardStatus === 0 ? '在线' : '离线',
 						this.baseInfo.operator = data.netWork === 1 ? '移动' : data.netWork === 2 ? '联通' : '电信'
 					this.baseInfo.system = translateSystem(data.networkType)
 					this.baseInfo.flowPackages = data.packages
@@ -269,7 +269,7 @@
 				iframe.src = this.uploadHref
 				document.body.appendChild(iframe)
 				iframe.style.display = 'none'
-			},
+			}
 		}
 	};
 </script>

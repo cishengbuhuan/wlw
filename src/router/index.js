@@ -7,10 +7,13 @@ import card from '../pages/card.vue'
 import singleCard from '../pages/singleCard.vue'
 import cardOperate from '../pages/cardOperate.vue'
 import packageChangeSearch from '../pages/packageChangeSearch.vue'
+import stopRestore from '../pages/stopRestore.vue'
+import stopRestoreDetail from '../pages/stopRestoreDetail.vue'
 import changeDetail from '../pages/changeDetail.vue'
 import packageChange from '../pages/packageChange.vue'
-import cardActive from '../pages/cardActive.vue'
-import cardStop from '../pages/cardStop.vue'
+import sendMsg from '../pages/sendMsg.vue'
+import sendMsgRecord from '../pages/sendMsgRecord.vue'
+import cardStopRestore from '../pages/cardStopRestore.vue'
 import cardDetail from '../pages/cardDetail.vue'
 import flowPool from '../pages/flowPool.vue'
 import ydFlow from '../pages/ydFlow.vue'
@@ -40,47 +43,98 @@ const router = new Router({
 		{
 			path: '/index',
 			name: 'index',
-			component: index
+			component: index,
+			meta: {
+				title: '梦初想物联网 | 首页'
+			}
 		},
 		{
 			path: '/card',
 			name: 'card',
-			component: card
+			component: card,
+			meta: {
+				title: '梦初想物联网 | 卡片列表'
+			}
 		},
 		{
 			path: '/singleCard',
 			name: 'singleCard',
-			component: singleCard
+			component: singleCard,
+			meta: {
+				title: '梦初想物联网 | 单卡列表'
+			}
 		},
 		{
 			path: '/cardOperate',
 			name: 'cardOperate',
-			component: cardOperate
+			component: cardOperate,
+			meta: {
+				title: '梦初想物联网 | 卡片操作'
+			}
 		},
 		{
 			path: '/packageChange',
 			name: 'packageChange',
-			component: packageChange
+			component: packageChange,
+			meta: {
+				title: '梦初想物联网 | 套餐变更'
+			}
 		},
 		{
 			path: '/packageChangeSearch',
 			name: 'packageChangeSearch',
-			component: packageChangeSearch
+			component: packageChangeSearch,
+			meta: {
+				title: '梦初想物联网 | 套餐变更查询'
+			}
 		},
 		{
 			path: '/changeDetail',
 			name: 'changeDetail',
-			component: changeDetail
+			component: changeDetail,
+			meta: {
+				title: '梦初想物联网 | 变更详情'
+			}
 		},
 		{
-			path: '/cardActive',
-			name: 'cardActive',
-			component: cardActive
+			path: '/stopRestore',
+			name: 'stopRestore',
+			component: stopRestore,
+			meta: {
+				title: '梦初想物联网 | 流量卡断复网查询'
+			}
 		},
 		{
-			path: '/cardStop',
-			name: 'cardStop',
-			component: cardStop
+			path: '/stopRestoreDetail',
+			name: 'stopRestoreDetail',
+			component: stopRestoreDetail,
+			meta: {
+				title: '梦初想物联网 | 流量卡断复网详情'
+			}
+		},
+		{
+			path: '/cardStopRestore',
+			name: 'cardStopRestore',
+			component: cardStopRestore,
+			meta: {
+				title: '梦初想物联网 | 停复卡'
+			}
+		},
+		{
+			path: '/sendMsg',
+			name: 'sendMsg',
+			component: sendMsg,
+			meta: {
+				title: '梦初想物联网 | 发送短信'
+			}
+		},
+		{
+			path: '/sendMsgRecord',
+			name: 'sendMsgRecord',
+			component: sendMsgRecord,
+			meta: {
+				title: '梦初想物联网 | 短信发送记录'
+			}
 		},
 		{
 			path: '/flowPool/:type',
@@ -90,53 +144,83 @@ const router = new Router({
 		{
 			path: '/ydFlow',
 			name: 'ydFlow',
-			component: ydFlow
+			component: ydFlow,
+			meta: {
+				title: '梦初想物联网 | 移动'
+			}
 		},
 		{
 			path: '/ltFlow',
 			name: 'ltFlow',
-			component: ltFlow
+			component: ltFlow,
+			meta: {
+				title: '梦初想物联网 | 联通'
+			}
 		},
 		{
 			path: '/dxFlow',
 			name: 'dxFlow',
-			component: dxFlow
+			component: dxFlow,
+			meta: {
+				title: '梦初想物联网 | 电信'
+			}
 		},
 		{
 			path: '/account',
 			name: 'account',
-			component: account
+			component: account,
+			meta: {
+				title: '梦初想物联网 | 我的账户'
+			}
 		},
 		{
 			path: '/recharge',
 			name: 'recharge',
-			component: recharge
+			component: recharge,
+			meta: {
+				title: '梦初想物联网 | 充值'
+			}
 		},
 		{
 			path: '/message',
 			name: 'message',
-			component: message
+			component: message,
+			meta: {
+				title: '梦初想物联网 | 我的消息'
+			}
 		},
 		{
 			path: '/manage',
 			name: 'manage',
-			component: manage
+			component: manage,
+			meta: {
+				title: '梦初想物联网 | 账户管理'
+			}
 		},
 		{
 			path: '/forget',
 			name: 'forget',
-			component: forget
+			component: forget,
+			meta: {
+				title: '梦初想物联网 | 忘记密码'
+			}
 		},
 		{
 			path: '/bill',
 			name: 'bill',
-			component: bill
+			component: bill,
+			meta: {
+				title: '梦初想物联网 | 申请发票'
+			}
 		},
 		// 卡详情
 		{
 			path: '/cardDetail',
 			name: 'cardDetail',
-			component: cardDetail
+			component: cardDetail,
+			meta: {
+				title: '梦初想物联网 | 卡详情'
+			}
 		},
 	]
 })

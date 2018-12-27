@@ -31,6 +31,7 @@
 	export default {
 		data() {
 			return {
+				headImg: 'logo',
 				user: {
 					msgNum: 0,
 					headImg: '../../static/images/default-head.png',
@@ -39,6 +40,7 @@
 			};
 		},
 		mounted() {
+//			console.log(document.body.clientWidth)
 			this.getHeaderInfo()
 		},
 		methods: {
@@ -55,7 +57,7 @@
 			},
 			// 退出登录
 			signOut() {
-				console.log('退出')
+//				console.log('退出')
 				sessionStorage.removeItem('_token');
 				sessionStorage.removeItem('userId');
 				sessionStorage.removeItem('companyId');

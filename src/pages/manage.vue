@@ -210,7 +210,6 @@
 				this.user.account = this.accountData[index].account;
 			},
 			saveEdit(index) {
-//				if(){}
 				this.$axios({
 					url: '/api/v2/user/update',
 					method: 'post',

@@ -219,11 +219,11 @@
 				systemValue: '',
 				statusOptions: [
 					{
-						value: '1',
+						value: '0',
 						status: '在线'
 					},
 					{
-						value: '0',
+						value: '1',
 						status: '离线'
 					}
 				],
@@ -342,7 +342,7 @@
 				}).then(res => {
 					let data = res.data.data;
 
-					console.log(data)
+//					console.log(data)
 					// 总流量
 					that.baseInfo.totalFlow = data.cardInfo.total
 					// 单卡流量
@@ -360,7 +360,7 @@
 					that.flowData.rows = []
 					that.flowData.rows.push({
 						flowSize: data.cardInfo.dataSize + 'M',
-						usage: data.cardInfo.poolUse,
+						usage: Number(data.cardInfo.poolUse).toFixed(2),
 						unused: this.getUnused(data.cardInfo.total, data.cardInfo.poolUse),
 						exceeded: this.getExceeded(data.cardInfo.total, data.cardInfo.poolUse)
 					})
@@ -423,8 +423,7 @@
 							message: data[i].msgNo,
 //							endTime: timestampToTime(data[i].endTime),
 							endTime: data[i].endTime.split(' ')[0],
-							cardStatus: data[i].onlineStatus === 1 ? '在线' :
-								data[i].onlineStatus === 0 ? '离线' : '',
+							cardStatus: data[i].cardStatus === 0 ? '在线' : '离线',
 							deviceId: data[i].deviceId
 						})
 					}
@@ -488,7 +487,7 @@
 			// 处理未使用
 			getUnused(total, used) {
 				if (total > used) {
-					return total - used
+					return Number(total - used).toFixed(2)
 				} else {
 					return o
 				}
@@ -498,7 +497,7 @@
 				if (total > used) {
 					return 0
 				} else {
-					return used - total
+					return Number(used - total).toFixed(2)
 				}
 			}
 		}

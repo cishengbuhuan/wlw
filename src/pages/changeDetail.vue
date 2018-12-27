@@ -131,8 +131,8 @@
 
 					this.tableData = []
 					this.tableData.push({
-						oldFlow: data.userLimitBefore + 'M',
-						newFlow: data.userLimitAfter + 'M',
+						oldFlow: getPackageFlow(data.userLimitBefore),
+						newFlow: getPackageFlow(data.userLimitAfter),
 						oldCost: data.packageFeeBefore + '元',
 						newCost: data.packageFeeAfter + '元',
 						oldTotalCost: data.totalFeeBefore + '元',

@@ -43,9 +43,9 @@
 						<div class="old-package">
 							原套餐流量: <span>{{ oldPackageFlow }}</span>
 						</div>
-						<!-- 需变革套餐流量 -->
+						<!-- 需变更套餐流量 -->
 						<div class="new-package">
-							<span>需变革套餐流量: </span>
+							<span>需变更套餐流量: </span>
 							<el-select v-model="newPackageFlow"
 							           clearable
 							           @change="getPackageChangeData"
@@ -81,27 +81,8 @@
 					<!-- 按钮组 -->
 					<div class="btn-group">
 						<div class="btn-item btn-back" @click="btnSure(0)">返回</div>
-						<div class="btn-item btn-sure" @click="btnSure(1)">确认</div>
+						<div class="btn-item btn-sure" v-show="tableData.length" @click="btnSure(1)">确认</div>
 					</div>
-				</div>
-			</div>
-		</div>
-		<!-- 处理结果弹出框 -->
-		<div class="modal-result" v-show="modalResult" @click.self="modalResult = false">
-			<div class="result">
-				<div class="result-header">
-					<div class="icon"></div>
-					<span>处理结果</span>
-					<div class="icon"></div>
-				</div>
-				<div class="result-content">
-					<div class="success" v-if="resultSuccess">
-						扣款成功，消费金额为: {{ totalPrice }}
-					</div>
-					<div class="failure" v-if="!resultSuccess">
-						扣款失败，您的余额不足
-					</div>
-					<div class="btn-sure" @click="modalSure">确认</div>
 				</div>
 			</div>
 		</div>
@@ -125,11 +106,8 @@
 				newPackageOptions: [],
 				// table
 				tableData: [],
+				totalPrice: '',
 				loading: '',
-				totalPrice: '0',
-				// 处理结果的弹出框
-				modalResult: false,
-				resultSuccess: false,
 
 				deviceIds: '',
 				userLimit: '',
@@ -148,7 +126,16 @@
 				if(i===0) {
 					this.$router.push({path: '/cardOperate'})
 				}else {
-//					this.modalResult = true
+					if(!this.tableData.length) {
+						this.$router.push({path: '/cardOperate'})
+						return
+					}
+					let loading = this.$loading({
+						lock: true,
+						text: '正在发送申请，请稍后...',
+						spinner: 'el-icon-loading',
+						background: 'rgba(0, 0, 0, 0.7)'
+					});
 					this.$axios({
 						url: '/ucenterDevice/changeFlow',
 						method: 'post',
@@ -162,19 +149,16 @@
 						}
 					}).then(res => {
 						let data = res.data
-						console.log(data)
 						if(data.code == '100') {
+							loading.close();
 							this.$message.success(data.object)
 							this.$router.push({path: '/cardOperate'})
 						}else {
+							loading.close();
 							this.$message.error(data.object)
 						}
 					})
 				}
-			},
-			modalSure() {
-				this.modalResult = false
-				this.$router.push({path: '/cardOperate'})
 			},
 			// 获取到基本信息
 			getBaseInfo() {
@@ -185,7 +169,7 @@
 						deviceIds: this.deviceIds
 					}
 				}).then(res => {
-					console.log(res.data.object.cardInfos)
+//					console.log(res.data.object.cardInfos)
 					let cardInfos = res.data.object.cardInfos
 					let cardNumbers = cardInfos.cardNumbers
 					let iccids = cardInfos.iccids
@@ -230,7 +214,7 @@
 						businessCard: this.businessCard
 					}
 				}).then(res => {
-					console.log(res.data.object)
+//					console.log(res.data.object)
 					let data = res.data.object.cardList
 					this.totalPrice = res.data.object.total
 					this.tableData = []
@@ -373,67 +357,6 @@
 							color: #fff;
 							margin-left: 110px;
 						}
-					}
-				}
-			}
-		}
-		// 处理结果的弹出框
-		.modal-result {
-			width: 100%;
-			height: 100%;
-			background-color: rgba(0, 0, 0, 0.2);
-			position: fixed;
-			left: 0;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			z-index: 999;
-			.result {
-				width: 550px;
-				height: 300px;
-				background-color: #fff;
-				transform: translate(-50%, -50%);
-				position: absolute;
-				left: 50%;
-				top: 50%;
-				border-radius: 5px;
-				padding-top 20px
-				.result-header {
-					font-size 30px
-					color #737374
-					margin-bottom 30px
-					display flex
-					justify-content center
-					.icon {
-						width 10px
-						height 10px
-						border-radius 50%
-						background-color mainBlue
-						margin-top 17px
-					}
-					span {
-						margin 0 20px
-					}
-				}
-				.result-content {
-					padding: 0 20px;
-					text-align: center;
-					.success, .failure {
-						font-size: 24px;
-						color: #262626;
-						margin-top: 60px;
-					}
-					.btn-sure {
-						width: 100px;
-						height: 44px;
-						border-radius: 10px;
-						background-color: mainBlue;
-						font-size: 18px;
-						color: #fff;
-						text-align: center;
-						line-height: 44px;
-						cursor: pointer;
-						margin: 60px auto 0;
 					}
 				}
 			}

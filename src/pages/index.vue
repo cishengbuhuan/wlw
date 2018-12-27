@@ -446,13 +446,13 @@
 					}
 				}).then(res => {
 					let data = res.data.object;
-					console.log(data)
+//					console.log(data)
 					this.flowData.rows = []
 					for (let i = 0; i < data.length; i++) {
 						this.flowData.rows.push({
 							flowSize: data[i].dataSize + 'M',
-							usage: data[i].poolUse,
-							unused: data[i].unused,
+							usage: Number(data[i].poolUse).toFixed(2),
+							unused: this.transformUnused(data[i].total, data[i].poolUse),
 							exceeded: this.transformExceeded(data[i].total, data[i].poolUse)
 						})
 					}
@@ -493,7 +493,15 @@
 			// 处理流量统计的已超出
 			transformExceeded(total, usage) {
 				if (total < usage) {
-					return usage - total
+					return Number(usage - total).toFixed(2)
+				} else {
+					return 0
+				}
+			},
+			// 处理流量统计的未使用
+			transformUnused(total, usage) {
+				if (total > usage) {
+					return Number(total - usage).toFixed(2)
 				} else {
 					return 0
 				}

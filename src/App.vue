@@ -21,6 +21,7 @@
 <style>
 	#app {
 		width: 100%;
+		min-width: 1400px;
 		height: 100vh;
 	}
 

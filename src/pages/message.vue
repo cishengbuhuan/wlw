@@ -81,7 +81,7 @@
 						message: '删除成功!'
 					});
 				}).catch(() => {
-					console.log(this)
+//					console.log(this)
 					this.$message({
 						type: 'info',
 						message: '已取消删除'
@@ -110,7 +110,7 @@
 						message: '删除成功!'
 					});
 				}).catch(() => {
-					console.log(this)
+//					console.log(this)
 					this.$message({
 						type: 'info',
 						message: '已取消删除'
@@ -127,7 +127,7 @@
 						pageNo: this.pageNo
 					}
 				}).then(res => {
-					console.log(res.data.data)
+//					console.log(res.data.data)
 					let data = res.data.data;
 					for (let i = 0; i < data.length; i++) {
 						this.msgData.push({
@@ -137,7 +137,7 @@
 //							time: data[i].createTime,
 							msgId: data[i].messageId
 						})
-						console.log(this.msgData.time[i])
+//						console.log(this.msgData.time[i])
 					}
 				})
 			},
