@@ -1,6 +1,6 @@
 <template>
-	<div class="yd-flowPool-wrap">
-		<div class="content">
+	<div class="yd-flowPool-wrap wrap">
+		<div class="content wrap-content">
 			<!-- 基本信息 -->
 			<div class="base-info">
 				<div class="info-header">
@@ -36,11 +36,11 @@
 					<div class="chart" v-if="!noPoolId">
 						<div class="chart-item">
 							<ve-ring :data="baseInfo.usageData" :colors="usageColors" :settings="baseSettings"
-							        :extend="baseExtend"></ve-ring>
+							         :extend="baseExtend"></ve-ring>
 						</div>
 						<div class="chart-item">
 							<ve-ring :data="baseInfo.alarmData" :colors="alarmColors" :settings="baseSettings"
-							        :extend="alarmExtend"></ve-ring>
+							         :extend="alarmExtend"></ve-ring>
 						</div>
 					</div>
 					<!-- tips -->
@@ -339,12 +339,12 @@
 						this.packageTypeOptions.push({
 							value: dataType[i].packageType,
 							typePackage: dataType[i].packageType === 1 ? '月' :
-									dataType[i].packageType === 2 ? '半年' :
+								dataType[i].packageType === 2 ? '半年' :
 									dataType[i].packageType === 3 ? '季' :
-									dataType[i].packageType === 4 ? '年' : ''
+										dataType[i].packageType === 4 ? '年' : ''
 						})
 					}
-					console.log(this.packageTypeOptions)
+//					console.log(this.packageTypeOptions)
 					this.getPieTips();
 					this.getAlarmTips();
 					this.getPieUsage();
@@ -570,13 +570,7 @@
 <style lang="stylus" scoped>
 	mainBlue = #4cb2ff;
 	.yd-flowPool-wrap {
-		padding-top: 50px;
-		padding-left: 200px;
 		.content {
-			width: 100%;
-			height: calc(100vh - 50px);
-			padding: 20px;
-			overflow-y: scroll;
 			/* 基本信息 */
 			.base-info {
 				width: 100%;

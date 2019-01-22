@@ -1,6 +1,6 @@
 <template>
-	<div class="changeDetail-wrap">
-		<div class="content">
+	<div class="changeDetail-wrap wrap">
+		<div class="content wrap-content">
 			<!-- 变更详情 -->
 			<div class="change-detail">
 				<div class="tips"><i class="line"></i>变更详情</div>
@@ -117,7 +117,7 @@
 					}
 				}).then(res => {
 					let data = res.data.data
-					console.log(data)
+//					console.log(data)
 					this.cardNoStr = data.cardNumbers.replace(/,/g,'、')
 					this.iccidStr = data.iccids.replace(/,/g,'、')
 					// 运营商
@@ -149,13 +149,7 @@
 	borderColor = #e7ebf3
 	buttonColor = #878787
 	.changeDetail-wrap {
-		padding-top: 50px;
-		padding-left: 200px;
 		.content {
-			width: 100%;
-			height: calc(100vh - 50px);
-			padding: 20px;
-			overflow-y: scroll;
 			/* 变更详情 */
 			.change-detail {
 				width: 100%;

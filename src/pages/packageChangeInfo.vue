@@ -1,52 +1,43 @@
 <template>
-	<div class="sendMsgRecord-wrap wrap">
+	<div class="packageChangeSearch-wrap wrap">
 		<div class="content wrap-content">
 			<!-- 标题 -->
 			<div class="page-title">
 				<div class="line"></div>
-				<span>短信发送记录</span>
+				<span>套餐变更信息</span>
 			</div>
-			<!-- 发送记录 -->
-			<div class="send-record">
+			<!-- 表格数据 -->
+			<div class="card">
 				<!-- 工具栏 -->
 				<div class="tools">
-					<!-- 操作时间 -->
-					<div class="operate-time">
-						<span>操作时间: </span>
+					<!-- 变更时间 -->
+					<div class="change-time">
+						<span>变更时间: </span>
 						<el-date-picker
 								v-model="tools.startTime"
-								@change="pickChange"
 								class="timePicker"
-								type="date"
-								placeholder="开始日期">
+								type="datetime"
+								placeholder="开始时间">
 						</el-date-picker>
 						&nbsp; 至 &nbsp;
 						<el-date-picker
 								v-model="tools.endTime"
-								@change="pickChange"
 								class="timePicker"
 								type="date"
-								placeholder="结束日期">
+								placeholder="结束时间">
 						</el-date-picker>
 					</div>
-					<!-- 发送卡号/ICCID -->
-					<div class="card-num">
-						<span class="card-iccid">发送卡号/ICCID: </span>
-						<el-input class="input"
-						          v-model="tools.cardNum">
-						</el-input>
-					</div>
-					<!-- 发送状态 -->
-					<div class="send-status">
-						<span>发送状态: </span>
+					<!-- 变更状态 -->
+					<div class="change-status">
+						<span>变更状态: </span>
 						<el-select class="select"
 						           placeholder="全部"
 						           clearable
-						           v-model="tools.sendStatus">
+						           v-model="tools.changeStatus">
 							<el-option
-									v-for="item in tools.sendStatusOptions"
+									v-for="item in tools.changeStatusOptions"
 									:key="item.value"
-									:label="item.sendStatus"
+									:label="item.changeStatus"
 									:value="item.value">
 							</el-option>
 						</el-select>
@@ -60,13 +51,19 @@
 							:data="tableData"
 							border
 							v-loading="loading"
+							element-loading-text="正在加载数据，请稍候"
 							style="width: 100%">
-						<el-table-column prop="operateTime" label="操作时间" align="center"></el-table-column>
-						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
-						<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
-						<el-table-column prop="netWork" label="运营商" align="center"></el-table-column>
-						<el-table-column prop="sendContent" label="发送内容" align="center"></el-table-column>
-						<el-table-column prop="sendStatus" label="发送状态" align="center"></el-table-column>
+						<el-table-column prop="changeTime" label="变更时间" width="200" align="center"></el-table-column>
+						<el-table-column prop="expiryTime" label="到期日期" align="center"></el-table-column>
+						<el-table-column prop="remainTime" label="剩余时间" align="center"></el-table-column>
+						<el-table-column prop="totalCard" label="共计卡数" align="center"></el-table-column>
+						<el-table-column prop="needPay" label="需支付费用" align="center"></el-table-column>
+						<el-table-column prop="changeStatus" label="变更状态" align="center"></el-table-column>
+						<el-table-column label="操作" align="center">
+							<template slot-scope="scope">
+								<span class="more" @click="goDetail(scope.row)">变更详情</span>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -85,41 +82,33 @@
 </template>
 
 <script>
-	import {getNetWork} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
 				// 表格工具栏
 				tools: {
-					// 操作时间
+					// 批次日期
 					startTime: '',
 					endTime: '',
-					// 发送卡号/ICCID
-					cardNum: '',
-					// 发送状态
-					sendStatus: '',
-					sendStatusOptions: [
+					// 变更状态
+					changeStatus: '',
+					changeStatusOptions: [
 						{
 							value: '1',
-							sendStatus: '成功'
+							changeStatus: '成功'
 						},
 						{
 							value: '2',
-							sendStatus: '失败'
+							changeStatus: '失败'
+						},
+						{
+							value: '3',
+							changeStatus: '待审核'
 						}
 					]
 				},
 				// 表格数据
-				tableData: [
-					{
-						operateTime: '2018-09-09',
-						cardNum: '2019-01-01',
-						iccid: '3个月',
-						netWork: '20',
-						sendContent: '100',
-						sendStatus: '成功'
-					}
-				],
+				tableData: [],
 				// 表格分页
 				totalCount: 0,
 				pageSize: 20,
@@ -146,51 +135,41 @@
 				this.pageNo = 1;
 				this.getTableData()
 			},
-			// 获取短信发送记录的列表
+			// 获取到套餐信息列表
 			getTableData() {
 				this.loading = true
 				this.$axios({
-					url: '/smsSendInfo/smsList',
+					url: '/changeCardInfo/cardChangeInfo',
 					method: 'post',
 					params: {
 						pageSize: this.pageSize,
 						pageNo: this.pageNo,
-						// 卡号/ICCID
-						cardNo: this.tools.cardNum,
-						// 操作时间
-						start: this.tools.startTime,
-						end: this.tools.endTime,
-						// 发送状态
-						sendStatus: this.tools.sendStatus,
+						// 变更状态
+						changeStatus: this.tools.changeStatus,
+						// 批次日期
+						startTime: this.tools.startTime,
+						endTime: this.tools.endTime,
 					}
 				}).then(res => {
 					this.tableData = []
 					let data = res.data.data;
-					console.log(data)
+//					console.log(data)
 					if(res.data.code == 1) {
 						this.loading = false
 						this.totalCount = res.data.totalCount
-						this.returnIds = res.data.msg
 						for(let i=0; i<data.length; i++) {
 							this.tableData.push({
-								operateTime: data[i].createTime,
-								cardNum: data[i].cardNumber,
-								iccid: data[i].iccid,
-								netWork: getNetWork(data[i].netWork),
-								sendContent: data[i].content,
-								sendStatus: this.getStatus(data[i].sendStatus)
+								changeTime: data[i].changeTime,
+								expiryTime: data[i].endTime.split(' ')[0],
+								remainTime: data[i].residueMonth ? data[i].residueMonth + '个月' : '',
+								totalCard: data[i].totalCard,
+								needPay: data[i].priceDiff ? data[i].priceDiff + '元' : '',
+								changeStatus: this.getChangeStatus(data[i].changeStatus),
+								changeCardsId: data[i].changeCardsId
 							})
 						}
 					}
 				})
-			},
-			// 获取到发送状态
-			getStatus(i) {
-				if(i==1) {
-					return '成功'
-				}else if(i==2) {
-					return '失败'
-				}
 			},
 			// 选择日期
 			pickChange() {
@@ -200,22 +179,42 @@
 					this.pageNo = 1
 					return
 				}
-				this.tools.startTime = format(new Date(this.tools.startTime).getTime(), "Y-m-d")
-				this.tools.endTime = format(new Date(this.tools.endTime).getTime(), "Y-m-d")
+				this.tools.startTime = format(new Date(this.tools.startTime).getTime(), "Y-m-d H:m:s")
+				this.tools.endTime = format(new Date(this.tools.endTime).getTime(), "Y-m-d H:m:s")
 				this.pageNo = 1
 			},
 			// 搜索按钮
 			btnSearch() {
 				if(!this.tools.startTime && this.tools.endTime) {
-					this.$message.info('操作时间的开始和结束时间都要选择')
+					this.$message.info('变更时间的开始和结束时间都要选择')
 				}else if(this.tools.startTime && !this.tools.endTime) {
-					this.$message.info('操作时间的开始和结束时间都要选择')
+					this.$message.info('变更时间的开始和结束时间都要选择')
 				}else if(this.tools.startTime > this.tools.endTime) {
 					this.$message.info('开始时间不能大于结束时间')
 				}else {
 					this.getTableData()
 				}
 			},
+			// 跳转到卡片信息页面
+			goDetail(data) {
+				let changeCardsId = data.changeCardsId
+				this.$router.push({
+					path: '/packageChangeDetail',
+					query: {
+						changeCardsId: changeCardsId
+					}
+				})
+			},
+			// 变更状态
+			getChangeStatus(i) {
+				if(i==1) {
+					return '成功'
+				}else if(i==2) {
+					return '失败'
+				}else {
+					return '待审核'
+				}
+			}
 		}
 	};
 </script>
@@ -223,10 +222,10 @@
 <style lang="stylus" scoped>
 	mainBlue = #1d9eed;
 	mainButton = #4cb2ff;
-	.sendMsgRecord-wrap {
+	.packageChangeSearch-wrap {
 		.content {
-			/* 发送记录 */
-			.send-record {
+			/* 表格数据 */
+			.card {
 				background-color: #fff;
 				border-radius: 20px;
 				margin-top: 20px;
@@ -235,29 +234,22 @@
 				.tools {
 					display: flex;
 					flex-wrap: wrap;
-					/* 操作时间、发送卡号、发送状态 */
-					.operate-time, .card-num, .send-status {
+					/* 变更日期、变更状态 */
+					.change-time, .change-status {
 						display: flex;
 						line-height: 40px;
 						margin-right: 40px;
 						margin-bottom: 20px;
 						span {
 							margin-right: 10px;
-							width: 80px;
 							font-size: 18px;
 							color: #545454;
-						}
-						.card-iccid {
-							width: 135px;
-						}
-						.input {
-							width: 220px;
 						}
 						.select {
 							width: 130px;
 						}
 						.timePicker {
-							width: 150px;
+							width: 220px;
 						}
 					}
 				}

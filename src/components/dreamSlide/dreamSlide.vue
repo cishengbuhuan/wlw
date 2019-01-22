@@ -5,9 +5,7 @@
 					:default-active="index"
 					active-text-color="#4cb2ff"
 					class="el-menu-vertical-demo"
-					unique-opened
-					@open="handleOpen"
-					@close="handleClose">
+					unique-opened>
 				<template v-for="(item,index) in menus">
 					<el-submenu v-if="item.menuTwo && item.menuTwo.length > 0" :index="item.index">
 						<template slot="title">
@@ -45,139 +43,103 @@
 						index: '2',
 						menuTwo: [
 							{
-								titleTwo: '卡片列表',
-								path: '/card',
+								titleTwo: '流量池卡库',
+								path: '/flowCard',
 								index: '2-1'
 							},
 							{
-								titleTwo: '单卡列表',
-								path: '/singleCard',
+								titleTwo: '非流量池卡库',
+								path: '/notFlowCard',
 								index: '2-2'
 							},
 							{
-								titleTwo: '卡片操作',
-								path: '/cardOperate',
+								titleTwo: '流量卡停复管理',
+								path: '/stopRestoreManage',
 								index: '2-3'
-							},
-							{
-								titleTwo: '套餐变更查询',
-								path: '/packageChangeSearch',
-								index: '2-4'
-							},
-							{
-								titleTwo: '流量卡断复网查询',
-								path: '/stopRestore',
-								index: '2-5'
-							},
-							{
-								titleTwo: '短信发送记录',
-								path: '/sendMsgRecord',
-								index: '2-6'
 							}
 						]
 					},
 					{
-						title: '流量池',
+						title: '套餐管理',
 						index: '3',
 						menuTwo: [
 							{
-								titleTwo: '中国移动',
-								path: '/ydFlow',
+								titleTwo: '套餐信息',
+								path: '/packageInfo',
 								index: '3-1',
 								type: 1
 							},
 							{
-								titleTwo: '中国联通',
-								path: '/ltFlow',
+								titleTwo: '套餐变更信息',
+								path: '/packageChangeInfo',
 								index: '3-2',
 								type: 2
-							},
-							{
-								titleTwo: '中国电信',
-								path: '/dxFlow',
-								index: '3-3',
-								type: 3
 							}
 						]
 					},
 					{
-						title: '系统设置',
+						title: '流量池管理',
 						index: '4',
 						menuTwo: [
 							{
-								titleTwo: '我的账户',
-								path: '/account',
+								titleTwo: '流量池信息',
+								path: '/flowPoolInfo',
 								index: '4-1'
+							}
+						]
+					},
+					{
+						title: '短信发送管理',
+						index: '5',
+						menuTwo: [
+							{
+								titleTwo: '短信发送',
+								path: '/sendMsg',
+								index: '5-1'
 							},
 							{
-								titleTwo: '账户管理',
-								path: '/manage',
-								index: '4-2'
-							},
-							{
-								titleTwo: '立即充值',
-								path: '/recharge',
-								index: '4-3'
-							},
-							{
-								titleTwo: '我的消息',
-								path: '/message',
-								index: '4-4'
-							},
-//							{
-//				                titleTwo: '申请开票',
-//				                path: '/bill',
-//				                index: '4-5'
-//							}
+								titleTwo: '短信发送记录',
+								path: '/sendMsgRecord',
+								index: '5-2'
+							}
 						]
 					}
 				]
 			};
 		},
 		mounted() {
-			if(this.$route.name === 'index') {
-				this.index = '1'
-			}else if(this.$route.name === 'card') {
-				this.index = '2-1'
-			}else if(this.$route.name === 'singleCard') {
-				this.index = '2-2'
-			}else if(this.$route.name === 'cardOperate') {
-				this.index = '2-3'
-			}else if(this.$route.name === 'packageChangeSearch') {
-				this.index = '2-4'
-			}else if(this.$route.name === 'storeRestore') {
-				this.index = '2-5'
-			}else if(this.$route.name === 'sendMsgRecord') {
-				this.index = '2-6'
-			}else if(this.$route.name === 'ydFlow') {
-				this.index = '3-1'
-			}else if(this.$route.name === 'ltFlow') {
-				this.index = '3-2'
-			}else if(this.$route.name === 'dxFlow') {
-				this.index = '3-3'
-			}else if(this.$route.name === 'account') {
-				this.index = '4-1'
-			}else if(this.$route.name === 'manage') {
-				this.index = '4-2'
-			}else if(this.$route.name === 'recharge') {
-				this.index = '4-3'
-			}else if(this.$route.name === 'message') {
-				this.index = '4-4'
-			}
+			this.getIndex(this.$route.name)
 		},
 		methods: {
-			handleOpen(key, keyPath) {
-				// console.log(key, keyPath);
-			},
-			handleClose(key, keyPath) {
-				// console.log(key, keyPath);
+			// 路由跳转的时候，根据不同的name，设置不同的index
+			getIndex(name) {
+				if(name === 'index') {
+					this.index = '1'
+				}else if(name === 'flowCard') {
+					this.index = '2-1'
+				}else if(name === 'notFlowCard') {
+					this.index = '2-2'
+				}else if(name === 'stopRestoreManage') {
+					this.index = '2-3'
+				}else if(name === 'packageInfo') {
+					this.index = '3-1'
+				}else if(name === 'packageChangeInfo') {
+					this.index = '3-2'
+				}else if(name === 'flowPoolInfo') {
+					this.index = '4-1'
+				}else if(name === 'sendMsg') {
+					this.index = '5-1'
+				}else if(name === 'sendMsgRecord') {
+					this.index = '5-2'
+				}
 			},
 			toPath(path) {
-//				console.log(path)
-//				if (path.path.indexOf('type') > 0) {
-//					this.$emit('typeChange', path.type)
-//				}
 				this.$router.replace(path)
+			}
+		},
+		watch: {
+			'$route.name'(val) {
+				this.getIndex(val)
 			}
 		}
 	};
@@ -187,7 +149,8 @@
 	.dream-slide {
 		width: 200px;
 		height: 100vh;
-		background-color: #334766;
+		/*background-color: #334766;*/
+		background-color: #fff;
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -199,34 +162,50 @@
 	}
 </style>
 <style lang="stylus">
+	mainBlue = #4cb2ff;
 	.dream-slide {
+		box-shadow: 0px 5px 10px rgba(47, 54, 82, 0.2);
 		.el-col {
 			ul.el-menu {
 				border-right: none;
 				background-color: transparent;
 				li.el-menu-item {
-					font-size: 18px;
-					color: #bbb;
+					font-size: 20px;
+					color: #a4a4a4;
 					height: 52px;
 					line-height: 52px;
 				}
+				>li.el-menu-item.is-active {
+					background: #f3f3f3;
+					position: relative;
+				}
+				>li.el-menu-item.is-active:after {
+					content: '';
+					display: block;
+					width: 6px;
+					height: 100%;
+					background-color: mainBlue;
+					position: absolute;
+					left: 0;
+					top: 0;
+				}
 				li.el-menu-item:hover, li.el-menu-item:focus {
-					background-color: #48576a;
+					background-color: #f3f3f3;
 				}
 				li.el-submenu {
 					.el-submenu__title {
-						font-size: 18px;
-						color: #bbb;
+						font-size: 20px;
+						color: #a4a4a4;
 					}
 					.el-submenu__title:hover, .el-submenu__title:focus {
-						background-color: #48576a;
+						background-color: #f3f3f3;
 					}
 					ul {
 						li.el-menu-item-group {
 							height: 36px;
 							line-height: 36px;
 							font-size: 16px;
-							color: #999;
+							color: #585858;
 							.el-menu-item-group__title {
 								padding: 0;
 							}
@@ -235,26 +214,28 @@
 							height: 36px;
 							line-height: 36px;
 							font-size: 16px;
-							color: #999;
+							color: #585858;
+						}
+						li .is-active {
+							background: #f3f3f3;
+							position: relative;
+						}
+						li .is-active:after {
+							content: '';
+							display: block;
+							width: 6px;
+							height: 100%;
+							background-color: mainBlue;
+							position: absolute;
+							left: 0;
+							top: 0;
 						}
 					}
 				}
 
 			}
+
 		}
-		/*.is-active {
-		  position: relative;
-		}
-		.is-active:after {
-		  content: '';
-		  display: block;
-		  width: 10px;
-		  height: 100%;
-		  background-color: #4cb2ff;
-		  position: absolute;
-		  right: 0;
-		  top: 0;
-		}*/
 	}
 </style>
 

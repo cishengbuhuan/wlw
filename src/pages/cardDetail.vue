@@ -1,30 +1,45 @@
 <template>
-	<div class="cardDetail-wrap">
-		<div class="content">
+	<div class="cardDetail-wrap wrap">
+		<div class="content wrap-content">
+			<!-- 标题 -->
+			<div class="page-title">
+				<div class="line"></div>
+				<span>单卡详情</span>
+			</div>
 			<!-- 基本信息 -->
 			<div class="base-info">
-				<div class="tips"><i></i>基本信息</div>
-				<div class="info-content">
-					<div class="row1">
-						<div class="item">
-							<img class="icon icon1" src="../../static/images/base-info-icon1.png">
-							<div class="info-data">
-								<div class="data-item">卡号: {{ baseInfo.cardNumber }}</div>
-								<div class="data-item">ICCID: {{ baseInfo.iccid }}</div>
-							</div>
+				<div class="tip">基本信息</div>
+				<div class="info-box">
+					<div class="info-item card-iccid">
+						<div class="item card">
+							卡号: {{ baseInfo.cardNum }}
 						</div>
-						<div class="item">
-							<img class="icon icon3" src="../../static/images/base-info-icon3.png">
-							<div class="info-data">
-								<div class="data-item">卡种类: {{ baseInfo.cardKind }}</div>
-								<div class="data-item">卡状态: {{ baseInfo.cardStatus }}</div>
-							</div>
+						<div class="item iccid">
+							ICCID: {{ baseInfo.iccid }}
 						</div>
-						<div class="item">
-							<img class="icon icon4" src="../../static/images/base-info-icon4.png">
-							<div class="info-data">
-								<div class="data-item">运营商: {{ baseInfo.operator }}</div>
-								<div class="data-item">卡制式: {{ baseInfo.system }}</div>
+					</div>
+					<div class="info-item base">
+						<div class="item kind">
+							卡种类: {{ baseInfo.cardType }}
+						</div>
+						<div class="item net-work">
+							运营商: {{ baseInfo.netWork }}
+						</div>
+						<div class="item netWork-type">
+							卡制式: {{ baseInfo.netWorkType }}
+						</div>
+					</div>
+					<div class="info-item status">
+						<span>卡状态: </span>
+						<div class="item-box">
+							<div class="item kind">
+								激活状态: {{ baseInfo.status.active }}
+							</div>
+							<div class="item net-work">
+								在线状态: {{ baseInfo.status.online }}
+							</div>
+							<div class="item netWork-type">
+								停卡状态: {{ baseInfo.status.stop }}
 							</div>
 						</div>
 					</div>
@@ -32,54 +47,72 @@
 			</div>
 			<!-- 流量信息 -->
 			<div class="flow-info">
-				<div class="tips"><i></i>流量信息</div>
-				<div class="info-content">
-					<div class="row1">
-						<div class="item">
-							<img class="icon icon2" src="../../static/images/base-info-icon2.png">
-							<div class="info-data">
-								<div class="data-item">本月套餐流量: {{ baseInfo.flowMonth }}</div>
-								<div class="data-item">本月已使用: {{ baseInfo.usageMonth }}</div>
-							</div>
+				<div class="tip">流量信息</div>
+				<div class="info-box">
+					<div class="info-item card-iccid">
+						<div class="item package">
+							本月套餐流量: {{ flowInfo.packageFlow }}
 						</div>
-						<div class="item">
-							<img class="icon icon6" src="../../static/images/base-info-icon6.png">
-							<div class="info-data">
-								<div class="data-item">开始时间: {{ baseInfo.startTime }}</div>
-								<div class="data-item">结束时间: {{ baseInfo.endTime }}</div>
-							</div>
+						<div class="item iccid">
+							本月已使用: {{ flowInfo.usage }}
 						</div>
-						<div class="item single">
-							<img class="icon-single" src="../../static/images/base-info-icon7.png">
-							<div class="info-data">已使用短信: {{ baseInfo.usageMsg }}</div>
+					</div>
+					<div class="info-item time">
+						<div class="item kind">
+							开始时间: {{ flowInfo.startTime }}
+						</div>
+						<div class="item net-work">
+							结束时间: {{ flowInfo.endTime }}
+						</div>
+					</div>
+					<div class="info-item msg">
+						<div class="item">
+							已使用短信: {{ flowInfo.usageMsg }}
 						</div>
 					</div>
 				</div>
 			</div>
 			<!-- 折线统计图 -->
-			<div class="polyline-chart">
-				<div class="tips"><i></i>折线统计图</div>
-				<div class="chart-content">
-					<!-- 时间筛选框 -->
+			<div class="line-chart">
+				<div class="tip">折线统计图</div>
+				<!-- chart -->
+				<div class="chart">
+					<!-- 工具栏 -->
 					<div class="tools">
-						<span>时间：</span>
-						<el-date-picker
-								v-model="timeValue"
-								type="daterange"
-								align="right"
-								unlink-panels
-								:clearable="isClearable"
-								range-separator="至"
-								start-placeholder="开始时间"
-								end-placeholder="结束时间">
-						</el-date-picker>
-						<div class="btn-search" @click="pickChange">查询</div>
-						<div class="btn-export" @click="btnExport">导出</div>
+						<!-- 时间 -->
+						<div class="time">
+							<span>时间: </span>
+							<el-date-picker
+									v-model="startTime"
+									@change="pickChange"
+									class="timePicker"
+									type="date"
+									format="yyyy-MM-dd"
+									value-format="yyyy-MM-dd"
+									placeholder="开始时间">
+							</el-date-picker>
+							&nbsp; 至 &nbsp;
+							<el-date-picker
+									v-model="endTime"
+									@change="pickChange"
+									class="timePicker"
+									type="date"
+									format="yyyy-MM-dd"
+									value-format="yyyy-MM-dd"
+									placeholder="结束时间">
+							</el-date-picker>
+						</div>
+						<!-- 搜索按钮 -->
+						<div class="btn-search btn-main" @click="getChartData">搜索</div>
+						<!-- 导出 -->
+						<div class="btn-export btn-gray" @click="btnExport">导出</div>
 					</div>
 					<!-- 折线图 -->
-					<div class="chart">
-						<ve-line :data="chartData" :settings="settings" :extend="extend"></ve-line>
-					</div>
+					<wl-line :options="chartData"
+					         :height="300"
+					         v-loading="loading"
+					         element-loading-text="正在加载数据，请稍侯">
+					</wl-line>
 				</div>
 			</div>
 		</div>
@@ -88,105 +121,103 @@
 
 <script>
 	import {
-		format, timestampToTime,
+		format, timestampToTime,getNetWork,getOnlineStatus,getActiveStatus,getStopStatus,
 		translateCardKind, translateSystem,
 		startDate, endDate, baseUrl
 	} from '../api/dataUtil'
-	import VeLine from "v-charts/lib/line.common";
-
+	import wlLine from '../components/chart/line.vue'
 	export default {
 		components: {
-			VeLine
+			wlLine
 		},
 		data() {
-			// 折线图
-			this.settings = {
-				labelLine: 'show',
-				yAxisName: ['流量/MB'],
-				xAxisName: ['日期'],
-				label: {
-					show: false
-				},
-				offsetY: 200,
-			}
-			this.extend = {
-				legend: {
-					show: false
-				},
-				series(v) {
-					v.forEach((e, idx) => {
-						e.lineStyle = {
-							color: '#4cb2ff', // 线条颜色
-							width: 2 // 线条宽度
-						}
-						e.itemStyle = {
-							borderColor: '#4cb2ff',
-							borderWidth: 6,
-							color: '#4cb2ff',
-							borderType: 'solid'
-						}
-					})
-					return v
-				},
-				tooltip: {
-					formatter: '{c0}MB' // 自定义提示
-				}
-			}
 			return {
 				// 基本信息
 				baseInfo: {
-					cardNumber: '',
+					cardNum: '',
 					iccid: '',
-					flowMonth: '',
-					usageMonth: '',
-					cardKind: '',
-					cardStatus: '',
-					operator: '',
-					system: '',
-					flowPackages: '',
-					singleFlow: '',
+					cardType: '',
+					netWork: '',
+					netWorkType: '',
+					status: {
+						active: '',
+						online: '',
+						stop: ''
+					}
+				},
+				// 流量信息
+				flowInfo: {
+					packageFlow: '',
+					usage: '',
 					startTime: '',
 					endTime: '',
 					usageMsg: ''
 				},
-				chartData: {
-					columns: ['date', 'usage'],
-					rows: []
-				},
-				timeValue: [],
-				// 预警值
-				warningStatus: 0,
-				deviceId: '',
-				// 起始时间
-				beginTime: '',
+				// 加载
+				loading: '',
+				// 折线图数据
+				startTime: '',
 				endTime: '',
+				chartData: {
+					color: ['#1d9eed'],
+					tooltip: {
+						trigger: 'axis',
+						formatter: function (params) {
+							return `日期: ${params[0].axisValue}</br>
+								<span style='display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: ${params[0].color};'></span>${params[0].seriesName}: ${params[0].value}M`
+						}
+					},
+					// 可以保存为图片
+//						toolbox: {
+//							feature: {
+//								saveAsImage: {}
+//							}
+//						},
 
-				pageSize: 50,
+					grid: {
+						left: '3%',
+						right: '5%',
+						bottom: '3%',
+						containLabel: true
+					},
+					xAxis: {
+						type: 'category',
+						boundaryGap: false,
+						axisLabel:{
+							interval: 0,
+							rotate: 50
+						},
+						data: []
+					},
+					yAxis: {
+						type: 'value'
+					},
+					series: [{
+						name: '使用量',
+						stack: '总量',
+						data: [],
+						type: 'line'
+					}]
+				},
+				deviceId: '',
 				pageNo: 1,
-				isClearable: false,
+				pageSize: 50,
 
 				// 下载的href
 				baseUrl: `${baseUrl}/api/importLog`,
 				uploadHref: ''
 			};
 		},
-		created() {
-			// 设置默认日期为当前日期
-			this.timeValue[0] = startDate
-			this.timeValue[1] = endDate
-			this.beginTime = startDate
-			this.endTime = endDate
-//			console.log(startDate)
-		},
 		mounted() {
-			this.deviceIdChange()
+			// 设置默认日期为当前日期
+			this.startTime = startDate
+			this.endTime = endDate
+			this.deviceId = this.$route.query.deviceId
 			this.getBaseInfo()
 		},
+		created() {
+		},
 		methods: {
-			deviceIdChange() {
-				this.deviceId = this.$route.query.deviceId
-				console.log(this.deviceId)
-			},
 			// 获取到基本信息
 			getBaseInfo() {
 				this.$axios({
@@ -197,74 +228,77 @@
 					}
 				}).then(res => {
 					let data = res.data.data
-					console.log(data)
-					this.baseInfo.cardNumber = data.cardNumber
+//					console.log(data)
+					// 基本信息
+					this.baseInfo.cardNum = data.cardNumber
 					this.baseInfo.iccid = data.iccid
-					this.baseInfo.flowMonth = data.poolName
-					this.baseInfo.usageMonth = (data.usageMonth / 1024).toFixed(2) + 'M'
-					this.baseInfo.cardKind = translateCardKind(data.cardType)
-					this.baseInfo.cardStatus = data.cardStatus === 0 ? '在线' : '离线',
-						this.baseInfo.operator = data.netWork === 1 ? '移动' : data.netWork === 2 ? '联通' : '电信'
-					this.baseInfo.system = translateSystem(data.networkType)
-					this.baseInfo.flowPackages = data.packages
-					this.baseInfo.singleFlow = data.usageMonth
-//					this.baseInfo.startTime = timestampToTime(Number(data.chargeTime))
-//					this.baseInfo.endTime = timestampToTime(Number(data.endTime))
-					this.baseInfo.startTime = data.chargeTime.split(' ')[0]
-					this.baseInfo.endTime = data.endTime.split(' ')[0]
-					this.baseInfo.usageMsg = data.msgNo
+					this.baseInfo.cardType = translateCardKind(data.cardType)
+					this.baseInfo.netWork = getNetWork(data.netWork)
+					this.baseInfo.netWorkType = translateSystem(data.networkType)
+
+					this.baseInfo.status.active = getActiveStatus(data.cardStatus)
+					this.baseInfo.status.online = getOnlineStatus(data.onlineStatus)
+					this.baseInfo.status.stop = getStopStatus(data.stopStatus)
+
+					// 流量信息
+					this.flowInfo.packageFlow = data.poolName
+					this.flowInfo.usage = (data.usageMonth / 1024).toFixed(2) + 'M'
+					this.flowInfo.startTime = data.chargeTime.split(' ')[0]
+					this.flowInfo.endTime = data.endTime.split(' ')[0]
+					this.flowInfo.usageMsg = data.msgNo
 
 
-					this.getFlowData()
+
+
+					this.getChartData()
 				})
 			},
 			// 获取到折线图数据
-			getFlowData() {
+			getChartData() {
+				this.loading = true
 				this.$axios({
 					url: '/api/v2/device/getLog',
 					method: 'post',
 					params: {
-						cardNo: this.baseInfo.cardNumber,
-						beginTime: this.beginTime,
+						cardNo: this.baseInfo.cardNum ? this.baseInfo.cardNum : this.baseInfo.iccid,
+						beginTime: this.startTime,
 						endTime: this.endTime,
 						pageSize: this.pageSize,
 						pageNo: this.pageNo
 					}
 				}).then(res => {
 					let data = res.data.data
-//					console.log(data)
-					this.chartData.rows = []
-					for (let i = 0; i < data.length; i++) {
-						this.chartData.rows.push({
-							date: data[i].insertTime.split(' ')[0],
-							usage: (data[i].usageYesterday / 1024).toFixed(2)
-						})
+					if(res.data.code == 1) {
+						this.loading = false
+						this.chartData.xAxis.data = []
+						this.chartData.series[0].data = []
+						for (let i = 0; i < data.length; i++) {
+							this.chartData.xAxis.data.push(data[i].insertTime.split(' ')[0]),
+								this.chartData.series[0].data.push((data[i].usageYesterday / 1024).toFixed(2))
+						}
 					}
 				})
 			},
 			// 选择日期
 			pickChange() {
-				if (!this.timeValue) {
-					this.beginTime = ''
+				if (!this.startTime && !this.endTime) {
+					this.startTime = ''
 					this.endTime = ''
-					this.getFlowData();
 					return
 				}
-				this.beginTime = format(new Date(this.timeValue[0]).getTime(), "Y-m-d")
-				this.endTime = format(new Date(this.timeValue[1]).getTime(), "Y-m-d")
-				this.getFlowData();
+				this.startTime = format(new Date(this.startTime).getTime(), "Y-m-d")
+				this.endTime = format(new Date(this.endTime).getTime(), "Y-m-d")
 			},
 			// 导出表格
 			btnExport() {
 				let token = sessionStorage.getItem('_token'),
-					cardNo = this.baseInfo.cardNumber ? this.baseInfo.cardNumber : this.baseInfo.iccid,
-					beginTime = this.beginTime,
+					cardNo = this.baseInfo.cardNum ? this.baseInfo.cardNum : this.baseInfo.iccid,
+					beginTime = this.startTime,
 					endTime = this.endTime
 				this.uploadHref = `${this.baseUrl}?_token=${token}
 						&cardNo=${cardNo}&beginTime=${beginTime}
 						&endTime=${endTime}`
 
-				console.log(this.uploadHref)
 				let iframe = document.createElement('iframe');
 				iframe.src = this.uploadHref
 				document.body.appendChild(iframe)
@@ -275,134 +309,153 @@
 </script>
 
 <style lang="stylus" scoped>
-	mainBlue = #4cb2ff;
+	mainBlue = #1d9eed;
+	mainButton = #4cb2ff;
 	.cardDetail-wrap {
-		padding-top: 50px;
-		padding-left: 200px;
 		.content {
-			width: 100%;
-			height: calc(100vh - 50px);
-			padding: 20px;
-			overflow-y: scroll;
 			/* 基本信息 */
-			.base-info, .flow-info {
-				width: 100%;
-				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
-				border-radius: 5px;
+			.base-info {
+				background-color: #fff;
+				height: 234px;
+				border-radius: 20px;
+				padding: 30px;
 				margin-bottom: 20px;
-				.tips {
-					height: 110px;
-					line-height: 110px;
-					border-bottom: 1px solid #ddd;
-					font-size: 26px;
-					display: flex;
-					padding-left: 45px;
-					i {
-						width: 6px;
-						height: 28px;
-						display: block;
-						background-color: mainBlue;
-						margin-top: 41px;
-						margin-right: 5px;
-					}
+				/* tip */
+				.tip {
+					font-size: 24px;
+					color: #585858;
 				}
-				.info-content {
-					padding: 20px 50px;
-					.row1, .row2, .row3 {
-						display: flex;
-						margin-bottom: 20px;
+				.info-box {
+					display: flex;
+					margin-top: 20px;
+					.info-item {
+						flex: 1;
 						.item {
-							display: flex;
-							flex: 1;
-							justify-content: center;
-							.icon {
-								width: 58px;
-								height: 72px;
-								margin-top: 23px;
-							}
-							.icon1 {
-
-							}
-							.info-data {
-								margin-left: 5px;
-								.data-item {
-									font-size: 18px;
-									height: 60px;
-									line-height: 60px;
-								}
-							}
+							font-size: 18px;
+							color: #585858;
 						}
-						.single {
-							margin-top: 43px;
-							display: flex;
-							flex: 1;
-							.icon-single {
-								width: 56px;
-								height: 28px;
-							}
-							.info-data {
-								margin-left: 5px;
-								font-size: 20px;
-								/*height: 60px;*/
-								line-height: 30px;
-							}
+					}
+					.card-iccid {
+						flex: 2;
+						display: flex;
+						flex-direction: column;
+						justify-content: space-around;
+					}
+					.base {
+						flex: 1;
+						border-left: 1px solid #ddd;
+						border-right: 1px solid #ddd;
+						text-align: center;
+						.item {
+							line-height: 40px;
+						}
+					}
+					.status {
+						flex: 2;
+						display: flex;
+						span {
+							margin: 44px 30px 0 70px;
+							font-size: 24px;
+							color: #585858;
+						}
+						.item {
+							line-height: 40px;
 						}
 					}
 				}
 			}
-			/* 折线统计图 */
-			.polyline-chart {
-				width: 100%;
-				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
-				border-radius: 5px;
+			/* 流量信息 */
+			.flow-info {
+				background-color: #fff;
+				height: 200px;
+				border-radius: 20px;
+				padding: 30px;
 				margin-bottom: 20px;
-				.tips {
-					height: 110px;
-					line-height: 110px;
-					border-bottom: 1px solid #ddd;
-					font-size: 26px;
+				/* tip */
+				.tip {
+					font-size: 24px;
+					color: #585858;
+				}
+				.info-box {
+					height: 90px;
 					display: flex;
-					padding-left: 45px;
-					i {
-						width: 6px;
-						height: 28px;
-						display: block;
-						background-color: mainBlue;
-						margin-top: 41px;
-						margin-right: 5px;
+					margin-top: 20px;
+					.info-item {
+						flex: 1;
+						display: flex;
+						flex-direction: column;
+						justify-content: space-between;
+						text-align: center;
+						.item {
+							font-size: 18px;
+							color: #585858;
+							line-height: 40px;
+						}
+					}
+					.card-iccid {
+						text-align: left;
+					}
+					.time {
+						border-left: 1px solid #ddd;
+						border-right: 1px solid #ddd;
+					}
+					.msg {
+						justify-content: space-around;
 					}
 				}
-				.chart-content {
-					padding-bottom: 40px;
-					/* 时间筛选框 */
+			}
+			/* 折线统计图 */
+			.line-chart {
+				background-color: #fff;
+				border-radius: 20px;
+				padding: 30px;
+				/* tip */
+				.tip {
+					font-size: 24px;
+					color: #585858;
+				}
+				.chart {
+					margin-top: 50px;
+					/* 工具栏 */
 					.tools {
 						display: flex;
-						justify-content: center;
-						font-size: 16px;
-						line-height: 40px;
-						margin-top: 50px;
-						span {
-							margin-right: 10px;
-						}
-						.btn-search, .btn-export {
-							width: 90px;
-							height: 40px;
-							border: 1px solid #ddd;
-							text-align: center;
+						/* 时间 */
+						.time {
+							display: flex;
 							line-height: 40px;
-							cursor: pointer;
-							border-radius: 5px;
+							margin-right: 40px;
+							margin-bottom: 20px;
+							span {
+								margin-right: 10px;
+								font-size: 18px;
+								color: #545454;
+							}
+							.timePicker {
+								width: 150px;
+							}
+						}
+						/* 导出按钮 */
+						.btn-export {
 							margin-left: 40px;
 						}
 					}
 					/* 折线图 */
-					.chart {
-						padding: 0 40px;
+				}
+			}
+		}
+	}
+	@media (min-width: 1600px) {
+		.cardDetail-wrap {
+			.content {
+				/* 基本信息 */
+				.base-info {
+					.info-box {
+						.info-item {
+							flex: 1;
+						}
 					}
 				}
 			}
 		}
 	}
 </style>
-
-

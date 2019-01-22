@@ -95,6 +95,30 @@ export function translateRechargeType(i) {
 		return ''
 	}
 }
+// 获取到在线状态
+export function getOnlineStatus(i) {
+	if (i == 1) {
+		return '在线'
+	} else if(i==0){
+		return '离线'
+	}
+}
+// 获取到激活状态
+export function getActiveStatus(i) {
+	if (i == 1) {
+		return '未激活'
+	} else if(i==0){
+		return '已激活'
+	}
+}
+// 获取到停卡状态
+export function getStopStatus(i) {
+	if (i == 0) {
+		return '已停卡'
+	} else {
+		return '未停卡'
+	}
+}
 
 // 返回本月的1号到当前天数日期
 export const startDate = `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01`
@@ -139,7 +163,6 @@ export function format(timestamp, formats) {
 }
 
 
-// export const baseUrl = 'http://192.168.1.27:8090'
-// export const baseUrl = 'http://www.91dream.net:8091'
-export const baseUrl = 'http://www.91dream.net:8090'
-
+// export const baseUrl = 'http://192.168.1.28:8091'
+export const baseUrl = 'http://www.91dream.net:8091'
+// export const baseUrl = 'http://www.91dream.net:8090'

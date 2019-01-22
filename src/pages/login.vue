@@ -15,61 +15,81 @@
 			<!-- 登录表单 -->
 			<div class="login-form">
 				<div class="title">账号登录</div>
-				<div class="form">
-					<!-- 账号 -->
-					<div class="tel">
-						<input type="tel" v-model="user.account" placeholder="请输入账号" maxlength="11" @change="loadCode">
-					</div>
-					<!-- 密码 -->
-					<div class="psw">
-						<input type="password" v-model="user.password" placeholder="请输入密码" @change="loadCode">
-					</div>
-					<!-- 图形验证码 -->
-					<div class="img-code" v-show="codeShow">
-						<input type="number" placeholder="请输入图形验证码" maxlength="4" v-model="user.code">
-						<img :src="user.imgSrc" alt="验证码" class="img" @click="refreshImg">
-					</div>
-					<!-- 记住密码和忘记密码 -->
+				<!--<div class="form">-->
+					<!--&lt;!&ndash; 账号 &ndash;&gt;-->
+					<!--<div class="tel">-->
+						<!--<input type="tel" v-model="user.account" placeholder="请输入账号" maxlength="11" @change="loadCode">-->
+					<!--</div>-->
+					<!--&lt;!&ndash; 密码 &ndash;&gt;-->
+					<!--<div class="psw">-->
+						<!--<input type="password" v-model="user.password" placeholder="请输入密码" @change="loadCode">-->
+					<!--</div>-->
+					<!--&lt;!&ndash; 图形验证码 &ndash;&gt;-->
+					<!--<div class="img-code" v-show="codeShow">-->
+						<!--<input type="text" placeholder="请输入图形验证码" maxlength="4" v-model="user.code">-->
+						<!--<img :src="user.imgSrc" alt="验证码" class="img" @click="refreshImg">-->
+					<!--</div>-->
+					<!--&lt;!&ndash; 记住密码和忘记密码 &ndash;&gt;-->
+					<!--<div class="remember-forget">-->
+						<!--<div class="remember">-->
+							<!--<input type="checkbox" v-model="isRemember">-->
+							<!--<span>记住账号</span>-->
+						<!--</div>-->
+						<!--<router-link to="/forget">-->
+							<!--<div class="forget">忘记密码</div>-->
+						<!--</router-link>-->
+					<!--</div>-->
+					<!--&lt;!&ndash; 登录按钮 &ndash;&gt;-->
+					<!--<div class="btn-login" @click="btnLogin">立即登录</div>-->
+				<!--</div>-->
+				<el-form
+						:model="form"
+						status-icon
+						:rules="rules"
+						label-width="100px"
+						class="form"
+						@keyup.enter.native="btnLogin">
+					<el-form-item label="用户名" prop="name">
+						<el-input
+								v-model="form.name"
+								auto-complete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="密码" prop="password">
+						<el-input
+								type="password"
+								v-model="form.password"
+								auto-complete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="验证码" prop="code" class="code">
+						<el-input
+								v-model="form.code"
+								auto-complete="off"></el-input>
+						<img :src="form.imgSrc" @click="refreshCode" class="img">
+					</el-form-item>
+					<!--<el-form-item class="remember-forget">-->
+						<!--&lt;!&ndash;<el-form-item label="记住密码">&ndash;&gt;-->
+							<!--&lt;!&ndash;<el-switch v-model="form.remember"></el-switch>&ndash;&gt;-->
+						<!--&lt;!&ndash;</el-form-item>&ndash;&gt;-->
+						<!--&lt;!&ndash;<router-link to="/forget">&ndash;&gt;-->
+							<!--&lt;!&ndash;<div class="forget">忘记密码</div>&ndash;&gt;-->
+						<!--&lt;!&ndash;</router-link>&ndash;&gt;-->
+						<!---->
+					<!--</el-form-item>-->
 					<div class="remember-forget">
 						<div class="remember">
-							<input type="checkbox" v-model="isRemember">
+							<input type="checkbox" v-model="form.remember">
 							<span>记住账号</span>
 						</div>
 						<router-link to="/forget">
 							<div class="forget">忘记密码</div>
 						</router-link>
 					</div>
-					<!-- 登录按钮 -->
-					<div class="btn-login" @click="btnLogin">立即登录</div>
-				</div>
+					<el-form-item>
+						<div class="btn-login" @click="btnLogin">立即登录</div>
+					</el-form-item>
+				</el-form>
 			</div>
 		</div>
-		<!--<footer>-->
-		<!--<div class="about">-->
-		<!--&lt;!&ndash; 关于我们 &ndash;&gt;-->
-		<!--<div class="about-us">-->
-		<!--<div class="icon"></div>-->
-		<!--<span>关于我们</span>-->
-		<!--</div>-->
-		<!--<div class="line"></div>-->
-		<!--&lt;!&ndash; 服务 &ndash;&gt;-->
-		<!--<div class="service">-->
-		<!--<div class="hot-line">-->
-		<!--<div class="icon"></div>-->
-		<!--<span>客服热线：028-849994</span>-->
-		<!--</div>-->
-		<!--<div class="time">-->
-		<!--<div class="icon"></div>-->
-		<!--<span>周一至周五：09：00-18：00</span>-->
-		<!--</div>-->
-		<!--</div>-->
-		<!--</div>-->
-		<!--<div class="copyright">-->
-		<!--<span>版权所有：2.0</span>-->
-		<!--<br>-->
-		<!--<span>备案号：12345789</span>-->
-		<!--</div>-->
-		<!--</footer>-->
 	</div>
 </template>
 
@@ -77,14 +97,28 @@
 	import {baseUrl} from '../api/dataUtil'
 	export default {
 		data() {
+			let checkName = (rule, value, callback) => {
+				if (!value) {
+					callback(new Error('请输入用户名'));
+				} else {
+					callback();
+				}
+			};
+			let checkPsw = (rule, value, callback) => {
+				if (!value) {
+					callback(new Error('请输入密码'));
+				} else {
+					callback();
+				}
+			};
+			let checkCode = (rule, value, callback) => {
+				if (!value) {
+					callback(new Error('请输入验证码'));
+				} else {
+					callback();
+				}
+			};
 			return {
-				codeShow: false,
-				user: {
-					account: '',
-					password: '',
-					code: '',
-					imgSrc: ''
-				},
 				bg: {
 					width: '100%',
 					minHeight: '100vh',
@@ -93,71 +127,88 @@
 					position: 'relative'
 				},
 				isRemember: true,
-				baseUrl: baseUrl
+				baseUrl: baseUrl,
+				form: {
+					name: '',
+					password: '',
+					code: '',
+					imgSrc: '',
+					time: '',
+					remember: ''
+				},
+				rules: {
+					name: [
+						{validator: checkName, trigger: 'blur'}
+					],
+					password: [
+						{validator: checkPsw, trigger: 'blur'}
+					],
+					code: [
+						{validator: checkCode, trigger: 'blur'}
+					]
+				}
 			};
 		},
+		created() {
+			// 页面创建的时候获取一次验证码
+			this.refreshCode()
+		},
 		mounted() {
-//          this.loadCode()
-			this.rememberAccount()
+			// 页面挂载的时候，先去看一下是否保存了账户密码
+			this.getAccountPassword()
 		},
 		methods: {
-			// 记住账号
-			rememberAccount(){
-				// 如果点击了记住账号
-				if(this.isRemember) {
-					this.user.account = sessionStorage.getItem('account');
-					this.user.password = sessionStorage.getItem('password');
-				}
-			},
+			// 登录按钮
 			btnLogin() {
-				if (!(/^1(3|4|5|6|7|8|9)\d{9}$/.test(this.user.account))) {
-					this.$message.error('请输入正确的手机号码！');
-				}else{
-					if(this.codeShow == false){
-						this.codeShow = true
-						this.user.imgSrc = this.baseUrl + '/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-					}else {
-						this.$axios({
-							url: '/api/v1/login',
-							method: 'post',
-							params: {
-								userCode: this.user.account,
-								password: this.user.password,
-								code: this.user.code
-							}
-						}).then(res => {
-							let code = res.data.code;
-							if (code == 1) {
-								sessionStorage.setItem('_token', res.data.data.token);
-								sessionStorage.setItem('userId', res.data.data.userId);
-								sessionStorage.setItem('companyId', res.data.data.companyId);
-								this.$router.push({path: '/index'})
-							} else if (code == 0) {
-								this.$message(res.data.msg);
-						        this.user.imgSrc = this.baseUrl + '/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-							}
-						})
-					}
-				}
-			},
-			// 账号和密码不为空
-			loadCode() {
-				if (this.user.account === '' || this.user.password === '') {
+				if(!this.form.name || !this.form.password || !this.form.code) {
+					this.$message.info('登录表单的内容不能为空！')
 					return
 				}
-				this.codeShow = true;
-				// 把账号和密码保存在sessionStorage里面
-				sessionStorage.setItem('account', this.user.account);
-				sessionStorage.setItem('password', this.user.password);
+				this.$axios({
+					url: '/api/v1/login',
+					method: 'post',
+					params: {
+						userCode: this.form.name,
+						password: this.form.password,
+						code: this.form.code,
+						time: this.form.time
+					}
+				}).then(res => {
+					// 登录的时候，如果点击了记住账号，则把账号和密码存放在缓存里
+					if(this.form.remember) {
+						localStorage.setItem('name', this.form.name);
+						localStorage.setItem('password', this.form.password);
+						localStorage.setItem('isRemember', this.form.remember);
+					}else {
+						localStorage.removeItem('name')
+						localStorage.removeItem('password')
+						localStorage.removeItem('isRemember')
+					}
 
-				this.user.imgSrc = this.baseUrl + '/api/v1/image?userCode=' + this.user.account
+
+					let code = res.data.code;
+					if (code == 1) {
+						sessionStorage.setItem('_token', res.data.data.token);
+						sessionStorage.setItem('userId', res.data.data.userId);
+						sessionStorage.setItem('companyId', res.data.data.companyId);
+						this.$router.push({path: '/index'})
+					} else if (code == 0) {
+						this.$message(res.data.msg);
+						this.refreshCode()
+					}
+				})
 			},
 			// 点击刷新验证码
-			refreshImg() {
-				this.user.imgSrc = '';
-				this.$nextTick(() => {
-					this.user.imgSrc = this.baseUrl + '/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-				})
+			refreshCode() {
+				let time = Date.parse(new Date())
+				this.form.time = time
+				this.form.imgSrc = `${this.baseUrl}/api/v1/image?time=${time}`
+			},
+			// 获取账户密码
+			getAccountPassword() {
+				this.form.remember = localStorage.getItem('isRemember');
+				this.form.name = localStorage.getItem('name');
+				this.form.password = localStorage.getItem('password');
 			}
 		}
 	};
@@ -202,7 +253,7 @@
 			}
 			/* 登录表单 */
 			.login-form {
-				width: 23%;
+				width: 400px;
 				height: 350px;
 				border-radius: 5px;
 				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
@@ -210,7 +261,7 @@
 				position: absolute;
 				top: 210px;
 				right: 5.2%;
-				padding: 0 42px;
+				padding-right: 30px;
 				.title {
 					font-size: 22px;
 					height: 76px;
@@ -229,17 +280,8 @@
 						}
 					}
 					/* 图形验证码 */
-					.img-code {
-						display: flex;
-						height: 60px;
-						border-bottom: 1px solid #ddd;
-						input {
-							width: 100%;
-						}
+					.code {
 						.img {
-							width: 78px;
-							height: 38px;
-							margin-top: 14px;
 							cursor: pointer;
 						}
 					}
@@ -247,7 +289,8 @@
 					.remember-forget {
 						display: flex;
 						justify-content: space-between;
-						margin-top: 5px;
+						margin-top: 20px;
+						padding-left: 100px;
 						.forget {
 							cursor: pointer;
 						}
@@ -261,7 +304,7 @@
 						text-align: center;
 						font-size: 16px;
 						cursor: pointer;
-						background-color: #5769b1;
+						background-color: #4cb2ff;
 						margin: 18px auto 0;
 						color: #fff;
 					}
@@ -346,3 +389,47 @@
 	}
 </style>
 
+<style lang="stylus">
+	.code {
+		margin-bottom: 5px;
+		.el-form-item__content {
+			display: flex;
+		}
+	}
+	/* 记住密码和忘记密码 */
+	.remember-forget {
+		.el-form-item__content {
+			display: flex;
+			justify-content: space-between;
+			margin-left: 0 !important;
+			.el-switch {
+				top: 10px;
+			}
+			.forget {
+				cursor: pointer;
+			}
+		}
+	}
+	/* 这段代码的作用是清除浏览器自动填充时的黄色背景 */
+	input {
+		&::-webkit-input-placeholder {
+			 color: #999;
+	    }
+		&:-webkit-autofill {
+			 transition: background-color 5000s ease-in-out 0s;
+			 -webkit-text-fill-color: #333 !important;
+			&:hover {
+				 transition: background-color 5000s ease-in-out 0s;
+				 -webkit-text-fill-color: #333 !important;
+		    }
+			&:focus {
+				 transition: background-color 5000s ease-in-out 0s;
+				 -webkit-text-fill-color: #333 !important;
+		    }
+			&:active {
+				 transition: background-color 5000s ease-in-out 0s;
+				 -webkit-text-fill-color: #333 !important;
+		    }
+		}
+	}
+</style>

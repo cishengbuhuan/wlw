@@ -11,12 +11,14 @@ import {
 	Dropdown, DropdownMenu, DropdownItem, MessageBox, Message,
 	Col, Row, Table, DatePicker, Input, Pagination, Menu, MenuItem,
 	Loading, TableColumn, Form, FormItem, Button, Tag, Tabs,
-	TabPane, Notification, Submenu, MenuItemGroup, Select, Option, Upload, Radio
+	TabPane, Notification, Submenu, MenuItemGroup, Select, Option,
+	Upload, Radio, Tooltip, Badge, Switch
 } from 'element-ui';
 // 引入echarts
-import echarts from 'echarts'
+// import echarts from 'echarts'
+//
+// Vue.prototype.$echarts = echarts
 
-Vue.prototype.$echarts = echarts 
 
 axios.defaults.baseURL = baseUrl;
 // axios.defaults.timeout = 10000;
@@ -26,7 +28,7 @@ Vue.use(Col).use(Row).use(Table).use(DatePicker)
 	.use(Loading).use(TableColumn).use(Form).use(FormItem)
 	.use(Button).use(Tag).use(Tabs).use(TabPane).use(Submenu)
 	.use(MenuItemGroup).use(Dropdown).use(DropdownMenu).use(DropdownItem)
-	.use(Select).use(Option).use(Upload).use(Radio)
+	.use(Select).use(Option).use(Upload).use(Radio).use(Tooltip).use(Badge).use(Switch)
 
 
 Vue.prototype.$msgbox = MessageBox;

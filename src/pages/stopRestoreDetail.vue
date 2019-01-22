@@ -1,16 +1,20 @@
 <template>
-	<div class="stopRestore-wrap">
-		<div class="content">
+	<div class="stopRestore-wrap wrap">
+		<div class="content wrap-content">
+			<!-- 标题 -->
+			<div class="page-title">
+				<div class="line"></div>
+				<span>流量卡停复管理<span class="small">变更详情</span></span>
+			</div>
 			<!-- 停复卡详情 -->
 			<div class="stopRestore-detail">
-				<div class="tips"><i class="line"></i>停复卡详情</div>
 				<div class="operate-type">操作类型: {{ operateType }}</div>
 				<div class="detail-box">
 					<!-- 卡号和iccid号 -->
 					<div class="number-wrap">
 						<!-- 成功 -->
 						<div class="success number-item">
-							<h3>{{ operateType }}成功</h3>
+							<h3>变更成功</h3>
 							<div class="box">
 								<!-- 卡号 -->
 								<div class="card-number item">
@@ -30,7 +34,7 @@
 						</div>
 						<!-- 失败 -->
 						<div class="failure number-item">
-							<h3>{{ operateType }}失败</h3>
+							<h3>变更失败</h3>
 							<div class="box">
 								<!-- 卡号 -->
 								<div class="card-number item">
@@ -51,8 +55,8 @@
 					</div>
 					<!-- 返回按钮 -->
 					<div class="btn">
-						<router-link to="/stopRestore">
-							<div class="btn-back">返回</div>
+						<router-link to="/stopRestoreManage">
+							<div class="btn-back btn-gray">返回</div>
 						</router-link>
 					</div>
 				</div>
@@ -78,6 +82,11 @@
 		},
 		mounted() {
 			this.id = this.$route.query.id
+			if(this.id==1) {
+				this.operateType = '复卡'
+			}else if(this.id == 0) {
+				this.operateType = '停卡'
+			}
 			this.getBaseInfo()
 		},
 		methods: {
@@ -110,36 +119,17 @@
 	borderColor = #e7ebf3
 	buttonColor = #878787
 	.stopRestore-wrap {
-		padding-top: 50px;
-		padding-left: 200px;
 		.content {
-			width: 100%;
-			height: calc(100vh - 50px);
-			padding: 20px;
-			overflow-y: scroll;
 			/* 停复卡详情 */
 			.stopRestore-detail {
-				width: 100%;
-				border-radius: 5px;
-				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
-				padding: 30px 40px 40px;
-				margin-bottom: 20px;
-				.tips {
-					font-size: 24px;
-					font-weight: 500;
-					display: flex;
-					.line {
-						width: 6px;
-						height: 28px;
-						display: block;
-						background-color: mainBlue;
-						margin-right: 5px;
-					}
-				}
+				background-color: #fff;
+				border-radius: 20px;
+				padding: 30px;
+				margin-top: 20px;
 				.operate-type {
-					font-size: 18px;
+					font-size: 24px;
 					color: #85888f;
-					margin: 40px 0;
+					margin-bottom: 30px;
 				}
 				.detail-box {
 					/* 卡号和iccid号 */
@@ -147,8 +137,8 @@
 						/* 成功或失败 */
 						.success, .failure {
 							h3 {
-								font-size: 26px;
-								color: #13232f;
+								font-size: 18px;
+								color: #1d9eed;
 								margin-bottom: 15px;
 							}
 							.box {
@@ -165,7 +155,6 @@
 										width: 350px;
 										height: 200px;
 										border: 1px solid borderColor;
-										border-right: 20px solid borderColor;
 										overflow-x: hidden;
 										overflow-y: scroll;
 										font-size: 17px;
@@ -190,15 +179,6 @@
 						display: flex;
 						justify-content: flex-end;
 						.btn-back {
-							width: 100px;
-							height: 44px;
-							border-radius: 10px;
-							background-color: mainBlue;
-							font-size: 18px;
-							color: #fff;
-							text-align: center;
-							line-height: 44px;
-							cursor: pointer;
 							margin-top: 50px;
 						}
 					}

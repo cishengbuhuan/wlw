@@ -1,0 +1,144 @@
+#app {
+    width: 100%;
+    min-width: 1400px;
+    height: 100vh;
+    background-color: #f8f8f8;
+}
+.wrap {
+    padding-top: 64px;
+    padding-left: 200px;
+}
+.wrap-content {
+    width: 100%;
+    height: calc(100vh - 64px);
+    padding: 20px 40px;
+    overflow-y: scroll;
+}
+/* 问号 */
+.el-icon-question {
+    color: #ed7f1d;
+    font-size: 24px;
+    line-height: 40px;
+    margin-left: 15px;
+}
+/* 页面的大标题 */
+    .page-title {
+    display: flex;
+    line-height: 50px;
+    margin-bottom: 30px;
+}
+.page-title .line {
+    width: 8px;
+    height: 50px;
+    border-radius: 4px;
+    background: linear-gradient(to bottom, #1d9eed, transparent);
+}
+.page-title span {
+    font-size: 42px;
+    color: #585858;
+    margin-left: 15px;
+}
+.page-title span .small {
+    font-size: 24px;
+    color: #585858;
+}
+
+
+/* 带阴影的主要按钮样式 */
+.btn-main {
+    display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    font-size: 18px;
+    border-radius: 5px;
+    background-color: #4cb2ff;
+    padding: 0 20px;
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 8px 16px 0px rgba(105, 190, 255, 0.6);
+}
+/* 带阴影的绿色按钮样式 */
+.btn-green {
+    display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    font-size: 18px;
+    border-radius: 5px;
+    background-color: #7ad628;
+    padding: 0 20px;
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 8px 16px 0px rgba(122, 214, 40, 0.6);
+}
+/* 灰色按钮样式 */
+.btn-gray {
+    display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    font-size: 18px;
+    border-radius: 5px;
+    background-color: #eeeeee;
+    padding: 0 20px;
+    cursor: pointer;
+    color: #585858;
+}
+
+/*公共样式--开始*/
+html, body, div, ul, li, h1, h2, h3, h4, h5, h6, p, dl, dt, dd, ol, form, input, textarea, th, td, select {
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    min-height: 100%;
+}
+
+body {
+    font-family: "Microsoft YaHei";
+    font-size: 14px;
+    color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+img {
+    border: none;
+    vertical-align: middle;
+}
+
+a {
+    text-decoration: none;
+    color: #232323;
+}
+
+table {
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+input, textarea {
+    outline: none;
+    border: none;
+    background-color: transparent !important;
+}
+
+textarea {
+    resize: none;
+    overflow: auto;
+}
+
+.ellipse {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
