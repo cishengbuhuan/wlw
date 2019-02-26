@@ -16,8 +16,16 @@
 					     element-loading-text="正在加载数据，请稍侯">
 						<p>{{ cardNum }}</p>
 					</div>
-					<!-- 添加流量卡按钮 -->
-					<div class="btn-add btn-main" @click="addFlow">添加流量卡</div>
+					<!-- 按钮和提示 -->
+					<div class="btn-tip">
+						<!-- 添加流量卡按钮 -->
+						<div class="btn-add btn-main" @click="addFlow">添加流量卡</div>
+						<!-- tips -->
+						<div class="tips">
+							<i class="el-icon-warning"></i>
+							<span>目前暂时支持中国移动流量卡短信发送</span>
+						</div>
+					</div>
 				</div>
 				<!-- 发送短信 -->
 				<div class="msg-number">
@@ -129,29 +137,6 @@
 							<div class="btn-all btn-main" @click="btnSelect(2)">全量操作</div>
 						</div>
 					</div>
-				</div>
-			</div>
-		</div>
-		<!-- 验证码弹出框 -->
-		<div class="modal-verify" v-show="modalVerify" @click.self="modalVerify = false">
-			<div class="verify">
-				<div class="verify-header">
-					<div class="icon"></div>
-					<span>验证</span>
-					<div class="icon"></div>
-				</div>
-				<div class="verify-content">
-					<!-- 验证码 -->
-					<div class="code">
-						<span>请输入获取到的验证码: </span>
-						<el-input
-								clearable
-								class="input"
-								v-model="code">
-						</el-input>
-					</div>
-					<!-- 确认按钮 -->
-					<div class="btn-sure" @click="verifySure">确认</div>
 				</div>
 			</div>
 		</div>
@@ -282,14 +267,20 @@
 				if(i == '1') {
 					this.tools.startPlaceHolder = '请输入开始的卡号'
 					this.tools.endPlaceHolder = '请输入结束的卡号'
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = true
 				}else if(i == '2') {
 					this.tools.startPlaceHolder = '请输入开始的ICCID'
 					this.tools.endPlaceHolder = '请输入结束的ICCID'
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = true
 				}else {
 					this.tools.startPlaceHolder = ''
 					this.tools.endPlaceHolder = ''
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = false
 				}
 			},
@@ -309,7 +300,9 @@
 						// 运营商
 						netWork: this.tools.netWork,
 						// 在线状态
-						onlineStatus: this.tools.online
+						onlineStatus: this.tools.online,
+						// 是否为短信发送
+						isSendSms: 1
 					}
 				}).then(res => {
 					this.tableData = []
@@ -435,9 +428,27 @@
 					this.$message.info('短信的内容不能为空')
 					return
 				}
+
+				let msgCount = this.deviceIds.split(',').length
+				let costCount = Number(msgCount * 0.1).toFixed(2)
+
+				this.$confirm(`本次发送短信共计${msgCount}条，需支付${costCount}元`, '短信发送确认', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消'
+				}).then(() => {
+					this.msgSure()
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消发送'
+					});
+				});
+			},
+			// 短信发送确认按钮
+			msgSure() {
 				let loading = this.$loading({
 					lock: true,
-					text: '正在发送申请，请稍后...',
+					text: '正在发送短信，请稍后...',
 					spinner: 'el-icon-loading',
 					background: 'rgba(0, 0, 0, 0.7)'
 				});
@@ -445,7 +456,8 @@
 					url: '/smsSendInfo/sureSendSms',
 					method: 'post',
 					params: {
-						deviceIds: this.deviceIds,
+						deviceIds: this.isAll === 1 ? '' : this.deviceIds,
+						isAll: this.isAll,
 						content: this.msg
 					}
 				}).then(res => {
@@ -463,32 +475,9 @@
 						});
 					}else {
 						this.$message.error(data.object)
+						loading.close();
 					}
 				})
-			},
-			// 验证码的确认按钮
-			verifySure() {
-				this.modalVerify = false
-				this.$axios({
-					url: '/pauseActiveCard/actCardAndStopCard',
-					method: 'post',
-					params: {
-						type: this.operateType,
-						code: this.code,
-						deviceIds: this.deviceIds
-					}
-				}).then(res => {
-//					console.log(res.data)
-					let data = res.data
-					if(data.code == '100') {
-						this.$message.success(data.object)
-						this.modalVerify = false
-						this.$router.push({path: '/stopRestoreManage'})
-					}else {
-						this.$message.error(data.object)
-					}
-				})
-
 			},
 
 
@@ -540,17 +529,26 @@
 							line-height: 30px;
 						}
 					}
-					.btn-add {
-						height: 40px;
-						line-height: 40px;
-						font-size: 18px;
-						border-radius: 5px;
-						background-color: mainBlue;
-						padding: 0 20px;
-						cursor: pointer;
-						color: #fff;
-						box-shadow: 0 8px 16px 0px rgba(105, 190, 255, 0.6);
+					.btn-tip {
 						margin-left: 50px;
+						.btn-add {
+							height: 40px;
+							line-height: 40px;
+							font-size: 18px;
+							border-radius: 5px;
+							background-color: mainBlue;
+							padding: 0 20px;
+							cursor: pointer;
+							color: #fff;
+							box-shadow: 0 8px 16px 0px rgba(105, 190, 255, 0.6);
+						}
+						.tips {
+							margin-top: 10px;
+							color: red;
+							span {
+								font-size: 14px;
+							}
+						}
 					}
 				}
 				/* 发送短信 */

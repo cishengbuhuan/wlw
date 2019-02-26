@@ -1,6 +1,6 @@
 <template>
-	<div class="recharge-wrap">
-		<div class="content">
+	<div class="recharge-wrap wrap">
+		<div class="content wrap-content">
 			<div class="recharge-box">
 				<div class="title">账户充值</div>
 				<div class="account">当前账号：<span>{{ account }}</span></div>
@@ -64,9 +64,10 @@
 							</el-form-item>
 							<el-form-item label="凭证上传：">
 								<el-upload
-										action="http://192.168.1.22:8090/orderPay/certiUrlUpload"
+										action="http://www.91dream.net:8090/orderPay/certiUrlUpload"
 										:file-list="form.upFile"
 										list-type="picture"
+										:limit="form.numberLimit"
 										:on-change="changeUpload"
 										:on-success="successUpload"
 										name="upfile"
@@ -229,15 +230,15 @@
 	export default {
 		data() {
 			return {
-				account: '成都快船有限公司',
+				account: '',
 				balance: 0,
 				payWay: [
 					{
 						wayImgSrc: '../../static/images/alipay.png'
 					},
-					{
-						wayImgSrc: '../../static/images/underline.png'
-					}
+//					{
+//						wayImgSrc: '../../static/images/underline.png'
+//					}
 				],
 				wayIndex: 0,
 				rechargeData: [],
@@ -254,7 +255,8 @@
 					amount: '',
 					rechargeTime: '',
 					upFile: [],
-					imgUrl: ''
+					imgUrl: '',
+					numberLimit: 1
 				}
 			};
 		},
@@ -324,7 +326,6 @@
 			},
 			// 点击立即充值按钮
 			btnRecharge() {
-//				this.$message({type: 'info', message: '系统更新中...'});
 				if(this.selectedAmount == ''){
 					this.$message.error('请先选择充值金额！');
 					return
@@ -372,6 +373,7 @@
 					this.form.depositAccount = ''
 					this.form.amount = ''
 					this.form.rechargeTime = ''
+					this.form.upFile = []
 				}else {
 					let userId = sessionStorage.getItem('userId')
 					let companyId = sessionStorage.getItem('companyId')
@@ -383,8 +385,9 @@
 						createTime = format(new Date(this.form.rechargeTime).getTime(), "Y-m-d H:i:s"),
 						upFile = this.form.upFile,
 						imgUrl = this.form.imgUrl;
-					console.log(upFile)
-					console.log(createTime)
+//					console.log(upFile)
+//					console.log(imgUrl)
+//					console.log(createTime)
 					if(!amount || !transferBank || !transferAccount || !incomeAccount || !createTime || upFile.length === 0) {
 						this.$message.info('请先将表格填写完整！')
 					}else {
@@ -403,7 +406,8 @@
 								certiUrl: imgUrl
 							}
 						}).then(res => {
-							if(res.data.code === 100){
+							console.log(res.data)
+							if(res.data.code == 100){
 								this.$message.success(res.data.info)
 //								this.$refs.upload.submit();
 							}
@@ -425,20 +429,12 @@
 <style lang="stylus" scoped>
 	mainBlue = #4cb2ff;
 	.recharge-wrap {
-		padding-top: 50px;
-		padding-left: 200px;
 		.content {
-			width: 100%;
-			height: calc(100vh - 50px);
-			padding: 20px;
-			overflow-y: scroll;
 			.recharge-box {
-				width: 100%;
-				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
-				border-radius: 5px;
-				padding-left: 100px;
-				padding-top: 50px;
-				padding-bottom: 20px;
+				background-color: #fff;
+				border-radius: 20px;
+				padding: 30px;
+				margin-top: 20px;
 				.title {
 					font-size: 22px;
 					margin-bottom: 50px;

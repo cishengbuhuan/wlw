@@ -61,13 +61,13 @@
 						<wl-line :options="active.options" :height="300"></wl-line>
 					</div>
 				</div>
-				<!-- 在线数 -->
+				<!-- 设备在线数 -->
 				<div class="chart-item online">
 					<!-- tip -->
 					<div class="tip">
 						<div class="header">
 							<div class="icon"><img src="../../static/images/index/icon-online.png"></div>
-							<span>在线数</span>
+							<span>设备在线数</span>
 							<el-tooltip class="tooltip" content="显示卡片在线数" placement="right">
 								<i class="el-icon-question"></i>
 							</el-tooltip>
@@ -97,8 +97,8 @@
 					<div class="tip">
 						<div class="header">
 							<div class="icon"><img src="../../static/images/index/icon-flow.png"></div>
-							<span>流量池(月)</span>
-							<el-tooltip class="tooltip" content="显示月套餐的本月流量池使用情况" placement="right">
+							<span>流量池</span>
+							<el-tooltip class="tooltip" content="流量池本月使用概况" placement="right">
 								<i class="el-icon-question"></i>
 							</el-tooltip>
 						</div>
@@ -123,8 +123,8 @@
 					<div class="tip">
 						<div class="header">
 							<div class="icon"><img src="../../static/images/index/icon-single.png"></div>
-							<span>非流量池卡(月)</span>
-							<el-tooltip class="tooltip" content="显示单卡链接本月卡片概况" placement="right">
+							<span>非共享流量卡(月)</span>
+							<el-tooltip class="tooltip" content="非共享流量卡本月概况" placement="right">
 								<i class="el-icon-question"></i>
 							</el-tooltip>
 						</div>
@@ -140,7 +140,7 @@
 						</div>
 						<div class="info-item stop">
 							<div class="num">{{ singleCard.stop }}</div>
-							<span>停卡数</span>
+							<span>离线数<br/>(GPRS)</span>
 						</div>
 						<div class="info-item active">
 							<div class="num">{{ singleCard.active }}</div>
@@ -464,8 +464,8 @@
 						let notPool = data.isNotPool
 
 
-						console.log(flowPool)
-						console.log(notPool)
+//						console.log(flowPool)
+//						console.log(notPool)
 
 
 
@@ -482,13 +482,19 @@
 						}
 
 
+
+						if(!flowPool.length) {
+							this.flowData.noData = true
+							return
+						}
 						// 循环流量池
 						for(let i=0; i<flowPool.length; i++) {
+//							debugger
+							// 如果poolUseInfo为空，则跳出
 							if(!flowPool[i].poolUseInfo.length) {
-								this.flowData.noData = true
-								return
+								continue
 							}
-							// 循环poolUseInfo
+							// 如果poolUseInfo不为空，则循环poolUseInfo
 							for(let j=0; j<flowPool[i].poolUseInfo.length; j++) {
 //								if(j%2==0) {
 //									this.flowData.xAxis.data.push(`${getNetWork(flowPool[i].netWork)}${getPackageFlow(flowPool[i].poolUseInfo[j].dataSize)}`)

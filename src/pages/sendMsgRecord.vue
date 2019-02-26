@@ -15,7 +15,7 @@
 						<span>操作时间: </span>
 						<el-date-picker
 								v-model="tools.startTime"
-								@change="pickChange"
+								@change="startTimeChange"
 								class="timePicker"
 								type="date"
 								placeholder="开始日期">
@@ -23,33 +23,11 @@
 						&nbsp; 至 &nbsp;
 						<el-date-picker
 								v-model="tools.endTime"
-								@change="pickChange"
+								@change="endTimeChange"
 								class="timePicker"
 								type="date"
 								placeholder="结束日期">
 						</el-date-picker>
-					</div>
-					<!-- 发送卡号/ICCID -->
-					<div class="card-num">
-						<span class="card-iccid">发送卡号/ICCID: </span>
-						<el-input class="input"
-						          v-model="tools.cardNum">
-						</el-input>
-					</div>
-					<!-- 发送状态 -->
-					<div class="send-status">
-						<span>发送状态: </span>
-						<el-select class="select"
-						           placeholder="全部"
-						           clearable
-						           v-model="tools.sendStatus">
-							<el-option
-									v-for="item in tools.sendStatusOptions"
-									:key="item.value"
-									:label="item.sendStatus"
-									:value="item.value">
-							</el-option>
-						</el-select>
 					</div>
 					<!-- 搜索按钮 -->
 					<div class="btn-search btn-main" @click="btnSearch">搜索</div>
@@ -62,11 +40,15 @@
 							v-loading="loading"
 							style="width: 100%">
 						<el-table-column prop="operateTime" label="操作时间" align="center"></el-table-column>
-						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
-						<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
 						<el-table-column prop="netWork" label="运营商" align="center"></el-table-column>
-						<el-table-column prop="sendContent" label="发送内容" align="center"></el-table-column>
-						<el-table-column prop="sendStatus" label="发送状态" align="center"></el-table-column>
+						<el-table-column prop="sendNumber" label="发送数量" align="center"></el-table-column>
+						<el-table-column prop="sendContent" label="短信内容" align="center"></el-table-column>
+						<el-table-column prop="sendMoney" label="短信费用" align="center"></el-table-column>
+						<el-table-column label="操作" align="center">
+							<template slot-scope="scope">
+								<span class="more" @click="goDetail(scope.row)">号码详情</span>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -85,7 +67,7 @@
 </template>
 
 <script>
-	import {getNetWork} from '../api/dataUtil'
+	import {getNetWork,format} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
@@ -93,31 +75,17 @@
 				tools: {
 					// 操作时间
 					startTime: '',
-					endTime: '',
-					// 发送卡号/ICCID
-					cardNum: '',
-					// 发送状态
-					sendStatus: '',
-					sendStatusOptions: [
-						{
-							value: '1',
-							sendStatus: '成功'
-						},
-						{
-							value: '2',
-							sendStatus: '失败'
-						}
-					]
+					endTime: ''
 				},
 				// 表格数据
 				tableData: [
 					{
-						operateTime: '2018-09-09',
-						cardNum: '2019-01-01',
-						iccid: '3个月',
-						netWork: '20',
-						sendContent: '100',
-						sendStatus: '成功'
+						operateTime: '',
+						cardNum: '',
+						iccid: '',
+						netWork: '',
+						sendContent: '',
+						sendStatus: ''
 					}
 				],
 				// 表格分页
@@ -150,18 +118,14 @@
 			getTableData() {
 				this.loading = true
 				this.$axios({
-					url: '/smsSendInfo/smsList',
+					url: '/smsRate/smsRateList',
 					method: 'post',
 					params: {
 						pageSize: this.pageSize,
 						pageNo: this.pageNo,
-						// 卡号/ICCID
-						cardNo: this.tools.cardNum,
 						// 操作时间
 						start: this.tools.startTime,
-						end: this.tools.endTime,
-						// 发送状态
-						sendStatus: this.tools.sendStatus,
+						end: this.tools.endTime
 					}
 				}).then(res => {
 					this.tableData = []
@@ -174,33 +138,32 @@
 						for(let i=0; i<data.length; i++) {
 							this.tableData.push({
 								operateTime: data[i].createTime,
-								cardNum: data[i].cardNumber,
-								iccid: data[i].iccid,
 								netWork: getNetWork(data[i].netWork),
+								sendNumber: data[i].count,
 								sendContent: data[i].content,
-								sendStatus: this.getStatus(data[i].sendStatus)
+								sendMoney: data[i].money,
+								id: data[i].id
 							})
 						}
 					}
 				})
 			},
-			// 获取到发送状态
-			getStatus(i) {
-				if(i==1) {
-					return '成功'
-				}else if(i==2) {
-					return '失败'
-				}
-			},
 			// 选择日期
-			pickChange() {
-				if (!this.tools.startTime && !this.tools.endTime) {
+			startTimeChange() {
+				if (!this.tools.startTime) {
 					this.tools.startTime = ''
-					this.tools.endTime = ''
 					this.pageNo = 1
 					return
 				}
 				this.tools.startTime = format(new Date(this.tools.startTime).getTime(), "Y-m-d")
+				this.pageNo = 1
+			},
+			endTimeChange() {
+				if (!this.tools.endTime) {
+					this.tools.endTime = ''
+					this.pageNo = 1
+					return
+				}
 				this.tools.endTime = format(new Date(this.tools.endTime).getTime(), "Y-m-d")
 				this.pageNo = 1
 			},
@@ -216,6 +179,18 @@
 					this.getTableData()
 				}
 			},
+			// 号码详情
+			goDetail(data) {
+				let id = data.id;
+				let sendTime = data.operateTime
+				this.$router.push({
+					path: '/numberDetail',
+					query: {
+						id: id,
+						sendTime: sendTime
+					}
+				})
+			}
 		}
 	};
 </script>

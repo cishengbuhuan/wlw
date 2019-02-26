@@ -17,6 +17,7 @@ import flowPoolInfo from '../pages/flowPoolInfo.vue'
 import flowPoolInfoCard from '../pages/flowPoolInfo-card.vue'
 import sendMsg from '../pages/sendMsg.vue'
 import sendMsgRecord from '../pages/sendMsgRecord.vue'
+import numberDetail from '../pages/numberDetail.vue'
 
 import message from '../pages/message.vue'
 
@@ -116,6 +117,11 @@ const router = new Router({
 			path: '/sendMsgRecord',
 			name: 'sendMsgRecord',
 			component: sendMsgRecord
+		},
+		{
+			path: '/numberDetail',
+			name: 'numberDetail',
+			component: numberDetail
 		},
 		// 公告
 		{

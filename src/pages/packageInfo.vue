@@ -93,7 +93,7 @@
 						<el-table-column prop="netWorkType" label="制式" align="center"></el-table-column>
 						<el-table-column prop="totalCard" label="总卡数" align="center"></el-table-column>
 						<el-table-column prop="active" label="已激活" align="center"></el-table-column>
-						<el-table-column prop="online" label="在线数" align="center"></el-table-column>
+						<el-table-column prop="online" label="设备在线数" align="center"></el-table-column>
 						<el-table-column label="操作" align="center">
 							<template slot-scope="scope">
 								<span class="more" @click="goDetail(scope.row)">卡片信息</span>
@@ -184,7 +184,8 @@
 				loading: '',
 				radio: '',
 				// 当前选中的项
-				currentSelect: ''
+				currentSelect: '',
+				selectedType: ''
 			};
 		},
 		mounted() {
@@ -230,7 +231,7 @@
 				}).then(res => {
 					this.tableData = []
 					let data = res.data.data;
-//					console.log(data)
+					console.log(data)
 					if(res.data.code == 1) {
 						this.loading = false
 						this.totalCount = res.data.totalCount
@@ -245,7 +246,8 @@
 								active: data[i].acticeCardCount,
 								online: data[i].onlineCount,
 								originalNetWork: data[i].netWork,
-								originalNetWorkType: data[i].netWorkType
+								originalNetWorkType: data[i].netWorkType,
+								poolId: data[i].poolId
 							})
 						}
 					}
@@ -256,10 +258,14 @@
 				//赋值给radio
 				this.radio = this.tableData.indexOf(row);
 				this.currentSelect = row.batchTime
+				this.selectedType = row.packageType
+
+//				console.log(row)
 			},
 			getCurrentRow(data){
-//				console.log(data)
+				console.log(data)
 				this.currentSelect = data.batchTime
+				this.selectedType = data.packageType
 			},
 			// 选择日期
 			pickChange() {
@@ -288,7 +294,10 @@
 			// 跳转到套餐变更页面
 			changePackage() {
 				if(!this.currentSelect) {
-					this.$message.info('请先选择某一批次')
+					this.$message.info('请先选择一个套餐')
+					return
+				}else if(this.selectedType != '月') {
+					this.$message.info('当前选择的套餐不可变更')
 					return
 				}
 				this.$router.push({
@@ -303,12 +312,14 @@
 				let batchTime = data.batchTime
 				let netWork = data.originalNetWork
 				let netWorkType = data.originalNetWorkType
+				let poolId = data.poolId
 				this.$router.push({
 					path: '/packageInfoCard',
 					query: {
 						batchTime: batchTime,
 						netWork: netWork,
-						netWorkType: netWorkType
+						netWorkType: netWorkType,
+						poolId: poolId
 					}
 				})
 			},

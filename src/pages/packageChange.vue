@@ -196,14 +196,20 @@
 				if(i == '1') {
 					this.tools.startPlaceHolder = '请输入开始的卡号'
 					this.tools.endPlaceHolder = '请输入结束的卡号'
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = true
 				}else if(i == '2') {
 					this.tools.startPlaceHolder = '请输入开始的ICCID'
 					this.tools.endPlaceHolder = '请输入结束的ICCID'
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = true
 				}else {
 					this.tools.startPlaceHolder = ''
 					this.tools.endPlaceHolder = ''
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = false
 				}
 			},

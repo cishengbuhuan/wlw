@@ -12,6 +12,7 @@
 				<div class="tip">
 					<div class="package-name">套餐名称: {{ packageInfo.netWork }} {{ packageInfo.flow }}/{{ packageInfo.type }}</div>
 					<div class="batch-date">批次日期: {{ batchDate }}</div>
+					<div class="btn-export btn-gray" @click="btnExport">导出</div>
 				</div>
 				<!-- 表格 -->
 				<div class="table-box">
@@ -47,17 +48,17 @@
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.packageName }}</span>
 							</template>
 						</el-table-column>
-						<el-table-column label="在线状态" align="center">
-							<template slot-scope="scope">
-								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.onlineStatus }}</span>
-							</template>
-						</el-table-column>
 						<el-table-column label="激活状态" align="center">
 							<template slot-scope="scope">
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.activeStatus }}</span>
 							</template>
 						</el-table-column>
-						<el-table-column label="停卡状态" align="center">
+						<el-table-column label="设备在线状态" align="center">
+							<template slot-scope="scope">
+								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.onlineStatus }}</span>
+							</template>
+						</el-table-column>
+						<el-table-column label="GPRS使用状态" align="center">
 							<template slot-scope="scope">
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.stopStatus }}</span>
 							</template>
@@ -65,6 +66,11 @@
 						<el-table-column label="制式" align="center">
 							<template slot-scope="scope">
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.netWorkType }}</span>
+							</template>
+						</el-table-column>
+						<el-table-column label="卡种类" align="center">
+							<template slot-scope="scope">
+								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.cardType }}</span>
 							</template>
 						</el-table-column>
 						<el-table-column width="120" label="到期时间" align="center">
@@ -96,7 +102,7 @@
 
 <script>
 	import {translatePackages,getOnlineStatus,getNetWork,
-		getActiveStatus,getStopStatus,translateSystem} from '../api/dataUtil'
+		getActiveStatus,getGPRS,translateSystem,translateCardKind,baseUrl} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
@@ -112,18 +118,25 @@
 				netWork: '',
 				// 表格数据
 				tableData: [],
+				// 表格排序
+				sortData: '',
+				direct: '',
 				// 表格分页
 				totalCount: 0,
 				pageSize: 20,
 				pageNo: 1,
 				// 加载
 				loading: '',
+				// 下载的href
+				baseUrl: `${baseUrl}/api/importCardList`,
+				uploadHref: '',
 			};
 		},
 		mounted() {
 			this.batchDate = this.$route.query.batchTime
 			this.netWork = this.$route.query.netWork
 			this.netWorkType = this.$route.query.netWorkType
+			this.poolId = this.$route.query.poolId
 			this.getTableData()
 		},
 		created() {
@@ -156,7 +169,8 @@
 						netWork: this.netWork,
 						// 制式
 						netWorkType: this.netWorkType,
-
+						// poolId
+						poolId: this.poolId,
 
 						// 排序
 						sort: this.sortData,
@@ -183,8 +197,9 @@
 								packageName: `${data[i].packages}/${translatePackages(data[i].packageType)}`,
 								onlineStatus: getOnlineStatus(data[i].onlineStatus),
 								activeStatus: getActiveStatus(data[i].cardStatus),
-								stopStatus: getStopStatus(data[i].stopStatus),
+								stopStatus: getGPRS(data[i].stopStatus),
 								netWorkType: translateSystem(data[i].networkType),
+								cardType: translateCardKind(data[i].cardType),
 								endTime: data[i].endTime.split(' ')[0],
 								deviceId: data[i].deviceId,
 								isOver: data[i].flowOverage
@@ -214,6 +229,35 @@
 						deviceId: deviceId
 					}
 				})
+			},
+			// 导出表格
+			btnExport() {
+				let token = sessionStorage.getItem('_token'),
+					pageSize = this.pageSize,
+					pageNo = this.pageNo,
+
+					serveTime = this.batchDate,
+					netWork = this.netWork,
+					netWorkType = this.netWorkType,
+					poolId = this.poolId,
+
+					sort = this.sortData,
+					direct = this.direct
+
+
+
+
+				this.uploadHref = `${this.baseUrl}?_token=${token}
+					&pageSize=${pageSize}&pageNo=${pageNo}&serveTime=${serveTime}
+					&netWork=${netWork}&netWork=${netWork}&netWorkType=${netWorkType}
+					&poolId=${poolId}&sort=${sort}&direct=${direct}`
+
+//				console.log(this.uploadHref)
+
+				let iframe = document.createElement('iframe');
+				iframe.src = this.uploadHref
+				document.body.appendChild(iframe)
+				iframe.style.display = 'none'
 			}
 		}
 	};

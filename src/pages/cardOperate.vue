@@ -344,14 +344,20 @@
 				if(i == '1') {
 					this.tools.startPlaceHolder = '请输入开始的卡号'
 					this.tools.endPlaceHolder = '请输入结束的卡号'
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = true
 				}else if(i == '2') {
 					this.tools.startPlaceHolder = '请输入开始的ICCID'
 					this.tools.endPlaceHolder = '请输入结束的ICCID'
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = true
 				}else {
 					this.tools.startPlaceHolder = ''
 					this.tools.endPlaceHolder = ''
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = false
 				}
 			},
@@ -372,7 +378,7 @@
 						netWork: this.tools.netWork,
 						// 停卡操作为1，复卡操作为0
 //						activeStatus: this.operateType == 1 ? 1 : 0,
-						stopStatus: this.operateType == 1 ? 0 : 1,
+//						stopStatus: this.operateType == 1 ? 0 : 1,
 
 						// 排序
 						sort: this.sortData,
@@ -507,7 +513,10 @@
 				if(i===0) {
 					this.$router.push({path: '/stopRestoreManage'})
 				}else {
-					if(!this.checked) {
+					if(!this.cardNum) {
+						this.$message.info('请先添加流量卡')
+						return
+					}else if(!this.checked) {
 						this.$message.info('请先阅读并同意用户协议')
 						return
 					}

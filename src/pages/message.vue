@@ -17,7 +17,7 @@
 							<span>通知时间: </span>
 							<el-date-picker
 									v-model="tools.startTime"
-									@change="pickChange"
+									@change="startTimeChange"
 									class="timePicker"
 									type="date"
 									placeholder="开始日期">
@@ -25,7 +25,7 @@
 							&nbsp; 至 &nbsp;
 							<el-date-picker
 									v-model="tools.endTime"
-									@change="pickChange"
+									@change="endTimeChange"
 									class="timePicker"
 									type="date"
 									placeholder="结束日期">
@@ -317,14 +317,21 @@
 			},
 
 			// 选择日期
-			pickChange() {
-				if (!this.tools.startTime && !this.tools.endTime) {
+			startTimeChange() {
+				if (!this.tools.startTime) {
 					this.tools.startTime = ''
-					this.tools.endTime = ''
 					this.pageNo = 1
 					return
 				}
 				this.tools.startTime = format(new Date(this.tools.startTime).getTime(), "Y-m-d")
+				this.pageNo = 1
+			},
+			endTimeChange() {
+				if (!this.tools.endTime) {
+					this.tools.endTime = ''
+					this.pageNo = 1
+					return
+				}
 				this.tools.endTime = format(new Date(this.tools.endTime).getTime(), "Y-m-d")
 				this.pageNo = 1
 			},

@@ -36,10 +36,10 @@
 								激活状态: {{ baseInfo.status.active }}
 							</div>
 							<div class="item net-work">
-								在线状态: {{ baseInfo.status.online }}
+								设备在线状态: {{ baseInfo.status.online }}
 							</div>
 							<div class="item netWork-type">
-								停卡状态: {{ baseInfo.status.stop }}
+								GPRS使用情况: {{ baseInfo.status.stop }}
 							</div>
 						</div>
 					</div>
@@ -84,7 +84,7 @@
 							<span>时间: </span>
 							<el-date-picker
 									v-model="startTime"
-									@change="pickChange"
+									@change="startTimeChange"
 									class="timePicker"
 									type="date"
 									format="yyyy-MM-dd"
@@ -94,7 +94,7 @@
 							&nbsp; 至 &nbsp;
 							<el-date-picker
 									v-model="endTime"
-									@change="pickChange"
+									@change="endTimeChange"
 									class="timePicker"
 									type="date"
 									format="yyyy-MM-dd"
@@ -103,7 +103,7 @@
 							</el-date-picker>
 						</div>
 						<!-- 搜索按钮 -->
-						<div class="btn-search btn-main" @click="getChartData">搜索</div>
+						<div class="btn-search btn-main" @click="btnSearch">搜索</div>
 						<!-- 导出 -->
 						<div class="btn-export btn-gray" @click="btnExport">导出</div>
 					</div>
@@ -121,7 +121,7 @@
 
 <script>
 	import {
-		format, timestampToTime,getNetWork,getOnlineStatus,getActiveStatus,getStopStatus,
+		format, timestampToTime,getNetWork,getOnlineStatus,getActiveStatus,getGPRS,
 		translateCardKind, translateSystem,
 		startDate, endDate, baseUrl
 	} from '../api/dataUtil'
@@ -238,7 +238,7 @@
 
 					this.baseInfo.status.active = getActiveStatus(data.cardStatus)
 					this.baseInfo.status.online = getOnlineStatus(data.onlineStatus)
-					this.baseInfo.status.stop = getStopStatus(data.stopStatus)
+					this.baseInfo.status.stop = getGPRS(data.stopStatus)
 
 					// 流量信息
 					this.flowInfo.packageFlow = data.poolName
@@ -252,6 +252,17 @@
 
 					this.getChartData()
 				})
+			},
+			// 搜索
+			btnSearch() {
+//				debugger
+				if(!this.startTime || !this.endTime) {
+					this.$message.info('开始时间和结束时间都要选择')
+				}else if(this.startTime > this.endTime) {
+					this.$message.info('开始时间不能大于结束时间')
+				}else {
+					this.getChartData()
+				}
 			},
 			// 获取到折线图数据
 			getChartData() {
@@ -280,13 +291,18 @@
 				})
 			},
 			// 选择日期
-			pickChange() {
-				if (!this.startTime && !this.endTime) {
+			startTimeChange() {
+				if (!this.startTime) {
 					this.startTime = ''
-					this.endTime = ''
 					return
 				}
 				this.startTime = format(new Date(this.startTime).getTime(), "Y-m-d")
+			},
+			endTimeChange() {
+				if (!this.endTime) {
+					this.endTime = ''
+					return
+				}
 				this.endTime = format(new Date(this.endTime).getTime(), "Y-m-d")
 			},
 			// 导出表格

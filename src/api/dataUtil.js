@@ -10,6 +10,18 @@ export function timestampToTime(timestamp) {
 	return Y + M + D;
 }
 
+export function allDateTime(timestamp) {
+	let date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000]
+	let Y, M, D, h, m, s;
+	Y = date.getFullYear() + '-';
+	M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+	D = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+	h = ' ' + date.getHours() + ':';
+	m = date.getMinutes() + ':';
+	s = date.getSeconds();
+	return Y + M + D + h + m + s;
+}
+
 // 转化卡种类
 export function translateCardKind(i) {
 	if (i === 1) {
@@ -111,18 +123,24 @@ export function getActiveStatus(i) {
 		return '已激活'
 	}
 }
-// 获取到停卡状态
-export function getStopStatus(i) {
+// 获取到GPRS使用情况
+export function getGPRS(i) {
 	if (i == 0) {
-		return '已停卡'
+		return '离线'
 	} else {
-		return '未停卡'
+		return '在线'
 	}
 }
+
 
 // 返回本月的1号到当前天数日期
 export const startDate = `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01`
 export const endDate = `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate() - 1}`
+
+
+// 返回当前月
+export const currentMonth = new Date().getMonth() < 10 ? `${new Date().getFullYear()}-0${new Date().getMonth() + 1}` : `${new Date().getFullYear()}-${new Date().getMonth() + 1}`
+
 
 
 export function format(timestamp, formats) {
@@ -147,8 +165,10 @@ export function format(timestamp, formats) {
 	let day = zero(myDate.getDate());
 
 	let hour = zero(myDate.getHours());
-	let minite = zero(myDate.getMinutes());
+	let minute = zero(myDate.getMinutes());
 	let second = zero(myDate.getSeconds());
+
+
 
 	return formats.replace(/Y|m|d|H|i|s/ig, function (matches) {
 		return ({
@@ -156,13 +176,13 @@ export function format(timestamp, formats) {
 			m: month,
 			d: day,
 			H: hour,
-			i: minite,
+			i: minute,
 			s: second
 		})[matches];
 	});
 }
 
 
-// export const baseUrl = 'http://192.168.1.28:8091'
-export const baseUrl = 'http://www.91dream.net:8091'
-// export const baseUrl = 'http://www.91dream.net:8090'
+// export const baseUrl = 'http://192.168.1.20:8090'
+// export const baseUrl = 'http://www.91dream.net:8091'
+export const baseUrl = 'http://www.91dream.net:8090'

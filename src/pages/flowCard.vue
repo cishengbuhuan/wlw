@@ -4,7 +4,7 @@
 			<!-- 标题 -->
 			<div class="page-title">
 				<div class="line"></div>
-				<span>流量池卡库</span>
+				<span>共享流量卡库</span>
 			</div>
 			<!-- 运营商切换 -->
 			<div class="tab-netWork">
@@ -34,8 +34,8 @@
 						<div class="item-bottom inactivated">未激活: {{ overview.inactivated }}</div>
 					</div>
 					<div class="overview-item isOnline">
-						<div class="item-top online">在线数: {{ overview.online }}</div>
-						<div class="item-bottom offline">离线数: {{ overview.offline }}</div>
+						<div class="item-top online">设备在线数: {{ overview.online }}</div>
+						<div class="item-bottom offline">设备离线数: {{ overview.offline }}</div>
 					</div>
 					<div class="overview-item">
 						<div class="item-center over">超套卡数: {{ overview.overCard }}</div>
@@ -74,21 +74,6 @@
 							          v-model="tools.endNum">
 							</el-input>
 						</div>
-						<!-- 在线状态 -->
-						<div class="online-status">
-							<span>在线状态: </span>
-							<el-select class="select"
-							           placeholder="全部"
-							           clearable
-							           v-model="tools.online">
-								<el-option
-										v-for="item in tools.onlineOptions"
-										:key="item.value"
-										:label="item.online"
-										:value="item.value">
-								</el-option>
-							</el-select>
-						</div>
 						<!-- 激活状态 -->
 						<div class="active-status">
 							<span>激活状态: </span>
@@ -104,9 +89,24 @@
 								</el-option>
 							</el-select>
 						</div>
+						<!-- 设备在线状态 -->
+						<div class="online-status">
+							<span>设备在线状态: </span>
+							<el-select class="select"
+							           placeholder="全部"
+							           clearable
+							           v-model="tools.online">
+								<el-option
+										v-for="item in tools.onlineOptions"
+										:key="item.value"
+										:label="item.online"
+										:value="item.value">
+								</el-option>
+							</el-select>
+						</div>
 						<!-- 停卡状态 -->
 						<div class="stop-active">
-							<span>停卡状态: </span>
+							<span>GPRS使用状态: </span>
 							<el-select class="select"
 							           placeholder="全部"
 							           clearable
@@ -135,22 +135,33 @@
 							</el-select>
 						</div>
 						<!-- 批次日期 -->
-						<div class="batch-time">
-							<span>批次日期: </span>
+						<!--<div class="batch-time">-->
+							<!--<span>批次日期: </span>-->
+							<!--<el-date-picker-->
+									<!--v-model="tools.startTime"-->
+									<!--@change="pickChange"-->
+									<!--class="timePicker"-->
+									<!--type="date"-->
+									<!--placeholder="开始日期">-->
+							<!--</el-date-picker>-->
+							<!--&nbsp; 至 &nbsp;-->
+							<!--<el-date-picker-->
+									<!--v-model="tools.endTime"-->
+									<!--@change="pickChange"-->
+									<!--class="timePicker"-->
+									<!--type="date"-->
+									<!--placeholder="结束日期">-->
+							<!--</el-date-picker>-->
+						<!--</div>-->
+						<!-- 使用月份 -->
+						<div class="month">
+							<span>使用月份: </span>
 							<el-date-picker
-									v-model="tools.startTime"
+									v-model="tools.month"
 									@change="pickChange"
 									class="timePicker"
-									type="date"
-									placeholder="开始日期">
-							</el-date-picker>
-							&nbsp; 至 &nbsp;
-							<el-date-picker
-									v-model="tools.endTime"
-									@change="pickChange"
-									class="timePicker"
-									type="date"
-									placeholder="结束日期">
+									type="month"
+									placeholder="使用月份">
 							</el-date-picker>
 						</div>
 						<!-- 备注信息 -->
@@ -185,7 +196,12 @@
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.iccid }}</span>
 							</template>
 						</el-table-column>
-						<el-table-column prop="flowUsage" sortable='custom' width="90" label="本月已使用流量" align="center">
+						<el-table-column label="使用月份" align="center">
+							<template slot-scope="scope">
+								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.month }}</span>
+							</template>
+						</el-table-column>
+						<el-table-column prop="flowUsage" sortable='custom' width="90" label="当月已使用流量" align="center">
 							<template slot-scope="scope">
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.flowUsage }}</span>
 							</template>
@@ -200,17 +216,17 @@
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.packageName }}</span>
 							</template>
 						</el-table-column>
-						<el-table-column label="在线状态" align="center">
-							<template slot-scope="scope">
-								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.onlineStatus }}</span>
-							</template>
-						</el-table-column>
 						<el-table-column label="激活状态" align="center">
 							<template slot-scope="scope">
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.activeStatus }}</span>
 							</template>
 						</el-table-column>
-						<el-table-column label="停卡状态" align="center">
+						<el-table-column label="设备在线状态" align="center">
+							<template slot-scope="scope">
+								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.onlineStatus }}</span>
+							</template>
+						</el-table-column>
+						<el-table-column label="GPRS使用状态" align="center">
 							<template slot-scope="scope">
 								<span :class="{ over: scope.row.isOver < 0 }">{{ scope.row.stopStatus }}</span>
 							</template>
@@ -283,7 +299,7 @@
 
 <script>
 	import {format,translatePackages,getOnlineStatus,
-		getActiveStatus,getStopStatus,translateSystem,baseUrl} from '../api/dataUtil'
+		getActiveStatus,getGPRS,translateSystem,baseUrl,currentMonth} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
@@ -332,7 +348,7 @@
 					endNum: '',
 					startPlaceHolder: '',
 					endPlaceHolder: '',
-					// 在线状态
+					// 设备在线状态
 					online: '',
 					onlineOptions: [
 						{
@@ -385,20 +401,22 @@
 						}
 					],
 					// 批次日期
-					startTime: '',
-					endTime: '',
+//					startTime: '',
+//					endTime: '',
+					// 使用月份
+					month: currentMonth,
 					// 备注信息
 					remark: '',
-					// 停卡状态
+					// GPRS使用状态
 					stop: '',
 					stopOptions: [
 						{
 							value: '0',
-							stop: '已停卡'
+							stop: '离线'
 						},
 						{
 							value: '1',
-							stop: '未停卡'
+							stop: '在线'
 						}
 					],
 				},
@@ -422,6 +440,7 @@
 				// 下载的href
 				baseUrl: `${baseUrl}/api/importCardList`,
 				uploadHref: '',
+
 			};
 		},
 		mounted() {
@@ -443,14 +462,20 @@
 				if(i == '1') {
 					this.tools.startPlaceHolder = '请输入开始的卡号'
 					this.tools.endPlaceHolder = '请输入结束的卡号'
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = true
 				}else if(i == '2') {
 					this.tools.startPlaceHolder = '请输入开始的ICCID'
 					this.tools.endPlaceHolder = '请输入结束的ICCID'
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = true
 				}else {
 					this.tools.startPlaceHolder = ''
 					this.tools.endPlaceHolder = ''
+					this.tools.startNum = ''
+					this.tools.endNum = ''
 					this.tools.inputShow = false
 				}
 			},
@@ -501,8 +526,10 @@
 						// 制式
 						netWorkType: this.tools.netWorkType,
 						// 批次日期
-						start: this.tools.startTime,
-						end: this.tools.endTime,
+//						start: this.tools.startTime,
+//						end: this.tools.endTime,
+						// 月份
+						insertTime: this.tools.month,
 						// 备注
 						remark: this.tools.remark,
 						// 运营商
@@ -524,12 +551,13 @@
 							this.tableData.push({
 								cardNum: data[i].cardNumber,
 								iccid: data[i].iccid,
+								month: data[i].updateTime.slice(0,7),
 								flowUsage: Number(data[i].usageMonth).toFixed(2) + 'M',
 								flowOverage: Number(data[i].flowOverage) < 0 ? '0.00M' : Number(data[i].flowOverage).toFixed(2) + 'M',
 								packageName: `${data[i].packages}/${translatePackages(data[i].packageType)}`,
 								onlineStatus: getOnlineStatus(data[i].onlineStatus),
 								activeStatus: getActiveStatus(data[i].cardStatus),
-								stopStatus: getStopStatus(data[i].stopStatus),
+								stopStatus: getGPRS(data[i].stopStatus),
 								netWorkType: translateSystem(data[i].networkType),
 								batchTime: data[i].serveTime.split(' ')[0],
 								endTime: data[i].endTime.split(' ')[0],
@@ -582,28 +610,41 @@
 					this.$message.info('请输入正确的卡号')
 				}else if(this.tools.cardNum == 2 && start != end) {
 					this.$message.info('请输入正确的ICCID')
-				}else if(!this.tools.startTime && this.tools.endTime) {
-					this.$message.info('批次日期的开始和结束日期都要选择')
-				}else if(this.tools.startTime && !this.tools.endTime) {
-					this.$message.info('批次日期的开始和结束日期都要选择')
-				}else if(this.tools.startTime > this.tools.endTime) {
-					this.$message.info('开始日期不能大于结束日期')
 				}else {
 					this.getTableData()
 				}
-				console.log(this.tools.startTime,this.tools.endTime)
 			},
 			// 选择日期
+//			pickChange() {
+//				if (!this.tools.startTime && !this.tools.endTime) {
+//					this.tools.startTime = ''
+//					this.tools.endTime = ''
+//					this.pageNo = 1
+//					return
+//				}
+//				this.tools.startTime = format(new Date(this.tools.startTime).getTime(), "Y-m-d")
+//				this.tools.endTime = format(new Date(this.tools.endTime).getTime(), "Y-m-d")
+//				this.pageNo = 1
+//			},
+
+			// 选择月份
 			pickChange() {
-				if (!this.tools.startTime && !this.tools.endTime) {
-					this.tools.startTime = ''
-					this.tools.endTime = ''
+				if(!this.tools.month) {
+					this.tools.month = ''
 					this.pageNo = 1
 					return
 				}
-				this.tools.startTime = format(new Date(this.tools.startTime).getTime(), "Y-m-d")
-				this.tools.endTime = format(new Date(this.tools.endTime).getTime(), "Y-m-d")
+				this.tools.month = format(new Date(this.tools.month).getTime(), "Y-m")
 				this.pageNo = 1
+//				let month = this.tools.month.split('-')[1]
+//				if(month == 1 || month == 3 || month ==5||month==7||month==8|| month==10|| month==12) {
+//					this.tools.month += '-31'
+//				}else if(month == 2) {
+//					this.tools.month += '-28'
+//				}else {
+//					this.tools.month += '-30'
+//				}
+//				console.log(this.tools.month)
 			},
 
 			// 改变当前页数
@@ -659,9 +700,8 @@
 					stopStatus = this.tools.stop,
 					// 制式
 					netWorkType = this.tools.netWorkType,
-					// 批次日期
-					start = this.tools.startTime,
-					end = this.tools.endTime,
+					// 使用月份
+					month = this.tools.month,
 					// 备注
 					remark = this.tools.remark
 
@@ -672,8 +712,9 @@
 					&pageSize=${pageSize}&pageNo=${pageNo}&isSingle=${isSingle}
 					&sort=${sort}&direct=${direct}&cardNo=${cardNo}&onlineStatus=${onlineStatus}
 					&activeStatus=${activeStatus}&stopStatus=${stopStatus}&netWorkType=${netWorkType}
-					&start=${start}&end=${end}&remark=${remark}`
+					&month=${month}&remark=${remark}`
 
+//				console.log(this.uploadHref)
 
 				let iframe = document.createElement('iframe');
 				iframe.src = this.uploadHref
@@ -795,7 +836,7 @@
 							}
 						}
 						/* 在线状态、激活状态、制式、批次时间、停卡状态 */
-						.online-status, .active-status, .netWork-type, .batch-time, .stop-active {
+						.online-status, .active-status, .netWork-type, .batch-time, .month, .stop-active {
 							display: flex;
 							line-height: 40px;
 							margin-right: 40px;

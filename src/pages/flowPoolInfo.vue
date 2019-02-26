@@ -7,7 +7,7 @@
 				<span>流量池信息</span>
 			</div>
 			<!-- 运营商切换 -->
-			<div class="tab-netWork">
+			<div class="tab-netWork" v-show="!noPool">
 				<div v-for="(item,index) in netWorkNav"
 				     :class="[{current: tabIndex === item.tabIndex},'tab-item']"
 				     @click="toggleNetWorkNav(item)"
@@ -16,7 +16,7 @@
 				</div>
 			</div>
 			<!-- 流量池使用情况柱状图 -->
-			<div class="usage-chart">
+			<div class="usage-chart" v-show="!noPool">
 				<!-- 工具栏 -->
 				<div class="tools">
 					<!-- 套餐流量 -->
@@ -34,20 +34,17 @@
 							</el-option>
 						</el-select>
 					</div>
-					<!-- 套餐类型 -->
-					<div class="package-type">
-						<span>套餐类型: </span>
-						<el-select class="select"
-						           placeholder="全部"
-						           @change="packageTypeChange"
-						           v-model="tools.packageTypeValue">
-							<el-option
-									v-for="item in tools.packageTypeOptions"
-									:key="item.value"
-									:label="item.packageType"
-									:value="item.value">
-							</el-option>
-						</el-select>
+					<!-- 月份 -->
+					<div class="month">
+						<span>月份: </span>
+						<el-date-picker
+								v-model="tools.month"
+								:clearable="tools.monthClear"
+								@change="pickChange"
+								class="timePicker"
+								type="month"
+								placeholder="月份">
+						</el-date-picker>
 					</div>
 					<!-- 搜索按钮 -->
 					<div class="btn-search btn-main" @click="btnSearch">搜索</div>
@@ -90,6 +87,7 @@
 
 			<!-- 流量池信息 -->
 			<div class="flow-info"
+			     v-show="!noPool"
 			     v-loading="tools.loading"
 			     element-loading-text="正在加载数据，请稍候">
 				<!-- title -->
@@ -151,11 +149,16 @@
 								<div class="num">
 									<span>{{ flowPoolInfo.card.newAdd }}</span>张
 								</div>
-								<div class="tip">最近新增卡数</div>
+								<div class="tip">当月新增卡数</div>
 							</div>
 						</div>
 					</div>
 				</div>
+			</div>
+
+			<!-- 暂无流量池 -->
+			<div class="no-pool" v-show="noPool">
+				<img src="../../static/images/common/no-pool.png">
 			</div>
 		</div>
 	</div>
@@ -164,7 +167,7 @@
 <script>
 //	let echarts = require('echarts/lib/echarts')
 	import wlBar from '../components/chart/bar.vue'
-	import {translatePackages,getNetWork} from '../api/dataUtil'
+	import {translatePackages,getNetWork,format,currentMonth} from '../api/dataUtil'
 	export default {
 		components: {
 			wlBar
@@ -172,8 +175,10 @@
 		data() {
 			return {
 				// 运营商切换
-				tabIndex: 1,
+				tabIndex: '',
 				netWorkNav: [],
+				// 暂无流量池
+				noPool: false,
 				// 工具栏
 				tools: {
 					loading: '',
@@ -182,11 +187,9 @@
 					poolId: '',
 					defaultPoolId: '',
 					packageFlowOptions: [],
-					// 套餐类型
-					packageTypeValue: '',
-					packageType: '',
-					defaultPackageType: '',
-					packageTypeOptions: []
+					// 月份
+					month: currentMonth,
+					monthClear: false
 				},
 				// 流量池柱状图数据
 				flowData: {
@@ -271,12 +274,12 @@
 		},
 		mounted() {
 			this.getNetWork()
-			this.getPackageFlow()
 		},
 		created() {
 
 		},
 		methods: {
+
 			// 获取所有的运营商
 			getNetWork() {
 				this.$axios({
@@ -287,12 +290,20 @@
 					let data = res.data.object
 //					console.log(data)
 					this.netWorkNav = []
+					// 如果没有流量池，则跳出
+					if(!data.length) {
+						this.noPool = true
+						return
+					}
+					this.noPool = false
+					this.tabIndex = data[0].netWork
 					for(let i=0; i<data.length; i++) {
 						this.netWorkNav.push({
 							netWork: getNetWork(data[i].netWork),
 							tabIndex: data[i].netWork
 						})
 					}
+					this.getPackageFlow()
 				})
 			},
 			// 切换运营商
@@ -304,11 +315,6 @@
 			// 套餐流量的下拉框变化的时候
 			packageFlowChange(val) {
 				this.tools.poolId = val;
-				this.getPackageType()
-			},
-			// 套餐类型的下拉框变化的时候
-			packageTypeChange(val) {
-				this.tools.packageType = val;
 			},
 			// 获取到套餐
 			getPackageFlow() {
@@ -340,44 +346,6 @@
 							packageFlow: data[i].name
 						})
 					}
-					that.getPackageType()
-				})
-			},
-			// 获取到套餐种类
-			getPackageType() {
-				let poolId = this.tools.poolId ? this.tools.poolId : this.tools.defaultPoolId
-				let that = this
-				that.$axios({
-					url: '/api/getPoolAndPack',
-					method: 'post',
-					params: {
-						netWork: this.tabIndex,
-						poolId: poolId
-					}
-				}).then(res => {
-//					console.log(res.data.data)
-					let data = res.data.data
-//					debugger
-					if (data.length === 0) {
-						that.tools.packageTypeOptions = []
-						that.tools.packageTypeValue = ''
-						that.tools.packageType = ''
-						that.tools.defaultPackageType = ''
-
-						return
-					}
-					that.tools.packageTypeOptions = []
-					that.tools.packageTypeValue = ''
-					that.tools.packageType = ''
-					that.tools.defaultPackageType = ''
-					that.tools.packageTypeValue = translatePackages(data[0].packageType)
-					that.tools.defaultPackageType = data[0].packageType
-					for (let i = 0; i < data.length; i++) {
-						that.tools.packageTypeOptions.push({
-							value: data[i].packageType,
-							packageType: translatePackages(data[i].packageType)
-						})
-					}
 					this.getFlowPoolUsage()
 				})
 			},
@@ -385,24 +353,61 @@
 			btnSearch() {
 				this.getFlowPoolUsage()
 			},
+			// 选择月份
+			pickChange() {
+				this.tools.month = format(new Date(this.tools.month).getTime(), "Y-m")
+			},
 			// 获取到流量池使用概况
 			getFlowPoolUsage() {
 				let that = this
 				that.tools.loading = true
 				let poolId = this.tools.poolId ? this.tools.poolId : this.tools.defaultPoolId;
-				let packageType = this.tools.packageType ? this.tools.packageType : this.tools.defaultPackageType;
+				let packageType = 1;
+				let month = this.tools.month
 				that.$axios({
 					url: '/api/v2/pool/poolUsage',
 					method: 'post',
 					params: {
 						poolId: poolId,
-						packageType: packageType
+						packageType: packageType,
+						insertTime: month
 					}
 				}).then(res => {
 					that.tools.loading = false
 					let data = res.data.data.cardInfo
-//					console.log(data)
+					console.log(res.data.data)
 					// total,poolUse
+
+					// 如果没有流量池，则跳出
+					if(!data) {
+						// 流量池
+						that.flowData.yAxis.data = []
+						// 已使用
+						that.flowData.series[0].data = []
+						// 未使用
+						that.flowData.series[1].data = []
+						// 已超出
+						that.flowData.series[2].data = []
+
+
+
+						// 总量和已使用量的提示
+						that.flow.total = 0
+						that.flow.usage = 0
+
+						// 流量池信息
+						// ->流量池
+						that.flowPoolInfo.flow.total = 0
+						that.flowPoolInfo.flow.usage = 0
+						that.flowPoolInfo.flow.unused = 0
+						that.flowPoolInfo.flow.exceeded = 0
+						// ->卡片
+						that.flowPoolInfo.card.total = 0
+						that.flowPoolInfo.card.active = 0
+						that.flowPoolInfo.card.overview = 0
+						that.flowPoolInfo.card.newAdd = 0
+						return
+					}
 
 					// 流量池
 					that.flowData.yAxis.data = []
@@ -459,10 +464,12 @@
 			// 跳转到卡片信息页面
 			jumpToCardInfo() {
 				let poolId = this.tools.poolId ? this.tools.poolId : this.tools.defaultPoolId;
+				let month = this.tools.month
 				this.$router.push({
 					path: '/flowPoolInfoCard',
 					query: {
-						poolId: poolId
+						poolId: poolId,
+						month: month
 					}
 				})
 			}
@@ -519,7 +526,7 @@
 					margin-bottom: 40px;
 					padding-left: 25px;
 					/* 套餐流量、套餐类型 */
-					.package-flow, .package-type {
+					.package-flow, .package-type, .month {
 						display: flex;
 						line-height: 40px;
 						margin-right: 60px;
@@ -530,6 +537,9 @@
 						}
 						.select {
 							width: 130px;
+						}
+						.timePicker {
+							width: 150px;
 						}
 					}
 				}
@@ -688,6 +698,13 @@
 					.card {
 						border-left: 1px solid #ddd;
 					}
+				}
+			}
+			/**/
+			.no-pool {
+				width: 100%;
+				img {
+					width: 100%;
 				}
 			}
 		}

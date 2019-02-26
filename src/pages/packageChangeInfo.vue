@@ -171,18 +171,6 @@
 					}
 				})
 			},
-			// 选择日期
-			pickChange() {
-				if (!this.tools.startTime && !this.tools.endTime) {
-					this.tools.startTime = ''
-					this.tools.endTime = ''
-					this.pageNo = 1
-					return
-				}
-				this.tools.startTime = format(new Date(this.tools.startTime).getTime(), "Y-m-d H:m:s")
-				this.tools.endTime = format(new Date(this.tools.endTime).getTime(), "Y-m-d H:m:s")
-				this.pageNo = 1
-			},
 			// 搜索按钮
 			btnSearch() {
 				if(!this.tools.startTime && this.tools.endTime) {

@@ -43,12 +43,12 @@
 						index: '2',
 						menuTwo: [
 							{
-								titleTwo: '流量池卡库',
+								titleTwo: '共享流量卡库',
 								path: '/flowCard',
 								index: '2-1'
 							},
 							{
-								titleTwo: '非流量池卡库',
+								titleTwo: '非共享流量卡库',
 								path: '/notFlowCard',
 								index: '2-2'
 							},
@@ -103,6 +103,22 @@
 								index: '5-2'
 							}
 						]
+					},
+					{
+						title: '财务管理',
+						index: '6',
+						menuTwo: [
+							{
+								titleTwo: '账户详情',
+								path: '/account',
+								index: '6-1'
+							},
+//							{
+//								titleTwo: '充值',
+//								path: '/recharge',
+//								index: '6-2'
+//							}
+						]
 					}
 				]
 			};
@@ -131,6 +147,8 @@
 					this.index = '5-1'
 				}else if(name === 'sendMsgRecord') {
 					this.index = '5-2'
+				}else if(name === 'account') {
+					this.index = '6-1'
 				}
 			},
 			toPath(path) {
